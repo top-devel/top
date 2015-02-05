@@ -1,0 +1,174 @@
+      SUBROUTINE DHAGER (N, X, ISGN, EST, KASE, REVCOM)
+      INTEGER N, ISGN(*), KASE, REVCOM
+      DOUBLE PRECISION X(N,*), EST
+C
+C     DHAGER ESTIMATES THE 1-NORM OF A SQUARE, REAL MATRIX  A.
+C     REVERSE COMMUNICATION IS USED FOR EVALUATING
+C     MATRIX-VECTOR PRODUCTS. 
+C
+C     ON ENTRY
+C
+C        N       INTEGER
+C                THE ORDER OF THE MATRIX.  N .GE. 1.
+C
+C        ISGN    INTEGER(N)
+C                USED AS WORKSPACE.
+C
+C        KASE    INTEGER
+C                = 0.
+C
+C     ON INTERMEDIATE RETURNS 
+C
+C        KASE    = 1 OR 2.
+C
+C        X       REAL(N,4)
+C                MUST BE OVERWRITTEN BY 
+C
+C                    X(:,3)=A*X(:,1),             IF KASE=1, 
+C                    X(:,4)=TRANSPOSE(A)*X(:,3),  IF KASE=2, 
+C
+C                AND SONEST MUST BE RE-CALLED, WITH ALL THE OTHER
+C                PARAMETERS UNCHANGED.
+C
+C     ON FINAL RETURN
+C
+C        KASE    = 3.
+C
+C        EST     REAL
+C                CONTAINS AN ESTIMATE (A LOWER BOUND) FOR NORM(A).
+C
+C     THIS VERSION DATED MARCH 16, 1988.
+C     NICK HIGHAM, UNIVERSITY OF MANCHESTER.
+C
+C     REFERENCE
+C     N.J. HIGHAM (1987) FORTRAN CODES FOR ESTIMATING
+C     THE ONE-NORM OF A REAL OR COMPLEX MATRIX, WITH APPLICATIONS
+C     TO CONDITION  ESTIMATION, NUMERICAL ANALYSIS REPORT NO. 135,
+C     UNIVERSITY OF MANCHESTER, MANCHESTER M13 9PL, ENGLAND.
+C
+C     SUBROUTINES AND FUNCTIONS
+C     BLAS     IDAMAX, DASUM, DCOPY
+C     GENERIC  DABS, DNINT, DREAL, DSIGN
+C
+      INTEGER ITMAX
+      PARAMETER (ITMAX = 5)
+      DOUBLE PRECISION ZERO, ONE, TWO
+      PARAMETER (ZERO = 0.0D0, ONE = 1.0D0, TWO = 2.0D0)
+C
+C     INTERNAL VARIABLES
+      INTEGER I, ITER, J, JLAST, JUMP, IDAMAX
+      DOUBLE PRECISION ALTSGN, ESTOLD, TEMP, DASUM
+C
+      SAVE
+C
+      IF (KASE .EQ. 0) THEN
+         DO 10,I = 1,N
+            X(I,1) = ONE/DBLE(N)
+   10    CONTINUE
+         KASE = 1
+         REVCOM = 1
+         JUMP = 1
+         RETURN
+      ENDIF
+C
+      GOTO (100, 200, 300, 400, 500) JUMP
+C
+C     ................ ENTRY   (JUMP = 1)
+C     FIRST ITERATION.  X HAS BEEN OVERWRITTEN BY A*X.
+C
+  100 CONTINUE
+      EST = DASUM(N,X(1,3),1)
+C
+      DO 110,I = 1,N
+         X(I,3) = DSIGN(ONE,X(I,3))
+         ISGN(I) = DINT(X(I,3)) 
+  110 CONTINUE
+      KASE = 2
+      REVCOM = 2
+      JUMP = 2
+      RETURN
+C
+C     ................ ENTRY   (JUMP = 2)
+C     FIRST ITERATION.  X HAS BEEN OVERWRITTEN BY TRANSPOSE(A)*X.
+C
+  200 CONTINUE
+      J = IDAMAX(N,X(1,4),1)
+      ITER = 2
+C
+C     MAIN LOOP - ITERATIONS 2,3,...,ITMAX.
+C
+  220 CONTINUE
+      DO 230,I = 1,N
+         X(I,1) = ZERO 
+  230 CONTINUE
+      X(J,1) = ONE
+      KASE = 1
+      REVCOM = 1
+      JUMP = 3
+      RETURN
+C
+C     ................ ENTRY   (JUMP = 3)
+C     X HAS BEEN OVERWRITTEN BY A*X.
+C
+  300 CONTINUE
+      CALL DCOPY(N,X(1,3),1,X(1,1),1)
+      ESTOLD = EST
+      EST = DASUM(N,X(1,1),1)
+      DO 310,I = 1,N
+         IF ( DINT( SIGN(ONE,X(I,3)) ) .NE. ISGN(I) ) GOTO 320
+  310 CONTINUE
+C     REPEATED SIGN VECTOR DETECTED, HENCE ALGORITHM HAS CONVERGED.
+      GOTO 410
+C
+  320 CONTINUE
+C     TEST FOR CYCLING.
+      IF (EST .LE. ESTOLD) GOTO 410
+C      
+      DO 330,I = 1,N
+         X(I,3) = DSIGN(ONE,X(I,3))
+         ISGN(I) = DINT(X(I,3)) 
+  330 CONTINUE
+      KASE = 2
+      REVCOM = 2
+      JUMP = 4
+      RETURN
+C
+C     ................ ENTRY   (JUMP = 4)
+C     X HAS BEEN OVERWRITTEN BY TRANSPOSE(A)*X.
+C
+  400 CONTINUE
+      JLAST = J
+      J = IDAMAX(N,X(1,4),1)
+      IF (   (  X(JLAST,4) .NE. DABS(X(J,4))  ) .AND.
+     +       (ITER .LT. ITMAX)   ) THEN
+         ITER = ITER + 1
+         GOTO 220
+      ENDIF
+C
+C     ITERATION COMPLETE.  FINAL STAGE. 
+C
+  410 CONTINUE
+      ALTSGN = ONE
+      DO 420,I = 1,N
+         X(I,1) = ALTSGN * (ONE + DBLE(I-1)/DBLE(N-1))
+         ALTSGN = -ALTSGN
+  420 CONTINUE
+      KASE = 1
+      REVCOM = 1
+      JUMP = 5
+      RETURN
+C
+C     ................ ENTRY   (JUMP = 5)
+C     X HAS BEEN OVERWRITTEN BY A*X.
+C
+  500 CONTINUE
+      TEMP = TWO*DASUM(N,X(1,3),1)/DBLE(3*N) 
+      IF (TEMP. GT. EST) THEN 
+         CALL DCOPY(N,X(1,3),1,X(1,1),1)
+         EST = TEMP 
+      ENDIF
+C
+      KASE = 3
+      RETURN
+C
+      END

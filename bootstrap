@@ -1,0 +1,2 @@
+#!/bin/sh
+autoreconf ${autoreconf_args:-"-ivf"}

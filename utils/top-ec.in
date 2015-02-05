@@ -1,0 +1,23 @@
+#!/bin/sh
+
+if test $# -ne 1; then
+    echo "Usage: $0 <eq_file>"
+    exit 0
+fi
+
+eq_file=$(readlink -f $1)
+
+cd @abs_top_builddir@/src/
+if test $? -ne 0; then
+    exit 1
+fi
+
+@abs_top_builddir@/utils/readeq $eq_file
+if test $? -ne 0; then
+    exit 1
+fi
+
+make TOP -C @abs_top_builddir@/src
+if test $? -eq 0; then
+    echo TOP program location: @abs_top_builddir@/src/TOP
+fi
