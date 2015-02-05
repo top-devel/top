@@ -68,7 +68,10 @@ AS_IF([test "x$enable_mpi" == "xyes"],
                      [LIBS="$LIBS -lblacsF77init-openmpi"],
                      [AC_ERROR(scalapack library not found)])])
 
-AS_IF([test "x${BLAS}" == "x"],
+AC_CHECK_FUNC(dgemm_     , [have_blas=yes],   [have_blas=no])
+AC_CHECK_FUNC(dgetrf_    , [have_lapack=yes], [have_lapack=no])
+
+AS_IF([test "x$have_blas" == "xno" -o "x$have_lapack" == "xno"],
     [AC_SEARCH_LIBS([dgemm_], [mkl_intel_lp64],
                     [LIBS="$LIBS -lmkl_intel_thread -lmkl_core -liomp5 -lpthread"],
                     [AC_CHECK_LIB([blas], [dgemm_], [],
@@ -78,26 +81,31 @@ AS_IF([test "x${BLAS}" == "x"],
                                  [AC_ERROR(lapack library not found: consider \
                                   setting LDFLAGS)])],
                                  [-lmkl_intel_thread -lmkl_core -liomp5
-                                  -lpthread])],
-    [LIBS="$LIBS ${BLAS}"])
+                                  -lpthread])])
 
-AC_MSG_CHECKING([blas library])
+AC_LANG_PUSH(Fortran)
+
+AC_MSG_CHECKING([whether we can link against the blas library])
 AC_LINK_IFELSE(
-              [AC_LANG_SOURCE([
-               void main(void) {dgemm_();}
-               ])], [link_blas=yes], [link_blas=no])
+              [AC_LANG_PROGRAM([], [call dgemm])],
+              [link_blas=yes],
+              [link_blas=no])
 AC_MSG_RESULT($link_blas)
-AS_IF([test "x$link_blas" == "xno"],
-      [AC_ERROR(Cannot link with blas library. Try setting BLAS variable)])
-AC_MSG_CHECKING([blas library])
 
+AS_IF([test "x$link_blas" == "xno"],
+      [AC_ERROR(Cannot link with blas library. Try setting LIBS...)])
+
+AC_MSG_CHECKING([whether we can link against lapack])
 AC_LINK_IFELSE(
-              [AC_LANG_SOURCE([
-               void main(void) {dgetrf_();}
-               ])], [link_lapack=yes], [link_lapack=no])
+              [AC_LANG_PROGRAM([], [call dgetrf])],
+              [link_lapack=yes],
+              [link_lapack=no])
 AC_MSG_RESULT($link_lapack)
+
 AS_IF([test "x$link_lapack" == "xno"],
       [AC_ERROR(Cannot link with lapack library. Try setting BLAS variable)])
+
+AC_LANG_POP(Fortran)
 
 # Checks for header files.
 
@@ -117,6 +125,7 @@ AC_CONFIG_FILES([Makefile
                  utils/Makefile
                  utils/top-ec
                  src/Makefile])
+
 AC_OUTPUT
 
 cat << EOF
