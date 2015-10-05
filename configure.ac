@@ -114,6 +114,7 @@ AC_CONFIG_FILES([Makefile
                  utils/Makefile
                  utils/top-build
                  python/top.py
+                 python/Makefile
                  utils/readeq-real-2D-mono
                  utils/readeq-cplx-2D-mono
                  utils/readeq-real-1D-mono

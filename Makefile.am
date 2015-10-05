@@ -1,2 +1,2 @@
-SUBDIRS = lib utils
+SUBDIRS = lib utils python
 
