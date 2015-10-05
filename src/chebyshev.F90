@@ -13,7 +13,7 @@ contains
        subroutine init_cheb(nr)
 
        implicit none
-       integer nr 
+       integer nr
 
        nr_cheb = nr
        if (allocated(real2spec))   deallocate(real2spec)
@@ -82,7 +82,7 @@ contains
 
       if (der_max.lt.1) &
          stop 'der_max_input must be >= 1 in init_cheb_derive'
-      
+
       allocate(derive(nr_cheb,nr_cheb,der_max),&
                derive_spec(nr_cheb,nr_cheb),&
                temp(nr_cheb,nr_cheb))
@@ -148,10 +148,10 @@ contains
          enddo
        enddo
        do i=1,nr1
-         temp1(1,i) = 0.5d0 * temp1(1,i) 
-         temp1(nr1,i) = 0.5d0 * temp1(nr1,i) 
-         temp1(i,1) = 0.5d0 * temp1(i,1) 
-         temp1(i,nr1) = 0.5d0 * temp1(i,nr1) 
+         temp1(1,i) = 0.5d0 * temp1(1,i)
+         temp1(nr1,i) = 0.5d0 * temp1(nr1,i)
+         temp1(i,1) = 0.5d0 * temp1(i,1)
+         temp1(i,nr1) = 0.5d0 * temp1(i,nr1)
        enddo
 
        aux(:) = 0d0
@@ -166,7 +166,7 @@ contains
            temp2(i,j) = aux(modulo((i-1)*(j-1),2*nr2-2))
          enddo
        enddo
-      
+
        call DGEMM('N','N',nr2,nr1,nr1,1d0,temp2,nr2,temp1,nr1,0d0,&
                   interpole,nr2)
        deallocate(temp1,temp2,aux)
@@ -210,12 +210,12 @@ contains
        deallocate(theta,weights)
        end subroutine
 
-!------------------------------------------------------------------------------ 
-!  This subroutine sets up integration weights for an arbitrary grid.  It does 
+!------------------------------------------------------------------------------
+!  This subroutine sets up integration weights for an arbitrary grid.  It does
 !  this by integrating Lagrange interpolation polynomials calculated over a
 !  sliding window which spans [i-order, i+order+1].  The function to be
 !  integrated is then assumed to be multiplied by cos(nt grid(i)).
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! description of variables:
 !
 ! grid(1:ngrid)    = grid on which the integration is carried out.
@@ -224,7 +224,7 @@ contains
 ! nt               = the integration takes into account the weight function
 !                    cos(nx)
 ! order            = positive integer which gives half the size of the window.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine find_weights(grid,weights,ngrid,nt)
 
       implicit none
@@ -234,7 +234,7 @@ contains
       double precision, allocatable :: mu(:), a(:)
       double precision prdct, my_sum
       integer, parameter :: order = 2
-      
+
       ! check parameters:
       if (order.lt.0) stop "Please set order>= 0 in find_weights"
 
@@ -263,7 +263,7 @@ contains
           do l=1,2*(order+1)
             a(l) = 0d0
           enddo
-          
+
           prdct = 1d0
           do k=start,j-1
             prdct = prdct*(mu(j)-mu(k))
@@ -272,7 +272,7 @@ contains
             prdct = prdct*(mu(j)-mu(k))
           enddo
           a(0) = a(0)/prdct
-          
+
 
           ! Calculate Lagrange polynomial, by calculating product of (x-mu(k))
           do k=start,j-1
@@ -323,10 +323,10 @@ contains
 
       end subroutine
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 !  This subroutine interpolate a function onto the Chebyshev grid of size
 !  nr_cheb, using Lagrange interpolation, on the npoints nearest  points.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! description of variables:
 !
 ! r(1:n)       = original grid
@@ -336,7 +336,7 @@ contains
 ! nout         = number of grid points after interpolation
 ! npoints      = number of points used to calculate the Lagrange interpolation
 !                polynomial
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine interpole_cheb(r,f,n,fout,nout)
 
       implicit none
@@ -391,7 +391,7 @@ contains
             finish = finish + 1
           endif
         enddo
-  
+
         ! Lagrange interpolation
         do j=start,finish
           term = f(j)
@@ -406,5 +406,5 @@ contains
       enddo
 
       end subroutine
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       end module

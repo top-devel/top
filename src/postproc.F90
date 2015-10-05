@@ -1,6 +1,19 @@
 #include "config.h"
+
+! #ifdef USE_MULTI
+#define DOM(i, var)     dm((i))%var
+#define IDOM(i, j, var) idm((i), (j))%var
+#define DMAT(i, var)    dmat((i))%var
+#define GRD(i, var)     grd((i))%var
+! #else
+! #define DOM(i, var)     var
+! #define IDOM(i, j, var) var
+! #define DMAT(i, var)    dmat%var
+! #define GRD(i, var)     var
+! #endif
       module postproc
 
+      use mod_grid
       integer, allocatable, save :: Ndex(:)
       integer, allocatable, save :: ldom(:)
 
@@ -22,7 +35,11 @@ contains
 
       if (allocated(Ndex)) deallocate(Ndex)
       allocate(Ndex(nsol_out))
+#ifdef USE_COMPLEX
       call hpsort_index(nsol_out,dreal(omega),Ndex)
+#else
+      call hpsort_index(nsol_out,omega,Ndex)
+#endif
       return
       end subroutine
 !-----------------------------------------------------
@@ -55,25 +72,25 @@ contains
 99    format("(",I3,"(X,f7.5))")
       call write_inputs(2)
       write(str,98) ndomains+1
-      write(2,str) nsol_out, (dm(id)%nvar_keep,id=1,ndomains)
+      write(2,str) nsol_out, (DOM(id, nvar_keep),id=1,ndomains)
       do iisol=1,nsol_out
         isol = Ndex(iisol)
         write(2,100) omega(isol)
         do id=1,ndomains
-          der_id = dmat(id)%der_id
-          lbder = dmat(id)%lbder(der_id)
-          ubder = dmat(id)%ubder(der_id)
-          do vvar=1,dm(id)%nvar_keep
-            var = dm(id)%var_list(vvar)
-            write(2,'(a,2X,I2)') trim(dm(id)%var_name(var)),id
+          der_id = DMAT(id, der_id)
+          lbder = DMAT(id, lbder)(der_id)
+          ubder = DMAT(id, ubder)(der_id)
+          do vvar=1,DOM(id, nvar_keep)
+            var = DOM(id, var_list)(vvar)
+            write(2,'(a,2X,I2)') trim(DOM(id, var_name)(var)),id
             do j=1,nt
-              write(2,102) j, dm(id)%lvar(j,var)
+              write(2,102) j, DOM(id, lvar)(j,var)
               do i=1,grd(id)%nr
                 vec_value = (0d0,0d0)
                 do ii=max(1,i-lbder),min(grd(id)%nr,i+ubder)
                   vec_value = vec_value                &
-                            + dmat(id)%derive(i,ii,der_id) &
-                            * vec(dm(id)%offset+dm(id)%ivar(var,ii,j),isol)
+                            + DMAT(id, derive)(i,ii,der_id) &
+                            * vec(DOM(id, offset)+DOM(id, ivar)(var,ii,j),isol)
                 enddo
                 write(2,101) vec_value
               enddo
@@ -152,9 +169,9 @@ contains
       do id=1,ndomains-1
         write(str,'(I2)') id
         iu(id) = 0
-        do var = 1,dm(id)%nvar
-          if (  (trim(dm(id)%var_name(var)).eq.'u' //trim(adjustl(str)))   &
-            .or.(trim(dm(id)%var_name(var)).eq.'Er'//trim(adjustl(str)))) then
+        do var = 1,DOM(id, nvar)
+          if (  (trim(DOM(id, var_name)(var)).eq.'u' //trim(adjustl(str)))   &
+            .or.(trim(DOM(id, var_name)(var)).eq.'Er'//trim(adjustl(str)))) then
                iu(id) = var
                exit
           endif
@@ -170,12 +187,12 @@ contains
           my_sum = 0d0
           do id=1,ndomains-1
             do i=1,grd(id)%nr
-              my_sum = my_sum + abs(vec(dm(id)%offset+dm(id)%ivar(iu(id),i,j),isol))**2
+              my_sum = my_sum + abs(vec(DOM(id, offset)+DOM(id, ivar)(iu(id),i,j),isol))**2
             enddo
           enddo
           if (my_sum.gt.my_max) then
             my_max = my_sum
-            lmax = dm(1)%lvar(j,iu(1))
+            lmax = DOM(1, lvar)(j,iu(1))
           endif
         enddo
         ldom(iisol) = lmax
@@ -183,6 +200,25 @@ contains
 
       deallocate(iu)
 
+      end subroutine
+
+      subroutine get_valp(i, val)
+          use eigensolve, only: omega
+          implicit none
+
+          integer, intent(in) :: i
+          double precision, intent(out) :: val
+
+          val = omega(i)
+      end subroutine
+
+      subroutine get_valps(vals)
+          use eigensolve, only: omega, nsol
+          implicit none
+
+          double precision, intent(out) :: vals(nsol)
+
+          vals = omega
       end subroutine
 
 !-----------------------------------------------------

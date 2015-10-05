@@ -2,20 +2,29 @@
       module eigensolve
 
       use mod_grid
+      use mod_blacs
       use matrices
       use inputs, only: nsol
 
       type MULTI_MAT
+
 #ifdef USE_COMPLEX
         double complex, pointer :: mat(:,:)
 #else
         double precision, pointer :: mat(:,:)
 #endif
         integer, pointer        :: ipiv(:)
+#ifdef USE_MPI
+        integer, pointer        :: desc(:)
+#endif
       end type MULTI_MAT
 
+#ifdef USE_COMPLEX
       double complex, save, allocatable :: omega(:), vec(:,:)
-      integer, save :: t_dim, nsol_out
+#else
+      double precision, save, allocatable :: omega(:), vec(:,:)
+#endif
+      integer, save :: lda, t_dim, nsol_out
 #ifdef USE_COMPLEX
       double complex, save, allocatable :: temp(:),tmp_s(:), &
                                            temp2(:,:)
@@ -23,7 +32,9 @@
       double precision, save, allocatable :: temp(:),tmp_s(:), &
                                              temp2(:,:)
 #endif
+
       type(MULTI_MAT), save, allocatable :: asigma(:)
+      integer ku, kl
 
 contains
 
@@ -62,7 +73,7 @@ contains
 ! Variables used in the arncheb code:
 !
 
-      ! variables in zarncheb.f 
+      ! variables in zarncheb.f
       integer iarn, deg, iparam(10), revcom, info
       integer, allocatable :: iord(:)
       double precision tol, normA
@@ -105,12 +116,16 @@ contains
 #else
       double precision aux
 #endif
-      integer iteration, i, j, id, d_dim, var, ku, kl, lda
 #ifdef USE_COMPLEX
       double complex, external :: zdotc
 #else
       double complex, external :: ddot
 #endif
+#ifdef USE_MPI
+      integer, external :: NUMROC
+#endif
+
+      integer iteration, i, j, var, id, d_dim
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -166,6 +181,8 @@ contains
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !  Create workspaces by allocating various arrays:
 !
+      allocate(asigma(ndomains))
+
       if (allocated(omega))  deallocate(omega)
       if (allocated(vec))    deallocate(vec)
       if (allocated(temp))   deallocate(temp)
@@ -177,46 +194,97 @@ contains
       shift = sigma
       t_dim = a_dim * power_max
 
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+#endif
 #ifdef USE_COMPLEX
-      allocate(u(t_dim), vrcom(t_dim,4), iord(t_dim), v(t_dim,iarn+1),&
-               h(iarn+1,iarn+1), z(iarn+1,iarn+1), w(iarn+1),         &
-               work(iarn+1), work1(iarn+1),                           &
-               workc(t_dim,2),yr(iarn+1),yc(iarn+1))
+          allocate(w(iarn+1), yr(iarn+1),yc(iarn+1))
+          allocate(work1(iarn+1))
 #else
-      allocate(u(t_dim), vrcom(t_dim,4), iord(t_dim), v(t_dim,iarn+1),&
-               h(iarn+1,iarn+1), z(iarn+1,iarn+1), wr(iarn+1),        &
-               wi(iarn+1), work(iarn+1), work1(iarn+1,2),             &
-               workc(t_dim,2),y(2*iarn+2))
+          allocate(wr(iarn+1), wi(iarn+1), y(2*iarn+2))
+          allocate(work1(iarn+1, 2))
+#endif
+          allocate(u(t_dim), vrcom(t_dim,4), iord(t_dim))
+          allocate(v(t_dim, iarn+1), h(iarn+1, iarn+1))
+          allocate(z(iarn+1,iarn+1))
+          allocate(work(iarn+1), workc(t_dim,2))
+#ifdef USE_MPI
+       endif
 #endif
 
 !  Extra space needed for the matrix vector products
-      allocate(temp(1:a_dim),temp2(1:a_dim,0:power_max-1),            &
-               tmp_s(1:d_dim_max))
+      allocate(temp(1:a_dim),temp2(1:a_dim,0:power_max-1))
+#ifdef USE_MULTI
+      allocate(tmp_s(1:d_dim_max))
+#endif
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !  Factorize the matrix A -shift*B
 !
 
+#ifdef USE_MULTI
       do id=1,ndomains
         if (grd(id)%mattype.eq.'BAND') then
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+            print*,"Domain: ",id
+            print*,"Banded matrices: currently unimplemented in MPI TOP"
+          endif
+          call BLACS_ABORT(ictxt,1)
+#else
           call init_ku_kl(id)
           call increase_ku_kl_downward(id)
+#endif
         elseif (grd(id)%mattype.ne.'FULL') then
-          print*,"Domain: ",id
-          print*,"Faulty mattype: ",grd(id)%mattype
-          stop
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
+              print*,"Domain: ",id
+              print*,"Faulty mattype: ",grd(id)%mattype
+#ifdef USE_MPI
+          endif
+          call BLACS_ABORT(ictxt,1)
+#else
+          stop "wrong mattype"
+#endif
         endif
       enddo
-
-      allocate(asigma(ndomains))
+#endif
 
       ! downward sweep method:
       do id=1,ndomains
         d_dim = dm(id)%d_dim
-        allocate(asigma(id)%ipiv(d_dim))
+#ifdef USE_MPI
+        dm(id)%vlsize = NUMROC(dm(id)%d_dim ,blk,irow,0,nrows)
+        dm(id)%hlsize = NUMROC(dm(id)%d_dim ,blk,icol,0,ncols)
+        allocate(asigma(id)%ipiv(dm(id)%vlsize +blk))
+        allocate(asigma(id)%desc(9))
+#else
+        allocate(asigma(id)%ipiv(dm(id)%d_dim ))
+#endif
         if (grd(id)%mattype.eq.'FULL') then
-          allocate(asigma(id)%mat(d_dim,d_dim))
-          call make_asigma_full_local(sigma,asigma(id)%mat,id,id)
+#ifdef USE_MPI
+            allocate(asigma(id)%mat(dm(id)%vlsize ,dm(id)%hlsize ))
+            call DESCINIT(asigma(id)%desc,d_dim,d_dim,blk,blk,0,0,ictxt, &
+                dm(id)%vlsize ,info_lapack)
+            if (info_lapack.ne.0) then
+                print*,info_lapack,' info'
+                print*,'DESCINIT problem in domain ',id
+                call BLACS_ABORT(ictxt,1)
+            endif
+#else
+#ifdef USE_MULTI
+            allocate(asigma(id)%mat(d_dim, d_dim))
+#else
+            allocate(asigma(id)%mat(a_dim, a_dim))
+#endif
+#endif
+#ifdef USE_MULTI
+          call make_asigma_full_local(sigma,asigma(id)%mat, id, id)
           if (id.gt.1) call correct_asigma_downward(id,sigma)
+
+#else
+          call make_asigma_full_total(sigma,asigma(id)%mat)
+#endif
 
 #ifdef USE_COMPLEX
           call ZGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
@@ -224,18 +292,46 @@ contains
           call DGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
 #endif
           if (info_lapack.ne.0) then
-            print*,info_lapack,' info'
-            print*,'Factorisation problem in domain ',id
+            print*, info_lapack,' info'
+            print*, 'Factorisation (1) problem in domain ', id
             stop
           endif
+        elseif (grd(id)%mattype.eq.'BAND') then
+            ku = dm(id)%ku
+            kl = dm(id)%kl
+            lda = 2*kl + ku + 1
+            allocate(asigma(id)%mat(lda,d_dim))
+#ifdef USE_MULTI
+            call make_asigma_band_local(sigma,asigma(id)%mat,id)
+            if (id.gt.1) call correct_asigma_downward(id,sigma)
+#else
+            call make_asigma_band(sigma,asigma(id)%mat)
+#endif
         else
-          ku = dm(id)%ku
-          kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
-          allocate(asigma(id)%mat(lda,d_dim))
-          call make_asigma_band_local(sigma,asigma(id)%mat,id)
-          if (id.gt.1) call correct_asigma_downward(id,sigma)
+            print*, "mattype:", grd(id)%mattype
+            stop 'faulty matrix type'
 
+#if USE_MPI
+#ifdef USE_COMPLEX
+          call PZGETRF(d_dim,d_dim,asigma(id)%mat,1,1,asigma(id)%desc, &
+              asigma(id)%ipiv,info_lapack)
+          if (info_lapack.ne.0) then
+              print*,info_lapack,' info'
+              print*,'Factorisation (2) problem in domain ',id
+              call BLACS_ABORT(ictxt,1)
+          endif
+#else
+          call PDGETRF(d_dim,d_dim,asigma(id)%mat,1,1,asigma(id)%desc, &
+              asigma(id)%ipiv,info_lapack)
+          if (info_lapack.ne.0) then
+              if (iproc.eq.0) then
+                  print*,info_lapack,' info'
+                  print*,'Factorisation (2) problem in domain ',id
+              endif
+              call BLACS_ABORT(ictxt,1)
+          endif
+#endif
+#else
 #ifdef USE_COMPLEX
           call ZGBTRF(d_dim,d_dim,kl,ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
 #else
@@ -243,9 +339,10 @@ contains
 #endif
           if (info_lapack.ne.0) then
             print*,info_lapack,' info'
-            print*,'Factorisation problem in domain ',id
+            print*,'Factorisation (3) problem in domain ',id
             stop
           endif
+#endif
         endif
       enddo
 
@@ -256,15 +353,24 @@ contains
       iteration=1
       revcom=0
 ! big loop starts here ------------------------------------------
-      do 
+      do
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
 #ifdef USE_COMPLEX
-        call zarncheb(t_dim,iarn,deg,iparam,tol,shift,normA,u,  &
-                      vrcom,iord,v,h,z,w,work,work1,workc,  &
-                      yr,yc,revcom,info)
+              call zarncheb(t_dim,iarn,deg,iparam,tol,shift,normA,u,  &
+                  vrcom,iord,v,h,z,w,work,work1,workc,  &
+                  yr,yc,revcom,info)
 #else
-        call darncheb(t_dim,iarn,deg,iparam,tol,shift,normA,u,  &
-                      vrcom,iord,v,h,z,wr,wi,work,work1,workc,  &
-                      y,revcom,info)
+              call darncheb(t_dim,iarn,deg,iparam,tol,shift,normA,u,  &
+                  vrcom,iord,v,h,z,wr,wi,work,work1,workc,  &
+                  y,revcom,info)
+#endif
+#ifdef USE_MPI
+              call IGEBS2D(ictxt,'A',topo,1,1,revcom,1)
+          else
+              call IGEBR2D(ictxt,'A',topo,1,1,revcom,1,0,0)
+          endif
 #endif
 
         if (revcom.le.0) exit
@@ -277,33 +383,50 @@ contains
         endif
 
         if (revcom.eq.2) then
-          ! Compute col3 <-- inv(A-shift*B)^H*col3 
+          ! Compute col3 <-- inv(A-shift*B)^H*col3
           call solve_amsigmab_transpose(sigma,vrcom(1:t_dim,3))
-          ! Compute col4 <-- B^H*col3 
+          ! Compute col4 <-- B^H*col3
           call b_times_transpose(vrcom(1:t_dim,3), vrcom(1:t_dim,4))
         endif
 
         if (revcom.eq.3) then
-#ifdef USE_COMPLEX
-          aux = zdotc(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
-#else
-          aux = ddot(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+#ifdef USE_MPI
+            if (iproc.eq.0) then
 #endif
-          vrcom(1,3) = aux
+#ifdef USE_COMPLEX
+                aux = zdotc(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+#else
+                aux = ddot(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+#endif
+                vrcom(1,3) = aux
+#ifdef USE_MPI
+            endif
+#endif
         endif
 
         iteration=iteration+1
 
       enddo
 ! big loop ends here ------------------------------------------
+#ifdef USE_MULTI
       do id=1,ndomains
         deallocate(asigma(id)%mat,asigma(id)%ipiv)
       enddo
-
-#ifdef USE_COMPLEX
-      deallocate(u,vrcom,iord,work,work1,workc,yr,yc,asigma)
+      deallocate(vrcom,asigma)
 #else
-      deallocate(u,vrcom,iord,work,work1,workc,y,asigma)
+      deallocate(vrcom)
+      deallocate(asigma(1)%mat)
+#endif
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+#endif
+#ifdef USE_COMPLEX
+          deallocate(u,iord,work,work1,workc,yr,yc)
+#else
+          deallocate(u,iord,work,work1,workc,y)
+#endif
+#ifdef USE_MPI
+      endif
 #endif
 
       ! print and store the eigenvalues:
@@ -320,14 +443,8 @@ contains
 
 !
 !  Compute the corresponding eigenvectors
-      if (info.ne.0) &
+      if (info /= 0) &
         stop "Failure in the Arnoldi-Chebyshev process"
-
-#ifdef USE_COMPLEX
-      print*,'call zeigvec'
-#else
-      print*,'call deigvec'
-#endif
 
 #ifdef USE_COMPLEX
       allocate(work2(3*iarn+3),z1(iarn+1,iarn+1),z2(iarn+1,iarn+1), &
@@ -346,31 +463,9 @@ contains
       call deigvec(t_dim,iarn,h,z,v,vec_arncheb,wi,work2,select, &
                    z1,z2,iparam)
 #endif
-#ifdef USE_COMPLEX
       do i=1,nsol_out
         vec(1:a_dim,i) = vec_arncheb(1:a_dim,i)
       enddo
-#else
-      j = 1
-      do while(j.le.nsol_out)
-        if (dimag(omega(j)).eq.0d0) then
-          vec(1:a_dim,j)=dcmplx(vec_arncheb(1:a_dim,j))
-          j = j + 1
-        else
-          ! This has been tested.  The complex eigenvalues
-          ! and eigenvectors are correctly matched.
-          vec(1:a_dim,j) = dcmplx(vec_arncheb(1:a_dim,j), &
-                                  vec_arncheb(1:a_dim,j+1))
-          if (j.lt.nsol_out) then
-            vec(1:a_dim,j+1) = dcmplx(vec_arncheb(1:a_dim,j),&
-                                     -vec_arncheb(1:a_dim,j+1))
-          else
-            print*,"Warning: problem with number of eigenvectors"
-          endif
-          j = j + 2
-        endif
-      enddo
-#endif
 
 #ifdef USE_COMPLEX
       deallocate(h,z,v,w,work2,work2real,select,z1,z2,vec_arncheb)
@@ -384,7 +479,7 @@ contains
 
 !--------------------------------------------------------------
 ! This routine does:
-!    vec2 = "B" * vec1 
+!    vec2 = "B" * vec1
 !--------------------------------------------------------------
 ! Variables:
 !
@@ -405,22 +500,47 @@ contains
 #endif
       integer i
 
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+        call ZGEBS2D(ictxt1D,"A",topo,t_dim,1,vec1,t_dim)
+      else
+        call ZGEBR2D(ictxt1D,"A",topo,t_dim,1,vec1,t_dim,0,0)
+        if (iproc.eq.0) vec2(1:t_dim) = 0d0
+      endif
+#else
       vec2(1:t_dim) = zero
       temp(1:a_dim) = zero
+#endif
       do i=1,power_max
+#ifdef USE_MULTI
           call a_product_total(vec1(1+(i-1)*a_dim:i*a_dim), temp(1:a_dim), i)
-          vec2(1:a_dim) = vec2(1:a_dim) - temp(1:a_dim)
+#else
+          call a_product(vec1(1+(i-1)*a_dim:i*a_dim), temp(1:a_dim), i)
+#endif
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
+              vec2(1:a_dim) = vec2(1:a_dim) - temp(1:a_dim)
+#ifdef USE_MPI
+          endif
+#endif
       enddo
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
       do i=2,power_max
           vec2(1+(i-1)*a_dim:i*a_dim) = vec1(1+(i-2)*a_dim:(i-1)*a_dim)
       enddo
+#ifdef USE_MPI
+          endif
+#endif
 
       return
       end subroutine b_times
 
 !--------------------------------------------------------------
 ! This routine does:
-!    vec2 = transpose("B") * vec1 
+!    vec2 = transpose("B") * vec1
 !--------------------------------------------------------------
 ! Variables:
 !
@@ -441,16 +561,34 @@ contains
 #endif
       integer i
 
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+        call ZGEBS2D(ictxt1D,"A",topo,t_dim,1,vec1,t_dim)
+      else
+        call ZGEBR2D(ictxt1D,"A",topo,t_dim,1,vec1,t_dim,0,0)
+      endif
+#endif
       vec2(1:t_dim) = zero
       do i=1,power_max
+#ifdef USE_MULTI
         call a_product_total_transpose(vec1(1:a_dim),&
                     vec2(1+(i-1)*a_dim:i*a_dim),i)
+#else
+        call a_product_transpose(vec1(1:a_dim),&
+                    vec2(1+(i-1)*a_dim:i*a_dim),i)
+#endif
       enddo
-      vec2(1:t_dim) = -vec2(1:t_dim)
-      do i=1,power_max-1
-        vec2(1+(i-1)*a_dim:i*a_dim) = vec2(1+(i-1)*a_dim:i*a_dim) &
-          + vec1(1+i*a_dim:(i+1)*a_dim)
-      enddo
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+#endif
+          vec2(1:t_dim) = -vec2(1:t_dim)
+          do i=1,power_max-1
+          vec2(1+(i-1)*a_dim:i*a_dim) = vec2(1+(i-1)*a_dim:i*a_dim) &
+              + vec1(1+i*a_dim:(i+1)*a_dim)
+          enddo
+#ifdef USE_MPI
+      endif
+#endif
 
       return
       end subroutine b_times_transpose
@@ -481,25 +619,88 @@ contains
       integer i, info_lapack
 
       if (sigma.eq.zero) then
+#ifdef USE_MULTI
         call solve_multi_domain(sigma,vect(1:a_dim))
+#else
+        if (grd(1)%mattype.eq.'FULL') then
+          call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
+                      vect(1:a_dim), info_lapack)
+        elseif (grd(1)%mattype.eq.'BAND') then
+          call DGBTRS('N', a_dim, kl, ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+                      vect(1:a_dim), a_dim, info_lapack)
+        else
+          stop 'mattype has a faulty value in solve_amsigmb'
+        endif
+        if (info_lapack.ne.0) &
+          stop 'Problem solving linear system, in arncheb'
+#endif
       else
+#ifdef USE_MPI
+      if (iproc.eq.0) then
+#endif
         if (power_max.gt.1) then
           temp2(1:a_dim,1) = sigma*vect(1+a_dim:2*a_dim)
         endif
+#ifdef USE_MPI
+        endif
+        do i=2,power_max-1
+            temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
+                vect(1+i*a_dim:(i+1)*a_dim)
+            temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
+        enddo
+        call DGEBS2D(ictxt1D,"A",topo,a_dim,power_max,temp2,a_dim)
+      else
+        call DGEBR2D(ictxt1D,"A",topo,a_dim,power_max,temp2,a_dim,0,0)
+      endif
+#endif
         do i=2,power_max-1
           temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
                              vect(1+i*a_dim:(i+1)*a_dim)
           temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
         enddo
         do i=1,power_max-1
+#ifdef USE_MULTI
           call a_product_total(temp2(1:a_dim,i),temp(1:a_dim), i+1)
-          vect(1:a_dim) = vect(1:a_dim)-temp(1:a_dim)
+#else
+          call a_product(temp2(1:a_dim,i),temp(1:a_dim), i+1)
+#endif
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
+              vect(1:a_dim) = vect(1:a_dim)-temp(1:a_dim)
+#ifdef USE_MPI
+          endif
+#endif
         enddo
+#ifdef USE_MULTI
         call solve_multi_domain(sigma,vect(1:a_dim))
+#else
+        if (grd(1)%mattype.eq.'FULL') then
+          call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
+                      vect(1:a_dim), info_lapack)
+        elseif (grd(1)%mattype.eq.'BAND') then
+          call DGBTRS('N', a_dim, kl, ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+                      vect(1:a_dim), a_dim, info_lapack)
+        else
+          stop 'mattype has a faulty value in solve_amsigmb'
+        endif
+        if (info_lapack.ne.0) &
+          stop 'Problem solving linear system, in arncheb'
         do i=1,power_max-1
           vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
                                        sigma*vect(1+(i-1)*a_dim:i*a_dim)
         enddo
+#endif
+#ifdef USE_MPI
+          if (iproc.eq.0) then
+#endif
+              do i=1,power_max-1
+              vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
+                  sigma*vect(1+(i-1)*a_dim:i*a_dim)
+              enddo
+#ifdef USE_MPI
+          endif
+#endif
       endif
       return
       end subroutine solve_amsigmab
@@ -532,7 +733,9 @@ contains
       integer i, info_lapack
 
       if (sigma.eq.zero) then
+#ifdef USE_MULTI
         call solve_multi_domain_transpose(sigma,vect(1:a_dim))
+#endif
       else
         temp(1:a_dim) = vect(1+(power_max-1)*a_dim:power_max*a_dim)
         do i=power_max-2,0,-1
@@ -542,7 +745,9 @@ contains
           temp(1:a_dim) = sigma*temp(1:a_dim)+vect(1+i*a_dim:(i+1)*a_dim)
 #endif
         enddo
+#ifdef USE_MULTI
         call solve_multi_domain_transpose(sigma,temp(1:a_dim))
+#endif
         do i=0,power_max-1
           temp2(1:a_dim,i) = vect(1+i*a_dim:(i+1)*a_dim)
         enddo
@@ -553,15 +758,24 @@ contains
 #endif
         vect(1:a_dim) = temp(1:a_dim)
         if (power_max.gt.1) then
+#ifdef USE_MULTI
           call a_product_total_transpose(vect(1:a_dim),vect(1+a_dim:2*a_dim),0)
           call a_product_total_transpose(vect(1:a_dim),temp(1:a_dim),1)
+#else
+          call a_product_transpose(vect(1:a_dim),vect(1+a_dim:2*a_dim),0)
+          call a_product_transpose(vect(1:a_dim),temp(1:a_dim),1)
+#endif
           vect(1+a_dim:2*a_dim) = vect(1+a_dim:2*a_dim)          &
                                 - temp2(1:a_dim,0)
           vect(1+a_dim:2*a_dim) = invsigma*vect(1+a_dim:2*a_dim) &
                                 + temp(1:a_dim)
         endif
         do i=2,power_max-1
+#ifdef USE_MULTI
           call a_product_total_transpose(vect(1:a_dim),temp(1:a_dim),i)
+#else
+          call a_product_transpose(vect(1:a_dim),temp(1:a_dim),i)
+#endif
           vect(1+i*a_dim:(i+1)*a_dim)=vect(1+(i-1)*a_dim:i*a_dim)   &
                                     -temp2(1:a_dim,i-1)
           vect(1+i*a_dim:(i+1)*a_dim)=invsigma*vect(1+i*a_dim:(i+1)*a_dim) &
@@ -580,8 +794,9 @@ contains
 ! id    = domain number
 ! sigma = eigenvalue shift
 !--------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine correct_asigma_downward(id,sigma)
-      
+
       implicit none
       integer, intent(in)         :: id
 #ifdef USE_COMPLEX
@@ -592,17 +807,17 @@ contains
       double precision, allocatable :: aiip(:,:)
 #endif
       integer info_lapack, ku, kl, lda, d_dim, n_h_bc
-      
+
       ! Just in case:
       if (id.eq.1) return
 
       ! Easy exit if possible
-      if (idm(id-1,id)%n_v_bc.eq.0) return
-      if (idm(id,id-1)%n_v_bc.eq.0) return
+      if (idm(id-1,id)%n_v_bc == 0) return
+      if (idm(id,id-1)%n_v_bc == 0) return
 
       d_dim = dm(id-1)%d_dim
-      n_h_bc = idm(id-1,id)%n_h_bc 
-      
+      n_h_bc = idm(id-1,id)%n_h_bc
+
       allocate(aiip(d_dim,n_h_bc))
       call make_asigma_full_local_hcomp(sigma,aiip,id-1,id)
       if (grd(id-1)%mattype.eq.'FULL') then
@@ -614,9 +829,9 @@ contains
                     asigma(id-1)%ipiv,aiip,d_dim,info_lapack)
 #endif
       else
-        ku = dm(id-1)%ku
+          ku = dm(id-1)%ku
         kl = dm(id-1)%kl
-        lda = 2*kl + ku + 1 
+        lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
         call ZGBTRS('N',d_dim,kl,ku,n_h_bc,asigma(id-1)%mat,lda, &
                     asigma(id-1)%ipiv,aiip,d_dim,info_lapack)
@@ -635,7 +850,8 @@ contains
       endif
       deallocate(aiip)
       end subroutine correct_asigma_downward
-      
+#endif
+
 !--------------------------------------------------------------
 ! Solve the system in a multi-domain context:
 !    vect <- inv(asigma) vect
@@ -646,8 +862,9 @@ contains
 ! sigma = the eigenvalue shift
 ! vect  = input and output vector
 !--------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine solve_multi_domain(sigma,vect)
-      
+
       implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: sigma
@@ -685,9 +902,9 @@ contains
                       asigma(id-1)%ipiv,tmp_s(1:d_dim),info_lapack)
 #endif
         else
-          ku = dm(id-1)%ku
-          kl = dm(id-1)%kl
-          lda = 2*kl + ku + 1 
+            ku = dm(id-1)%ku
+            kl = dm(id-1)%kl
+          lda = 2*kl + ku + 1
           call ZGBTRS('N',d_dim,kl,ku,1,asigma(id-1)%mat,lda,        &
                       asigma(id-1)%ipiv,tmp_s(1:d_dim),              &
                       d_dim,info_lapack)
@@ -710,9 +927,9 @@ contains
                     info_lapack)
 #endif
       else
-        ku = dm(ndomains)%ku
-        kl = dm(ndomains)%kl
-        lda = 2*kl + ku + 1 
+          ku = dm(ndomains)%ku
+          kl = dm(ndomains)%kl
+        lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
         call ZGBTRS('N',d_dimn,kl,ku,1,asigma(ndomains)%mat,lda, &
                     asigma(ndomains)%ipiv,                       &
@@ -746,9 +963,9 @@ contains
                       info_lapack)
 #endif
         else
-          ku = dm(id)%ku
-          kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
+            ku = dm(id)%ku
+            kl = dm(id)%kl
+          lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
           call ZGBTRS('N',d_dimn,kl,ku,1,asigma(id)%mat,lda, &
                       asigma(id)%ipiv,                       &
@@ -764,6 +981,7 @@ contains
       enddo
 
       end subroutine solve_multi_domain
+#endif
 
 !--------------------------------------------------------------
 ! Solve the conjugate transposed system in a multi-domain context:
@@ -775,8 +993,9 @@ contains
 ! sigma = the eigenvalue shift
 ! vect  = input and output vector
 !--------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine solve_multi_domain_transpose(sigma,vect)
-      
+
       implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: sigma
@@ -816,8 +1035,8 @@ contains
                       tmp_s(1:d_dim),info_lapack)
 #endif
         else
-          ku = dm(id-1)%ku
-          kl = dm(id-1)%kl
+            ku = dm(id-1)%ku
+            kl = dm(id-1)%kl
           lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
           call ZGBTRS('C',d_dim,kl,ku,1,asigma(id-1)%mat,lda, &
@@ -847,9 +1066,9 @@ contains
                     info_lapack)
 #endif
       else
-        ku = dm(ndomains)%ku
-        kl = dm(ndomains)%kl
-        lda = 2*kl + ku + 1 
+          ku = dm(ndomains)%ku
+          kl = dm(ndomains)%kl
+        lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
         call ZGBTRS('C',d_dimn,kl,ku,1,asigma(ndomains)%mat,lda, &
                     asigma(ndomains)%ipiv,                       &
@@ -882,9 +1101,9 @@ contains
                       info_lapack)
 #endif
         else
-          ku = dm(id)%ku
-          kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
+            ku = dm(id)%ku
+            kl = dm(id)%kl
+          lda = 2*kl + ku + 1
 #ifdef USE_COMPLEX
           call ZGBTRS('C',d_dimn,kl,ku,1,asigma(id)%mat,lda, &
                       asigma(id)%ipiv,                       &
@@ -898,7 +1117,8 @@ contains
 #endif
         endif
       enddo
- 
+
       end subroutine solve_multi_domain_transpose
+#endif
 !--------------------------------------------------------------
       end module

@@ -68,7 +68,7 @@ C
 C
       IF (KASE .EQ. 0) THEN
          DO 10,I = 1,N
-            X(I,1) =( CONE/DBLE(N) )	
+            X(I,1) =( CONE/DBLE(N) )
    10    CONTINUE
          KASE = 1
          REVCOM = 1

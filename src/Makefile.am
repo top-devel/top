@@ -3,25 +3,31 @@ AM_FCFLAGS = -I. \
 			 -I@abs_top_builddir@/lib/der \
 			 -I@abs_top_builddir@/lib/getpar \
 			 -I@abs_top_builddir@/lib/itemlist \
-			 -I@abs_top_builddir@/lib/legendre
+			 -I@abs_top_builddir@/lib/legendre \
+			 $(top_flags) \
+			 -g
 
-AM_LDFLAGS = -lgetpar -llegendre -larnoldi -lder -lfit \
-			  -litemlist -llapack_extra \
-			  -L@prefix@/lib			\
+AM_LDFLAGS = -L@prefix@/lib \
 			  -Wl,-rpath -Wl,@prefix@/lib
 
-TOP: TOP.o \
-	mod_grid.o \
-	inputs.o \
-	model.o \
-	udirectory.o \
-	matrices.o \
-	eigensolve.o \
-	postproc.o \
-	hpsort_index.o \
-	TOP.o \
-	mod_blacs.o
-	$(FC) $(LIBS) $(LDFLAGS) $(AM_LDFLAGS) $(FCFLAGS) $(AM_FCFLAGS) -o $@ $^
+lib_LTLIBRARIES   = libtop.la
+libtop_la_LIBADD  = -lgetpar -llegendre -larnoldi -lder -lfit \
+					-litemlist -llapack_extra
+libtop_la_SOURCES = grid.F90 \
+					udirectory.F90 \
+					eigensolve.F90 \
+					python.F90 \
+					hpsort_index.F90 \
+					mod_blacs.F90 \
+					model.F90 \
+					inputs.F90 \
+					matrices.F90
+
+bin_PROGRAMS = TOP
+TOP_LDADD = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
+			-litemlist -llapack_extra
+
+TOP_SOURCES = TOP.F90 postproc.F90
 
 EXTRA_DIST = order.inc \
 			 model_ester.F90 \
@@ -35,26 +41,21 @@ EXTRA_DIST = order.inc \
 			 postproc.F90 \
 			 TOP.F90
 
+model.F90:
+	cp $(srcdir)/model_$(model).F90 model.F90
 
-.F90.o:
-	$(FC) $(FCFLAGS) $(AM_FCFLAGS) -c -o $@ $<
+model.lo: inputs.lo grid.lo
 
-model.o: model_$(model).F90
-	$(FC) $(FCFLAGS) $(AM_FCFLAGS) -c -o $@ $<
-
-TOP.o:			model.o matrices.o inputs.o postproc.o
-postproc.o:		eigensolve.o udirectory.o
-eigensolve.o:	matrices.o
-matrices.o:		matrices.inc model.o
-model.o:		inputs.o ../config.h
-inputs.o:		mod_grid.o
-udirectory.o:	inputs.o
-inputs.o:		mod_blacs.o
-
-mod_grid.o: 	mod_grid.F90
-mod_blacs.o: 	mod_blacs.F90
+TOP.o:				postproc.o libtop.la
+postproc.lo:		eigensolve.lo udirectory.lo grid.lo
+eigensolve.lo:		matrices.lo mod_blacs.lo grid.lo
+matrices.lo:		matrices.inc model.lo grid.lo
+inputs.lo:			grid.lo grid.lo
+udirectory.lo:		inputs.lo model.lo grid.lo
+inputs.lo:			mod_blacs.lo grid.lo
+python.lo:			inputs.lo eigensolve.lo
 
 clean-local:
-	rm -f *.mod
-	rm -f inputs.F90 matrices.inc mod_grid.F90
+	rm -f *.mod *.lo
+	rm -f inputs.F90 matrices.inc model.F90 mod_grid.F90
 

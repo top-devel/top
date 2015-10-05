@@ -1,9 +1,9 @@
 #include "config.h"
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 !  This module contains all the matrices relevant to the oscillations problem.
 !  It is based on the idea of additive operators, so as to allow efficient
 !  storage of coupling coefficients.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       module matrices
 
       use mod_grid
@@ -14,38 +14,45 @@
         ! moment)
         integer :: nvar, d_dim, offset, ku, kl, nvar_keep
         integer :: nas, nart, nartt
-        double precision, pointer :: as(:), art(:,:,:),artt(:,:,:,:)
-        integer, pointer :: asi(:,:), arti(:,:), artti(:,:)
-        integer, pointer :: ivar(:,:,:), ieq(:,:,:)
-        integer, pointer :: lvar(:,:), leq(:,:)
-        integer, pointer :: var_der_max(:), var_der_min(:)
-        integer, pointer :: var_list(:)
-        logical, pointer :: bc_flag(:), var_keep(:)
+        double precision, allocatable :: as(:), art(:,:,:),artt(:,:,:,:)
+        integer, allocatable :: asi(:,:), arti(:,:), artti(:,:)
+        integer, allocatable :: ivar(:,:,:), ieq(:,:,:)
+        integer, allocatable :: lvar(:,:), leq(:,:)
+        integer, allocatable :: var_der_max(:), var_der_min(:)
+        integer, allocatable :: var_list(:)
+        logical, allocatable :: bc_flag(:), var_keep(:)
 #ifdef USE_COMPLEX
-        double complex, pointer :: vect_der(:,:)
+        double complex, allocatable :: vect_der(:,:)
 #else
-        double precision, pointer :: vect_der(:,:)
+        double precision, allocatable :: vect_der(:,:)
 #endif
-        character*(10), pointer :: var_name(:), eq_name(:)
+        character*(10), allocatable :: var_name(:), eq_name(:)
       end type DOMAIN
 
       type INTERDOMAIN
         integer :: natbc, nattbc
-        double precision, pointer :: atbc(:,:),attbc(:,:,:)
-        integer, pointer :: atbci(:,:), attbci(:,:)
-        integer, pointer :: v_bc_range(:), h_bc_range(:)
-        integer, pointer :: inv_v_bc_range(:), inv_h_bc_range(:)
+        double precision, allocatable :: atbc(:,:),attbc(:,:,:)
+        integer, allocatable :: atbci(:,:), attbci(:,:)
+        integer, allocatable :: v_bc_range(:), h_bc_range(:)
+        integer, allocatable :: inv_v_bc_range(:), inv_h_bc_range(:)
         integer :: n_v_bc, n_h_bc
         integer :: v_bc_min, v_bc_max, h_bc_min, h_bc_max
       end type INTERDOMAIN
 
+      logical, save :: first_run = .true.
       type(DOMAIN),      allocatable, save :: dm(:)
       type(INTERDOMAIN), allocatable, save :: idm(:,:)
       type(DERMAT),      allocatable, save :: dmat(:)
-      integer, save :: power_max, a_dim, d_dim_max, llmax
-      logical, save :: first_run = .true.
 
-!------------------------------------------------------------------------------ 
+      integer, save :: a_dim, llmax, power_max
+#ifdef USE_MULTI
+      integer, save :: d_dim_max
+#else
+      logical, save :: first_dmat = .true.
+      integer, save, pointer :: nr
+#endif
+
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! dm(:)        = these contain a sparse representation of the equations
@@ -60,7 +67,7 @@
 ! first_run    = this keeps track of whether this is a first run or not so
 !                as to know whether the different arrays in domain,
 !                interdomain and dmat can be freed or not
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables in DOMAIN:
 !
 ! as, art, artt, asi, arti, artti, nas, nart, nartt: contains sparse matrices
@@ -93,7 +100,7 @@
 !                First index: ivar(var,i).  Second index: derivative order.
 ! var_name()   = names of the variables (it is used when writing vecp.gz)
 ! eq_name()    = names of the equations
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables in INTERDOMAIN:
 !
 ! atbc, attbc, atbci, attbci, natbc, nattbc: contains boundary and interface
@@ -115,7 +122,7 @@
 !   v = vertical, h = horizontal
 !   1 <= index <= number of lines/columns with b.c. or i.c.
 !   1 <= position <= number of lines/columns in matrix
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! The remaining variables are named through the following scheme:
 ! [{},n]a[{},bc][s,r][{},i] = coupling matrices and relevant information
 !                       [{},n]:  {} = matrices themselves (or relevant
@@ -149,20 +156,20 @@
 !                 (info = 6: variable location, only for boundary conditions (typically, 1 or nr))
 !                  info = 7: 0 for real, 1 for imaginary
 !
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
 contains
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine initialises the arrays dm, idm and dmat.  The arrays dm and
 ! idm, which contain the equations and boundary/interface conditions are
 ! initialised in "matrices.inc" which is written by readeq.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       include "matrices.inc"
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine finds the maximum l value in the lvar and leq arrays.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine find_llmax()
 
       implicit none
@@ -170,30 +177,30 @@ contains
 
       llmax = 0
       do id=1,ndomains
-        do var = 1, dm(id)%nvar
+      do var = 1, dm(id)%nvar
           do j=1,nt
-            if (dm(id)%lvar(j,var).gt.llmax) llmax = dm(id)%lvar(j,var)
-            if (dm(id)%leq(j,var).gt.llmax)  llmax = dm(id)%leq(j,var)
+          if (dm(id)%lvar(j,var).gt.llmax) llmax = dm(id)%lvar(j,var)
+          if (dm(id)%leq(j,var).gt.llmax)  llmax = dm(id)%leq(j,var)
           enddo
         enddo
       enddo
 
       end subroutine find_llmax
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine initialises var_list, the list of variables to be
 ! printed in the output file, from the logical array var_keep.  It also
 ! sets the appropriate value for nvar_keep.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine init_var_list()
 
       implicit none
       integer id, var, var_out
 
       do id=1,ndomains
-        dm(id)%nvar_keep = 0
-        do var = 1, dm(id)%nvar
-          if (dm(id)%var_keep(var)) dm(id)%nvar_keep=dm(id)%nvar_keep+1
+      dm(id)%nvar_keep = 0
+      do var = 1, dm(id)%nvar
+      if (dm(id)%var_keep(var)) dm(id)%nvar_keep=dm(id)%nvar_keep+1
         enddo
 
         allocate(dm(id)%var_list(dm(id)%nvar_keep))
@@ -209,9 +216,9 @@ contains
 
       end subroutine init_var_list
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine clears dm, idm and dmat so as to avoid memory leaks.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine clear_all()
 
       use derivative
@@ -219,10 +226,12 @@ contains
       integer id,id2
 
       ! clear derivation matrices
+#ifdef USE_MULTI
       do id=1,ndomains
         call clear_derive(dmat(id))
       enddo
       deallocate(dmat)
+#endif
 
       ! clear domain matrices
       do id=1,ndomains
@@ -235,7 +244,9 @@ contains
         deallocate(dm(id)%var_name,dm(id)%eq_name)
         deallocate(dm(id)%var_keep,dm(id)%var_list)
       enddo
+#ifdef USE_MULTI
       deallocate(dm)
+#endif
 
       ! clear interdomain matrices
       do id=1,ndomains
@@ -246,13 +257,15 @@ contains
           deallocate(idm(id,id2)%inv_v_bc_range,idm(id,id2)%inv_h_bc_range)
         enddo
       enddo
+#ifdef USE_MULTI
       deallocate(idm)
+#endif
 
       end subroutine clear_all
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine allocates most of the arrays in dm and idm
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine allocate_all()
 
       implicit none
@@ -305,6 +318,7 @@ contains
 ! mm                = azimuthal order (or some other appropriate quantity)
 ! f(1:nr,1:nt,1:nt) = coupling matrix which is being modified
 !------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine modify_l0(f,nr,mm)
 
       implicit none
@@ -319,6 +333,21 @@ contains
       endif
 
       end subroutine modify_l0
+#else
+      subroutine modify_l0(f,m)
+
+      implicit none
+      double precision f(1:grd(1)%nr,1:nt,1:nt)
+      integer m, i
+
+      if (m.eq.0) then
+        do i=1,grd(1)%nr
+          f(i,1,1) = 1d0
+        enddo
+      endif
+
+      end subroutine modify_l0
+#endif
 
 !------------------------------------------------------------------------------
 ! This subroutine interpolates background equilibrium quantities so that
@@ -332,6 +361,7 @@ contains
 ! vin(1:grd(id)%nr)  = variable before interpolation
 ! vout(1:grd(id)%nr) = variable after interpolation
 !------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine avg1D(vin,vout,id)
 
       implicit none
@@ -347,6 +377,7 @@ contains
         enddo
       enddo
       end subroutine
+#endif
 
 !------------------------------------------------------------------------------
 ! This subroutine assigns a 1D array to a 2D array, by repeating the
@@ -377,7 +408,7 @@ contains
 ! This subroutine finds the min and max derivative domain id and for
 ! each variable in the domain.  The global min and max derivatives
 ! are set in der_min and der_max, and the min and max derivatives for
-! each variable are set in dm(id)%var_der_min and dm(id)%var_der_max).
+! each variable are set in dm(id)%var_der_min and dm(id)%var_der_max.)
 !------------------------------------------------------------------------------
 ! Variables:
 !
@@ -385,10 +416,18 @@ contains
 ! der_max = highest derivative for domain id
 ! id      = number of the domain
 !------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine find_der_range(der_min,der_max,id)
+#else
+      subroutine find_der_range(der_min,der_max)
+#endif
 
       implicit none
+#ifdef USE_MULTI
       integer, intent(in)  :: id
+#else
+      integer, parameter :: id = 1
+#endif
       integer, intent(out) :: der_min, der_max
       integer n, der, var, i, id2
 
@@ -454,18 +493,16 @@ contains
 
       end subroutine find_der_range
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine initialises the arrays ivar and ieq which govern the order
 ! in which the variables and the equations appear in the matrices.
 ! The following is a generic form:
-!------------------------------------------------------------------------------ 
-
+!------------------------------------------------------------------------------
       include "order.inc"
-
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine checks the arrays ivar and ieq to make sure they have been
 ! correctly initialised.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
       subroutine check_order()
       implicit none
@@ -474,23 +511,29 @@ contains
 
       do id=1,ndomains
         min_value = 1
-        max_value = dm(id)%nvar*grd(id)%nr*nt 
+        max_value = dm(id)%nvar*grd(id)%nr*nt
         do var=1,dm(id)%nvar
           do i=1,grd(id)%nr
             do j=1,nt
               if ((dm(id)%ieq(var,i,j).gt.max_value).or. &
                   (dm(id)%ieq(var,i,j).lt.min_value)) then
-                print*,"ieq takes on values outside allowed range"
-                print*,"faulty value = ",dm(id)%ieq(var,i,j)
-                print*,"var = ",var
-                print*,"i = ",i
-                print*,"j = ",j
+                print*, "ieq takes on values outside allowed range: ", &
+                         1, max_value
+                print*, "faulty value = ",dm(id)%ieq(var,i,j)
+                print*, "should be: ", j + nt*(var-1 + (dm(1)%nvar-2)*(i-1))
+                print*, "nvar:", dm(id)%nvar
+                print*, "nr:", grd(id)%nr
+                print*, "nt:", nt
+                print*, "var = ",var
+                print*, "i = ",i
+                print*, "j = ",j
+                print*, "id = ",id
                 stop ! the following tests won't function correctly
               endif
             enddo
           enddo
         enddo
-      
+
         do var=1,dm(id)%nvar
           do i=1,grd(id)%nr
             do j=1,nt
@@ -542,7 +585,7 @@ contains
 
       print*,"ieq and ivar seem to be initialised correctly."
       print*,"Please remove 'check_order' and run program again."
-      stop
+      ! stop
 
       end subroutine check_order
 
@@ -560,7 +603,7 @@ contains
 
       do id=1,ndomains
         allocate(dm(id)%bc_flag(dm(id)%d_dim))
-      
+
         ! The boundary conditions:
         dm(id)%bc_flag(:) = .false.
 
@@ -583,18 +626,21 @@ contains
         enddo
       enddo
 
+#ifdef USE_MULTI
+      call init_bc_range()
+#endif
       end subroutine init_bc_flag
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine initialises the arrays v_bc_range, h_bc_range,
-! inv_v_bc_range and inv_h_bc_range which are used when calculating 
+! inv_v_bc_range and inv_h_bc_range which are used when calculating
 ! corrections to the matrices which operate within one domain (i.e.
 ! id = id2).  Their lower and upper bounds intervene in determining
 ! the number of lower and upper diagonal bands in these matrices,
 ! when working with band storage.
 !
 ! This must come after init_order.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! REMINDER:
 !
 ! n_v_bc                   = number of rows with b.c. or i.c.
@@ -613,8 +659,8 @@ contains
 !   v = vertical, h = horizontal
 !   1 <= index <= number of lines/columns with b.c. or i.c.
 !   1 <= position <= number of lines/columns in matrix
-!------------------------------------------------------------------------------ 
-
+!------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine init_bc_range()
 
       implicit none
@@ -628,7 +674,7 @@ contains
         do id2=1,ndomains
           v_bc_flag(1:dm(id)%d_dim)  = .false.
           h_bc_flag(1:dm(id2)%d_dim) = .false.
-      
+
           ! The boundary conditions:
           do n=1,idm(id,id2)%natbc
             der = idm(id,id2)%atbci(2,n)
@@ -712,7 +758,7 @@ contains
           else
             ! these conditions ensure that ku and kl are not modified
             ! in increase_ku_kl_upward/downward
-            idm(id,id2)%v_bc_min = 0 
+            idm(id,id2)%v_bc_min = 0
             idm(id,id2)%v_bc_max = 0
           endif
 
@@ -732,9 +778,10 @@ contains
 
       deallocate(v_bc_flag, h_bc_flag)
       end subroutine init_bc_range
+#endif
 
 !------------------------------------------------------------------------------
-! For a given domain, this subroutine sets appropriate values for dm(id)%ku 
+! For a given domain, this subroutine sets appropriate values for dm(id)%ku
 ! and dm(id)%kl, the number of upper and lower bands, when using band storage
 ! for the matrix asigma(id,id):
 !      asigma = a(0) + sigma.a(1) + sigma^2.a(2) +  ...
@@ -743,10 +790,18 @@ contains
 !
 ! id = number of the domain
 !------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine init_ku_kl(id)
+#else
+      subroutine init_ku_kl()
+#endif
 
       implicit none
+#ifdef USE_MULTI
       integer, intent(in) :: id
+#else
+      integer, parameter :: id = 1
+#endif
       integer n, i, j, ii, jj, l, c, der, eq, var, eqloc, varloc
 
       dm(id)%ku = 0
@@ -761,7 +816,8 @@ contains
           do j=1,nt
             l = dm(id)%ieq(eq,i,j)
             if (.not.dm(id)%bc_flag(l)) then
-              do ii=max(1,i-dmat(id)%lbder(der)),min(grd(id)%nr,i+dmat(id)%ubder(der))
+              do ii=max(1,i-dmat(id)%lbder(der)), &
+                  & min(grd(id)%nr,i+dmat(id)%ubder(der))
                 c = dm(id)%ivar(var,ii,j)
                 if (dm(id)%kl.lt.(l-c)) dm(id)%kl = l-c
                 if (dm(id)%ku.lt.(c-l)) dm(id)%ku = c-l
@@ -845,7 +901,9 @@ contains
       enddo
 
       print*,"**************************************"
+#ifdef USE_MULTI
       print*,"DOMAIN: ",id
+#endif
       print*,"Number of lower bands (before): ",dm(id)%kl
       print*,"Number of upper bands (before): ",dm(id)%ku
 
@@ -861,6 +919,7 @@ contains
 !
 ! id = number of the domain
 !------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine increase_ku_kl_downward (id)
 
       implicit none
@@ -880,6 +939,7 @@ contains
       print*,"Number of upper bands (after):  ",dm(id)%ku
 
       end subroutine increase_ku_kl_downward
+#endif
 
 !------------------------------------------------------------------------------
 ! This adjusts the values of dm(id)%ku and dm(id)%kl so that the system can
@@ -923,8 +983,9 @@ contains
 !                     product
 ! power             = this tells which matrix to use (it corresponds to the
 !                     power of the eigenvalue in front)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine a_product_total(vect_in, vect_out, power)
 
       implicit none
@@ -942,7 +1003,7 @@ contains
       integer, intent(in) :: power
       integer id, id2, i, j, ii, jj, n, der, eq, var, a_index, v_index
       integer eqloc, varloc
-    
+
       vect_out(1:a_dim) = zero
 
       ! Preliminary calculations: derivative(s) of vect
@@ -1099,20 +1160,22 @@ contains
       enddo
 
       end subroutine a_product_total
+#endif
 
 !------------------------------------------------------------------------------
 ! This does:
 !  vect_out(id) <-  vect_out(id) - asigma(id,id2)*vect_in(id2)
 ! using a sparse multiplication method.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! Variables:
 !
 ! vect_in  = input vector (dim = dm(id2)%d_dim)
 ! vect_out = output vector (dim = dm(id)%d_dim)
 ! id, id2  = domain coordinates of matrix, from matrix-vector product
 ! sigma    = the eigenvalue shift
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine asigma_product_subtract_local(vect_in, vect_out, id, id2, sigma)
 
       implicit none
@@ -1280,12 +1343,13 @@ contains
       enddo
 
       end subroutine asigma_product_subtract_local
+#endif
 
 !------------------------------------------------------------------------------
 ! This does:
 !   mat_out <-  mat_out - asigma(id,id-1)*mat_in
 ! using a sparse multiplication method.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! Variables:
 !
 ! mat_in   = matrix which should correspond to:
@@ -1297,11 +1361,12 @@ contains
 !            mat_out is a FULL matrix
 ! id       = the number of the domain
 ! sigma    = the eigenvalue shift
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! IMPORTANT: id must be greater than 1 (otherwise the declarations will go out
 !            of array bounds)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine asigma_full_product_subtract_local_hcomp(mat_in, &
                         mat_out, id, sigma)
 
@@ -1320,8 +1385,8 @@ contains
 #endif
       integer i, j, ii, jj, n, k, kk, der, eq, var, a_index, v_index
       integer eqloc, varloc, power
-   
-      do k=1,idm(id-1,id)%n_h_bc 
+
+      do k=1,idm(id-1,id)%n_h_bc
         ! Preliminary calculations: derivative(s) of vect
         dm(id-1)%vect_der(1:dm(id-1)%d_dim,dmat(id-1)%der_min:dmat(id-1)%der_max) = (0d0,0d0)
         do var=1,dm(id-1)%nvar
@@ -1342,7 +1407,7 @@ contains
         ! Boundary conditions:
         kk = idm(id-1,id)%h_bc_range(k)
         do n=1,idm(id,id-1)%natbc
-          power  = idm(id,id-1)%atbci(1,n) 
+          power  = idm(id,id-1)%atbci(1,n)
           der    = idm(id,id-1)%atbci(2,n)
           eq     = idm(id,id-1)%atbci(3,n)
           var    = idm(id,id-1)%atbci(4,n)
@@ -1391,12 +1456,13 @@ contains
       enddo
 
       end subroutine asigma_full_product_subtract_local_hcomp
+#endif
 
 !------------------------------------------------------------------------------
 ! This does:
 !   mat_out <-  mat_out - asigma(id,id-1)*mat_in
 ! using a sparse multiplication method.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! Variables:
 !
 ! mat_in   = matrix which should correspond to:
@@ -1407,11 +1473,12 @@ contains
 !            should, in the end, correspond to tilde(asigma(id,id))
 !            mat_out is a BAND matrix
 ! id       = the number of the domain
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! IMPORTANT: id must be greater than 1 (otherwise the declarations will go out
 !            of array bounds)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine asigma_band_product_subtract_local_hcomp(mat_in, &
                  mat_out, id, sigma)
 
@@ -1432,10 +1499,10 @@ contains
 #endif
       integer i, j, ii, jj, n, k, kk, der, eq, var, a_index, v_index, pos
       integer eqloc, varloc, power
-  
+
       pos = dm(id)%kl + dm(id)%ku + 1
 
-      do k=1,idm(id-1,id)%n_h_bc 
+      do k=1,idm(id-1,id)%n_h_bc
         ! Preliminary calculations: derivative(s) of vect
         dm(id-1)%vect_der(1:dm(id-1)%d_dim,dmat(id-1)%der_min:dmat(id-1)%der_max) = (0d0,0d0)
         do var=1,dm(id-1)%nvar
@@ -1505,13 +1572,14 @@ contains
       enddo
 
       end subroutine asigma_band_product_subtract_local_hcomp
+#endif
 
-!------------------------------------------------------------------------------ 
-! This subroutine performs the matrix vector product 
+!------------------------------------------------------------------------------
+! This subroutine performs the matrix vector product
 ! conjg(transpose(a(power))).x for the whole system, where a(power) comes
 ! from the eigenvalue problem:
 !      w^2.a(2).x + w.a(1).x + a(0).x = 0.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! vect_in(1:a_dim)  = vecteur undergoing the matrix product
@@ -1519,8 +1587,9 @@ contains
 !                     product
 ! power             = this tells which matrix to use (it corresponds to the
 !                     power of the eigenvalue in front)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine a_product_total_transpose(vect_in,vect_out,power)
 
       implicit none
@@ -1575,7 +1644,7 @@ contains
             enddo
           endif
         enddo
-  
+
         do n=1,dm(id)%nart
           if (dm(id)%arti(1,n).eq.power) then
             der = dm(id)%arti(2,n)
@@ -1590,7 +1659,7 @@ contains
 #endif
             do i=1,grd(id)%nr
               do j=1,nt
-                a_index = dm(id)%ieq(eq,i,j) 
+                a_index = dm(id)%ieq(eq,i,j)
                 if (.not.dm(id)%bc_flag(a_index)) then
                   a_index = a_index + dm(id)%offset
                   v_index = dm(id)%ivar(var,i,j)
@@ -1602,7 +1671,7 @@ contains
             enddo
           endif
         enddo
-  
+
         do n=1,dm(id)%nartt
           if (dm(id)%artti(1,n).eq.power) then
             der = dm(id)%artti(2,n)
@@ -1617,7 +1686,7 @@ contains
 #endif
             do i=1,grd(id)%nr
               do j=1,nt
-                a_index = dm(id)%ieq(eq,i,j) 
+                a_index = dm(id)%ieq(eq,i,j)
                 if (.not.dm(id)%bc_flag(a_index)) then
                   a_index = a_index+dm(id)%offset
                   do jj=1,nt
@@ -1631,7 +1700,7 @@ contains
             enddo
           endif
         enddo
-  
+
         ! Boundary conditions:
         do id2 = 1,ndomains
           do n=1,idm(id,id2)%natbc
@@ -1649,15 +1718,15 @@ contains
               endif
 #endif
               do j=1,nt
-                a_index = dm(id)%offset+dm(id)%ieq(eq,eqloc,j) 
-                v_index = dm(id2)%ivar(var,varloc,j) 
+                a_index = dm(id)%offset+dm(id)%ieq(eq,eqloc,j)
+                v_index = dm(id2)%ivar(var,varloc,j)
                 dm(id2)%vect_der(v_index,der) =   &
                   dm(id2)%vect_der(v_index,der) + &
                   cfactor*idm(id,id2)%atbc(j,n)*vect_in(a_index)
               enddo
             endif
           enddo
-    
+
           do n=1,idm(id,id2)%nattbc
             if (idm(id,id2)%attbci(1,n).eq.power) then
               der = idm(id,id2)%attbci(2,n)
@@ -1673,9 +1742,9 @@ contains
               endif
 #endif
               do j=1,nt
-                a_index = dm(id)%offset+dm(id)%ieq(eq,eqloc,j) 
+                a_index = dm(id)%offset+dm(id)%ieq(eq,eqloc,j)
                 do jj=1,nt
-                  v_index = dm(id2)%ivar(var,varloc,jj) 
+                  v_index = dm(id2)%ivar(var,varloc,jj)
                   dm(id2)%vect_der(v_index,der) =   &
                     dm(id2)%vect_der(v_index,der) + &
                     cfactor*idm(id,id2)%attbc(j,jj,n)*vect_in(a_index)
@@ -1693,9 +1762,9 @@ contains
           do der=dm(id)%var_der_min(var),dm(id)%var_der_max(var)
             do j=1,nt
               do i=1,grd(id)%nr
-                v_index = dm(id)%offset+dm(id)%ivar(var,i,j) 
+                v_index = dm(id)%offset+dm(id)%ivar(var,i,j)
                 do ii=max(1,i-dmat(id)%ubder(der)),min(grd(id)%nr,i+dmat(id)%lbder(der))
-                  a_index = dm(id)%ivar(var,ii,j) 
+                  a_index = dm(id)%ivar(var,ii,j)
                   ! To understand this, you need to draw a picture...
                   vect_out(v_index) = vect_out(v_index) + &
                     dmat(id)%derive(ii,i,der)*dm(id)%vect_der(a_index,der)
@@ -1707,24 +1776,26 @@ contains
       enddo
 
       end subroutine a_product_total_transpose
+#endif
 
 !------------------------------------------------------------------------------
 ! This does:
 !   vect_out(id2) <- vect_out(id2) - CONJG(TRANSPOSE(asigma(id,id2)))*vect_in(id)
 ! using a sparse multiplication method.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! Variables:
 !
 ! vect_in  = input vector (dim = dm(id)%d_dim)
 ! vect_out = output vector (dim = dm(id2)%d_dim)
 ! id, id2  = domain coordinates of matrix, from matrix-vector product
 ! sigma    = the eigenvalue shift
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! NOTE: The eigenvalue shift will be conjugated within this subroutine, so the
 !       subroutine should be called with the eigenvalue shift and NOT its
 !       conjugate.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine asigma_product_subtract_local_transpose(vect_in, &
                                         vect_out, id, id2, sigma)
 
@@ -1746,7 +1817,7 @@ contains
       integer i, j, ii, jj, n, der, eq, var, power
       integer a_index, v_index, eqloc, varloc
 
-      ! Initialisation 
+      ! Initialisation
       dm(id2)%vect_der(1:dm(id2)%d_dim,dmat(id2)%der_min:dmat(id2)%der_max) = zero
 
       ! Boundary conditions:
@@ -1908,18 +1979,20 @@ contains
       enddo
 
       end subroutine asigma_product_subtract_local_transpose
+#endif
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the matrix asigma using FULL storage:
-!      asigma(id,id2) = a(power=0,id,id2) + sigma.a(power=1,id,id2) 
+!      asigma(id,id2) = a(power=0,id,id2) + sigma.a(power=1,id,id2)
 !                     + sigma^2.a(power=2,id,id2) +  ...
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! sigma  = value for sigma
 ! asigma = matrix which will contain asigma
 ! id,id2 = domain coordinates for asigma
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine make_asigma_full_local(sigma, asigma, id, id2)
 
       implicit none
@@ -2079,16 +2152,131 @@ contains
       enddo
 
       end subroutine make_asigma_full_local
+#else
+      subroutine make_asigma_full(sigma, asigma)
 
-!------------------------------------------------------------------------------ 
+      implicit none
+      double precision sigma
+      double precision asigma(a_dim,a_dim)
+      double precision sigmap, temp
+      integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
+
+      asigma = 0d0
+
+      ! The equations:
+      do n=1,dm(1)%nas
+        power = dm(1)%asi(1,n)
+        der = dm(1)%asi(2,n)
+        eq  = dm(1)%asi(3,n)
+        var = dm(1)%asi(4,n)
+        sigmap = sigma**power
+        temp = sigmap*dm(1)%as(n)
+        do i=1,grd(1)%nr
+          do j=1,nt
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                c = dm(1)%ivar(var,ii,j)
+                asigma(l,c) = asigma(l,c)+temp*dmat(1)%derive(i,ii,der)
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      do n=1,dm(1)%nart
+        power = dm(1)%arti(1,n)
+        der = dm(1)%arti(2,n)
+        eq  = dm(1)%arti(3,n)
+        var = dm(1)%arti(4,n)
+        sigmap = sigma**power
+        do i=1,grd(1)%nr
+          do j=1,nt
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              temp = sigmap*dm(1)%art(i,j,n)
+              do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                c = dm(1)%ivar(var,ii,j)
+                asigma(l,c) = asigma(l,c)+temp*dmat(1)%derive(i,ii,der)
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      do n=1,dm(1)%nartt
+        power = dm(1)%artti(1,n)
+        der = dm(1)%artti(2,n)
+        eq  = dm(1)%artti(3,n)
+        var = dm(1)%artti(4,n)
+        sigmap = sigma**power
+        do i=1,grd(1)%nr
+          do j=1,nt
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              do jj=1,nt
+                temp = sigmap*dm(1)%artt(i,j,jj,n)
+                do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                  c = dm(1)%ivar(var,ii,jj)
+                  asigma(l,c) = asigma(l,c)+temp*dmat(1)%derive(i,ii,der)
+                enddo
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      ! Boundary conditions:
+      do n=1,idm(1, 1)%natbc
+        power = idm(1, 1)%atbci(1,n)
+        der = idm(1, 1)%atbci(2,n)
+        eq  = idm(1, 1)%atbci(3,n)
+        var = idm(1, 1)%atbci(4,n)
+        eqloc  = idm(1, 1)%atbci(5,n)
+        varloc = idm(1, 1)%atbci(6,n)
+        sigmap = sigma**power
+        do ii=max(1,varloc-dmat(1)%lbder(der)),min(grd(1)%nr,varloc+dmat(1)%ubder(der))
+          temp = sigmap*dmat(1)%derive(varloc,ii,der)
+          do j=1,nt
+            l = dm(1)%ieq(eq,eqloc,j)
+            c = dm(1)%ivar(var,ii,j)
+            asigma(l,c) = asigma(l,c)+temp*idm(1, 1)%atbc(j,n)
+          enddo
+        enddo
+      enddo
+
+      do n=1,idm(1, 1)%nattbc
+        power = idm(1, 1)%attbci(1,n)
+        der = idm(1, 1)%attbci(2,n)
+        eq  = idm(1, 1)%attbci(3,n)
+        var = idm(1, 1)%attbci(4,n)
+        eqloc  = idm(1, 1)%attbci(5,n)
+        varloc = idm(1, 1)%attbci(6,n)
+        sigmap = sigma**power
+        do ii=max(1,varloc-dmat(1)%lbder(der)),min(grd(1)%nr,varloc+dmat(1)%ubder(der))
+          temp = sigmap*dmat(1)%derive(varloc,ii,der)
+          do j=1,nt
+            l = dm(1)%ieq(eq,eqloc,j)
+            do jj=1,nt
+              c = dm(1)%ivar(var,ii,jj)
+              asigma(l,c) = asigma(l,c)+temp*idm(1, 1)%attbc(j,jj,n)
+            enddo
+          enddo
+        enddo
+      enddo
+
+      end subroutine make_asigma_full
+#endif
+
+!------------------------------------------------------------------------------
 ! This subroutine creates the TOTAL matrix asigma using FULL storage:
 !      asigma = a(power=0) + sigma.a(power=1) + sigma^2.a(power=2) +  ...
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! sigma  = value for sigma
 ! asigma = matrix which will contain asigma
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine make_asigma_full_total(sigma, asigma)
 
       implicit none
@@ -2256,15 +2444,15 @@ contains
 
       end subroutine make_asigma_full_total
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the matrix asigma using FULL storage, and compressed
 ! in the horizontal direction:
-!      asigma(id,id2) = a(power=0,id,id2) + sigma.a(power=1,id,id2) 
+!      asigma(id,id2) = a(power=0,id,id2) + sigma.a(power=1,id,id2)
 !                     + sigma^2.a(power=2,id,id2) +  ...
 !
 ! Horizontal compression means that only non-zero columns of asigma are
 ! created.  Their indices are given by h_bc_range.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! sigma  = value for sigma
@@ -2275,6 +2463,7 @@ contains
 !            case would not correspond to the non-zero columns.
 !------------------------------------------------------------------------------
 
+#ifdef USE_MULTI
       subroutine make_asigma_full_local_hcomp(sigma, asigma, id, id2)
 
       implicit none
@@ -2296,7 +2485,7 @@ contains
       if (id.eq.id2) then
         stop "id == id2 not allowed in make_asigma_full_local_hcomp"
       endif
-   
+
       asigma = zero
 
       ! Boundary conditions:
@@ -2353,18 +2542,20 @@ contains
       enddo
 
       end subroutine make_asigma_full_local_hcomp
+#endif
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the matrix apower using FULL storage, where
 ! apower = a(0) when power = 0, apower = a(1) when power = 1, etc.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! power  = exponent of the eigenvalue which goes in front of the matrix in
 !          the full eigenvalue problem
 ! apower = matrix into which the result is stored
 ! id,id2 = domain coordinates for apower
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine make_a_full_local(power, apower, id, id2)
 
       implicit none
@@ -2517,17 +2708,18 @@ contains
       enddo
 
       end subroutine make_a_full_local
+#endif
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the TOTAL matrix apower using FULL storage, where
 ! apower = a(0) when power = 0, apower = a(1) when power = 1, etc.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! power  = exponent of the eigenvalue which goes in front of the matrix in
 !          the full eigenvalue problem
 ! apower = matrix into which the result is stored
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
       subroutine make_a_full_total(power, apower)
 
       implicit none
@@ -2688,21 +2880,22 @@ contains
 
       end subroutine make_a_full_total
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the matrix asigma using BAND storage:
 !      asigma(id,id) = a(0) + sigma.a(1) + sigma^2.a(2) +  ...
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! sigma  = value for sigma
 ! asigma = matrix which will contain asigma
 ! id     = domain number
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! NOTE: a second domain argument, id2, is not given because band storage
 !       only seems appropriate for square matrices, which usually only occurs
 !       when id == id2 (and the corresponding ku, kl are only defined for
 !       id == id2)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine make_asigma_band_local(sigma, asigma, id)
 
       implicit none
@@ -2859,23 +3052,25 @@ contains
       enddo
 
       end subroutine make_asigma_band_local
+#endif
 
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! This subroutine creates the matrix apower using BAND storage, where
 ! apower = a(0) when power = 0, apower = a(1) when power = 1, etc.
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! List of variables:
 !
 ! power  = exponent of the eigenvalue which goes in front of the matrix in
 !          the full eigenvalue problem
 ! apower = matrix into which the result is stored
 ! id,id2 = domain coordinates for apower
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
 ! NOTE: a second domain argument, id2, is not given because band storage
 !       only seems appropriate for square matrices, which usually only occurs
 !       when id == id2 (and the corresponding ku, kl are only defined for
 !       id == id2)
-!------------------------------------------------------------------------------ 
+!------------------------------------------------------------------------------
+#ifdef USE_MULTI
       subroutine make_a_band_local(power, apower, id)
 
       implicit none
@@ -3037,5 +3232,361 @@ contains
       enddo
 
       end subroutine make_a_band_local
+#endif
+!------------------------------------------------------------------------------
+      subroutine a_product_transpose(vect_in,vect_out,power)
+
+      implicit none
+      double precision, intent(in) :: vect_in(a_dim)
+      double precision, intent(out):: vect_out(a_dim)
+      integer, intent(in) :: power
+      integer i,j,ii,jj,n,der,eq,var,eqloc,varloc,a_index,v_index
+
+      ! Initialisation:
+      dm(1)%vect_der(1:a_dim,dmat(1)%der_min:dmat(1)%der_max) = 0d0
+
+      ! The equations:
+      do n=1,dm(1)%nas
+        if (dm(1)%asi(1,n).eq.power) then
+          der = dm(1)%asi(2,n)
+          eq  = dm(1)%asi(3,n)
+          var = dm(1)%asi(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              a_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(a_index)) then
+                v_index = dm(1)%ivar(var,i,j)
+                dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + dm(1)%as(n)*vect_in(a_index)
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      do n=1,dm(1)%nart
+        if (dm(1)%arti(1,n).eq.power) then
+          der = dm(1)%arti(2,n)
+          eq  = dm(1)%arti(3,n)
+          var = dm(1)%arti(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              a_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(a_index)) then
+                v_index = dm(1)%ivar(var,i,j)
+                dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + dm(1)%art(i,j,n)*vect_in(a_index)
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      do n=1,dm(1)%nartt
+        if (dm(1)%artti(1,n).eq.power) then
+          der = dm(1)%artti(2,n)
+          eq  = dm(1)%artti(3,n)
+          var = dm(1)%artti(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              a_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(a_index)) then
+                do jj=1,nt
+                  v_index = dm(1)%ivar(var,i,jj)
+                  dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + dm(1)%artt(i,j,jj,n)*vect_in(a_index)
+                enddo
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      ! Boundary conditions:
+      do n=1,idm(1, 1)%natbc
+        if (idm(1, 1)%atbci(1,n).eq.power) then
+          der = idm(1, 1)%atbci(2,n)
+          eq  = idm(1, 1)%atbci(3,n)
+          var = idm(1, 1)%atbci(4,n)
+          eqloc  = idm(1, 1)%atbci(5,n)
+          varloc = idm(1, 1)%atbci(6,n)
+          do j=1,nt
+            a_index = dm(1)%ieq(eq,eqloc,j)
+            v_index = dm(1)%ivar(var,varloc,j)
+            dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + idm(1, 1)%atbc(j,n)*vect_in(a_index)
+          enddo
+        endif
+      enddo
+
+      do n=1,idm(1, 1)%nattbc
+        if (idm(1, 1)%attbci(1,n).eq.power) then
+          der = idm(1, 1)%attbci(2,n)
+          eq  = idm(1, 1)%attbci(3,n)
+          var = idm(1, 1)%attbci(4,n)
+          eqloc  = idm(1, 1)%attbci(5,n)
+          varloc = idm(1, 1)%attbci(6,n)
+          do j=1,nt
+            a_index = dm(1)%ieq(eq,eqloc,j)
+            do jj=1,nt
+              v_index = dm(1)%ivar(var,varloc,jj)
+              dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + idm(1, 1)%attbc(j,jj,n)*vect_in(a_index)
+            enddo
+          enddo
+        endif
+      enddo
+
+      ! Finish the calculations: transpose(mat_der)*vect
+      vect_out = 0d0 ! don't forget this
+      do var=1,dm(1)%nvar
+        do der=dm(1)%var_der_min(var),dm(1)%var_der_max(var)
+          do j=1,nt
+            do i=1,grd(1)%nr
+              v_index = dm(1)%ivar(var,i,j)
+              do ii=max(1,i-dmat(1)%ubder(der)),min(grd(1)%nr,i+dmat(1)%lbder(der))
+                a_index = dm(1)%ivar(var,ii,j)
+                ! To understand this, you need to draw a picture...
+                vect_out(v_index) = vect_out(v_index) + &
+                        dmat(1)%derive(ii,i,der)*dm(1)%vect_der(a_index,der)
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+
+      end subroutine a_product_transpose
+!------------------------------------------------------------------------------
+      subroutine make_asigma_band(sigma, asigma)
+
+      implicit none
+      double precision sigma
+      double precision asigma(2*dm(1)%kl+dm(1)%ku+1,a_dim)
+      double precision sigmap, temp
+      integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
+      integer pos
+
+      asigma = 0d0
+      pos = dm(1)%kl + dm(1)%ku + 1
+
+      ! The equations:
+      do n=1,dm(1)%nas
+        power = dm(1)%asi(1,n)
+        der = dm(1)%asi(2,n)
+        eq  = dm(1)%asi(3,n)
+        var = dm(1)%asi(4,n)
+        sigmap = sigma**power
+        temp = sigmap*dm(1)%as(n)
+        do i=1,grd(1)%nr
+          do j=1,nt
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                c = dm(1)%ivar(var,ii,j)
+                asigma(l-c+pos,c) = asigma(l-c+pos,c)+temp*dmat(1)%derive(i,ii,der)
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      do n=1,dm(1)%nart
+        power = dm(1)%arti(1,n)
+        der = dm(1)%arti(2,n)
+        eq  = dm(1)%arti(3,n)
+        var = dm(1)%arti(4,n)
+        sigmap = sigma**power
+        do j=1,nt
+          do i=1,grd(1)%nr
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              temp = sigmap*dm(1)%art(i,j,n)
+              do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                c = dm(1)%ivar(var,ii,j)
+                asigma(l-c+pos,c) = asigma(l-c+pos,c)+temp*dmat(1)%derive(i,ii,der)
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      do n=1,dm(1)%nartt
+        power = dm(1)%artti(1,n)
+        der = dm(1)%artti(2,n)
+        eq  = dm(1)%artti(3,n)
+        var = dm(1)%artti(4,n)
+        sigmap = sigma**power
+        do i=1,grd(1)%nr
+          do j=1,nt
+            l = dm(1)%ieq(eq,i,j)
+            if (.not.dm(1)%bc_flag(l)) then
+              do jj=1,nt
+                temp = sigmap*dm(1)%artt(i,j,jj,n)
+                do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                  c = dm(1)%ivar(var,ii,jj)
+                  asigma(l-c+pos,c) = asigma(l-c+pos,c)+temp*dmat(1)%derive(i,ii,der)
+                enddo
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+
+      ! Boundary conditions:
+      do n=1,idm(1, 1)%natbc
+        power = idm(1, 1)%atbci(1,n)
+        der = idm(1, 1)%atbci(2,n)
+        eq  = idm(1, 1)%atbci(3,n)
+        var = idm(1, 1)%atbci(4,n)
+        eqloc  = idm(1, 1)%atbci(5,n)
+        varloc = idm(1, 1)%atbci(6,n)
+        sigmap = sigma**power
+        do ii=max(1,varloc-dmat(1)%lbder(der)),min(grd(1)%nr,varloc+dmat(1)%ubder(der))
+          temp = sigmap*dmat(1)%derive(varloc,ii,der)
+          do j=1,nt
+            l = dm(1)%ieq(eq,eqloc,j)
+            c = dm(1)%ivar(var,ii,j)
+            asigma(l-c+pos,c) = asigma(l-c+pos,c)+temp*idm(1, 1)%atbc(j,n)
+          enddo
+        enddo
+      enddo
+
+      do n=1,idm(1, 1)%nattbc
+        power = idm(1, 1)%attbci(1,n)
+        der = idm(1, 1)%attbci(2,n)
+        eq  = idm(1, 1)%attbci(3,n)
+        var = idm(1, 1)%attbci(4,n)
+        eqloc  = idm(1, 1)%attbci(5,n)
+        varloc = idm(1, 1)%attbci(6,n)
+        sigmap = sigma**power
+        do ii=max(1,varloc-dmat(1)%lbder(der)),min(grd(1)%nr,varloc+dmat(1)%ubder(der))
+          temp = sigmap*dmat(1)%derive(varloc,ii,der)
+          do j=1,nt
+            l = dm(1)%ieq(eq,eqloc,j)
+            do jj=1,nt
+              c = dm(1)%ivar(var,ii,jj)
+              asigma(l-c+pos,c) = asigma(l-c+pos,c)+temp*idm(1, 1)%attbc(j,jj,n)
+            enddo
+          enddo
+        enddo
+      enddo
+
+      end subroutine
+!------------------------------------------------------------------------------
+      subroutine a_product(vect_in, vect_out, power)
+
+      implicit none
+      double precision, intent(in)  :: vect_in(a_dim)
+      double precision, intent(out) :: vect_out(a_dim)
+      integer, intent(in) :: power
+      integer i, j, ii, jj, n, der, eq, var, a_index, v_index
+      integer eqloc, varloc
+
+      ! Preliminary calculations: derivative(s) of vect
+      dm(1)%vect_der(1:a_dim,dmat(1)%der_min:dmat(1)%der_max) = 0d0
+      do var=1,dm(1)%nvar
+        do der=dm(1)%var_der_min(var),dm(1)%var_der_max(var)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              v_index = dm(1)%ivar(var,i,j)
+              do ii=max(1,i-dmat(1)%lbder(der)),min(grd(1)%nr,i+dmat(1)%ubder(der))
+                a_index = dm(1)%ivar(var,ii,j)
+                dm(1)%vect_der(v_index,der) = dm(1)%vect_der(v_index,der) + &
+                               dmat(1)%derive(i,ii,der)*vect_in(a_index)
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+
+      vect_out(1:a_dim) = 0d0
+
+      ! The equations:
+      do n=1,dm(1)%nas
+        if (dm(1)%asi(1,n).eq.power) then
+          der = dm(1)%asi(2,n)
+          eq  = dm(1)%asi(3,n)
+          var = dm(1)%asi(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              v_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(v_index)) then
+                a_index = dm(1)%ivar(var,i,j)
+                vect_out(v_index) = vect_out(v_index) + dm(1)%as(n)*dm(1)%vect_der(a_index,der)
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      do n=1,dm(1)%nart
+        if (dm(1)%arti(1,n).eq.power) then
+          der = dm(1)%arti(2,n)
+          eq  = dm(1)%arti(3,n)
+          var = dm(1)%arti(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              v_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(v_index)) then
+                a_index = dm(1)%ivar(var,i,j)
+                vect_out(v_index) = vect_out(v_index) + &
+                                  dm(1)%art(i,j,n)*dm(1)%vect_der(a_index,der)
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      do n=1,dm(1)%nartt
+        if (dm(1)%artti(1,n).eq.power) then
+          der = dm(1)%artti(2,n)
+          eq  = dm(1)%artti(3,n)
+          var = dm(1)%artti(4,n)
+          do i=1,grd(1)%nr
+            do j=1,nt
+              v_index = dm(1)%ieq(eq,i,j)
+              if (.not.dm(1)%bc_flag(v_index)) then
+                do jj=1,nt
+                  a_index = dm(1)%ivar(var,i,jj)
+                  vect_out(v_index) = vect_out(v_index) + &
+                                    dm(1)%artt(i,j,jj,n)*dm(1)%vect_der(a_index,der)
+                enddo
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+
+      ! Boundary conditions:
+      do n=1,idm(1, 1)%natbc
+        if (idm(1, 1)%atbci(1,n).eq.power) then
+          der = idm(1, 1)%atbci(2,n)
+          eq  = idm(1, 1)%atbci(3,n)
+          var = idm(1, 1)%atbci(4,n)
+          eqloc  = idm(1, 1)%atbci(5,n)
+          varloc = idm(1, 1)%atbci(6,n)
+          do j=1,nt
+            v_index = dm(1)%ieq(eq,eqloc,j)
+            a_index = dm(1)%ivar(var,varloc,j)
+            vect_out(v_index) = vect_out(v_index) &
+                              + idm(1, 1)%atbc(j,n)*dm(1)%vect_der(a_index,der)
+          enddo
+        endif
+      enddo
+
+      do n=1,idm(1, 1)%nattbc
+        if (idm(1, 1)%attbci(1,n).eq.power) then
+          der = idm(1, 1)%attbci(2,n)
+          eq  = idm(1, 1)%attbci(3,n)
+          var = idm(1, 1)%attbci(4,n)
+          eqloc  = idm(1, 1)%attbci(5,n)
+          varloc = idm(1, 1)%attbci(6,n)
+          do j=1,nt
+            v_index = dm(1)%ieq(eq,eqloc,j)
+            do jj=1,nt
+              a_index = dm(1)%ivar(var,varloc,jj)
+              vect_out(v_index) = vect_out(v_index) &
+                                + idm(1, 1)%attbc(j,jj,n)*dm(1)%vect_der(a_index,der)
+            enddo
+          enddo
+        endif
+      enddo
+
+      end subroutine a_product
 !------------------------------------------------------------------------------
       end module matrices

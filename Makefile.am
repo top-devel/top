@@ -1,2 +1,2 @@
-SUBDIRS = src lib utils
+SUBDIRS = lib utils
 

@@ -1,0 +1,889 @@
+#!/usr/bin/perl
+
+if (scalar @ARGV < 1) {die "Usage: readeq eq_file\n";}
+
+$input  = $ARGV[0];
+$output = "matrices.inc";
+
+$ncols=80;
+$lincr=2;
+
+&cleardefs;
+&setdefault;
+
+open(SOURCE, "< $input") or die "File $input not found.\n";
+foreach $chaine(<SOURCE>)
+{
+  $nline++;
+  $chaine =~ s/\#.*//; # this removes comments
+
+  @list = split (" ",$chaine);
+  if (($list[0] eq "term") or ($list[0] eq "termbc") or
+      ($list[0] eq "sub") or ($list[0] eq "subbc")) {&countterm;}
+  elsif ($list[0] eq "definition") {&add_definition;}
+}
+close SOURCE;
+
+open(PUITS, "> $output") or die "Cannot write to $output.\n";
+open(SOURCE, "< $input") or die "File $input not found.\n";
+&writehead;
+&setdefault;
+
+foreach $chaine(<SOURCE>)
+{
+  $nline++;
+  $chaine =~ s/\#.*//; # this removes comments
+
+  @list = split (" ",$chaine);
+     if ($list[0] eq "varlist")  {&readvarlist;}
+  elsif ($list[0] eq "eqlist")   {&readeqlist;}
+  elsif ($list[0] eq "equation") {&seteq;}
+  elsif ($list[0] eq "term")     {&addterm;}
+  elsif ($list[0] eq "termbc")   {&addtermbc;}
+  elsif ($list[0] eq "sub")      {&callsub;}
+  elsif ($list[0] eq "subbc")    {&callsubbc;}
+  elsif ($list[0] eq "input")    {&addinput;}
+  elsif ($list[0] eq "stamp")    {$stamp = join(" ",@list[1..(scalar @list - 1)]);}
+  elsif ($list[0] eq "instruction") {&writeinstruction;}
+  elsif ($list[0] eq "leq")      {&setleq;}
+  elsif ($list[0] eq "lvar")     {&setlvar;}
+  elsif ($list[0] eq "suppress") {&suppressvar;}
+  elsif ($list[0] eq "definition") {}
+  elsif (scalar @list >= 1)
+    {die "Error on line $nline: \"$list[0]\" unknown command.\n";}
+}
+&writetail;
+&writeinputs;
+close SOURCE;
+close PUITS;
+
+########################################################################
+sub cleardefs{
+  @defs_type = ();
+  @defs = ();
+  @defs_value = ();
+}
+########################################################################
+sub setdefault{
+  $nline = 0;
+  $nas = 0;
+  $nart = 0;
+  $nartt = 0;
+  $natbc = 0;
+  $nattbc = 0;
+  $power_max = 0;
+  @inputs = ('shift','rootdir','mattype','dertype','orderFD','nsol');
+  @inputs_format = ('f7.4','A2','A4','A4','I2','I2');
+  @inputs_datatype = ('double precision','character*(512)','character*(4)',
+                      'character*(4)','integer','integer');
+  @inputs_value = ('0d0',"'no_dir'","'FULL'","'CHEB'",'2','4');
+  $current_equation = "no_eq";
+  $prev = "empty";
+  @amat = (); # this contains the instructions for the coupling coefficients
+  @imat = (); # this contains the instructions which specify the indices in
+              # the asi, arti, artti, atbci and attbci matrices
+  @asub = (); # this contains the calls to the subroutines which calculate the
+              # coupling coefficients
+  @isub = (); # this contains the calls to the subroutine which specify the
+              # indicies in the asi, arti, artti, atbci and attbci matrices
+  push @asub, "      call eq_$current_equation()\n";
+  push @amat, "!".("-"x60)."\n";
+  push @amat, "! Preliminary instructions\n";
+  push @amat, "!".("-"x60)."\n";
+  push @amat, "      subroutine eq_$current_equation()\n";
+  push @amat, "      use model\n";
+  push @amat, "      use inputs\n";
+  push @amat, "      use integrales\n";
+  push @amat, "      implicit none\n";
+  push @amat, "      integer i, j, jj\n";
+}
+########################################################################
+sub countterm{
+  if (($list[0] eq "term") or ($list[0] eq "sub"))
+  {
+    if (scalar @list < 2) {die "Error on line $nline: many terms missing.\n";}
+       if ($list[1] eq "s")   {$nas++;}
+    elsif ($list[1] eq "rt")  {$nart++;}
+    elsif ($list[1] eq "rtt") {$nartt++;}
+    else {die "Error on line $nline: unrecognised term type.\n";}
+  }
+  elsif (($list[0] eq "termbc") or ($list[0] eq "subbc"))
+  {
+    if (scalar @list < 2) {die "Error on line $nline: many terms missing.\n";}
+       if ($list[1] eq "t")  {$natbc++;}
+    elsif ($list[1] eq "tt") {$nattbc++;}
+    else {die "Error on line $nline: unrecognised term type.\n";}
+  }
+  else {die "Error on line $nline: Programming error in readeq.\n";}
+}
+########################################################################
+sub writehead{
+  print PUITS "      subroutine init_a()\n\n";
+  print PUITS "      use model\n";
+  print PUITS "      use mod_grid, only: grd\n";
+  print PUITS "      use inputs\n";
+  print PUITS "      use integrales\n\n";
+  print PUITS "      implicit none\n";
+  print PUITS "      integer i,j,jj,der_min,der_max\n\n";
+
+  for($i=0; $i < scalar @defs; $i++) {
+    print PUITS mywrap("      $defs[$i] = $defs_value[$i]",$ncols);
+  }
+  print PUITS "\n";
+
+  print PUITS "      grd(1)%mattype = mattype\n";
+  print PUITS "      nr => grd(1)%nr\n";
+
+  print PUITS "      ! if (allocated(dm(1)%as))           deallocate(dm(1)%as)\n";
+  print PUITS "      ! if (allocated(dm(1)%art))          deallocate(dm(1)%art)\n";
+  print PUITS "      ! if (allocated(dm(1)%artt))         deallocate(dm(1)%artt)\n";
+  print PUITS "      ! if (allocated(idm(1,1)%atbc))      deallocate(idm(1,1)%atbc)\n";
+  print PUITS "      ! if (allocated(idm(1,1)%attbc))     deallocate(idm(1,1)%attbc)\n";
+  print PUITS "      ! if (allocated(dm(1)%asi))          deallocate(dm(1)%asi)\n";
+  print PUITS "      ! if (allocated(dm(1)%arti))         deallocate(dm(1)%arti)\n";
+  print PUITS "      ! if (allocated(dm(1)%artti))        deallocate(dm(1)%artti)\n";
+  print PUITS "      ! if (allocated(idm(1,1)%atbci))     deallocate(idm(1,1)%atbci)\n";
+  print PUITS "      ! if (allocated(idm(1,1)%attbci))    deallocate(idm(1,1)%attbci)\n";
+  print PUITS "      ! if (allocated(dm(1)%var_name))     deallocate(dm(1)%var_name)\n";
+  print PUITS "      ! if (allocated(dm(1)%eq_name))      deallocate(dm(1)%eq_name)\n";
+  print PUITS "      ! if (allocated(dm(1)%lvar))         deallocate(dm(1)%lvar)\n";
+  print PUITS "      ! if (allocated(dm(1)%leq))          deallocate(dm(1)%leq)\n";
+  print PUITS "      ! if (allocated(dm(1)%var_keep))     deallocate(dm(1)%var_keep)\n";
+  print PUITS "      ! if (allocated(dm))                 deallocate(dm)\n\n";
+  print PUITS "      allocate(dm(1))\n";
+  print PUITS "      allocate(dmat(1))\n";
+  print PUITS "      allocate(idm(1, 1))\n\n";
+  print PUITS "      dm(1)%offset=0\n";
+  print PUITS "      dm(1)%nas=$nas\n";
+  print PUITS "      dm(1)%nart=$nart\n";
+  print PUITS "      dm(1)%nartt=$nartt\n";
+  print PUITS "      idm(1,1)%natbc=$natbc\n";
+  print PUITS "      idm(1,1)%nattbc=$nattbc\n";
+  print PUITS "      allocate(dm(1)%as(dm(1)%nas),dm(1)%asi(4,dm(1)%nas))\n";
+  print PUITS "      dm(1)%as = 0d0; dm(1)%asi=0\n";
+  print PUITS "      allocate(dm(1)%art(grd(1)%nr,nt,dm(1)%nart),dm(1)%arti(4,dm(1)%nart))\n";
+  print PUITS "      dm(1)%art = 0d0; dm(1)%arti=0\n";
+  print PUITS "      allocate(dm(1)%artt(grd(1)%nr,nt,nt,dm(1)%nartt),dm(1)%artti(4,dm(1)%nartt))\n";
+  print PUITS "      dm(1)%artt = 0d0; dm(1)%artti=0\n";
+  print PUITS "      allocate(idm(1,1)%atbc(nt,idm(1,1)%natbc),idm(1,1)%atbci(6,idm(1,1)%natbc))\n";
+  print PUITS "      idm(1,1)%atbc = 0d0; idm(1,1)%atbci=0\n";
+  print PUITS "      allocate(idm(1,1)%attbc(nt,nt,idm(1,1)%nattbc),idm(1,1)%attbci(6,idm(1,1)%nattbc))\n";
+  print PUITS "      idm(1,1)%attbc = 0d0; idm(1,1)%attbci=0\n\n";
+}
+########################################################################
+sub writetail{
+  if ($current_equation ne "no_eq") {
+    push @amat, "      end subroutine eq_$current_equation\n";
+    push @imat, "      end subroutine eqi_$current_equation\n";
+  } else {
+    die "You seem to have no equations in $input! Aborting\n";
+  }
+  for ($i=0; $i < scalar @imat; $i++) {print PUITS "$isub[$i]";}
+  print PUITS "      power_max=$power_max\n\n";
+  print PUITS "      a_dim = nt*grd(1)%nr*dm(1)%nvar\n";
+  print PUITS "      dm(1)%d_dim = a_dim\n";
+  print PUITS "      call find_llmax()\n";
+  print PUITS "      print*,'Dimension of problem: ',a_dim\n\n";
+  print PUITS "      call find_der_range(der_min,der_max)\n";
+  print PUITS "      if (allocated(dm(1)%vect_der)) deallocate(dm(1)%vect_der)\n";
+  print PUITS "      allocate(dm(1)%vect_der(a_dim,der_min:der_max))\n\n";
+  print PUITS "      if (.not.first_dmat) call clear_derive(dmat(1))\n";
+  print PUITS "      call init_derive(dmat(1),grd(1)%r,grd(1)%nr,der_max,der_min,orderFD,dertype)\n";
+  print PUITS "      first_dmat = .false.\n";
+  print PUITS "      call init_var_list()\n";
+  for ($i=0; $i < scalar @imat; $i++) {print PUITS "$asub[$i]";}
+  print PUITS "      call integrales_clear()\n";
+  print PUITS "      end subroutine init_a\n";
+  for ($i=0; $i < scalar @imat; $i++) {print PUITS "$imat[$i]";}
+  for ($i=0; $i < scalar @amat; $i++) {print PUITS "$amat[$i]";}
+}
+########################################################################
+sub add_definition{
+  if (scalar @list < 4) {die "Error on line $nline: missing arguments\n";}
+  $list[3] = join(" ",@list[3..(scalar @list - 1)]);
+  if (scalar @list > 4) {splice @list,4;}
+
+  $list[1] =~ s/_/ /g;
+  push @defs_type, $list[1];
+  push @defs, $list[2];
+  push @defs_value, $list[3];
+}
+########################################################################
+sub writeinstruction{
+  if (scalar @list < 2) {die "Error on line $nline: missing arguments\n";}
+  $list[1] = join(" ",@list[1..(scalar @list - 1)]);
+  if (scalar @list > 2) {splice @list,2;}
+
+  $string = $list[1];
+  &treat_string;
+  push @amat, mywrap("      $string",$ncols);
+  for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+}
+########################################################################
+sub suppressvar{
+  if (scalar @list < 2) {die "Error on line $nline: missing arguments\n";}
+
+  for($i=1;$i<scalar @list;$i++) {
+    $varname = $list[$i];
+    $variable = 0;
+    for($j=0;$j < scalar @varlist;$j++) {
+      if ($varname eq $varlist[$j]) {$variable = $j+1;}
+    }
+    if ($variable == 0)
+      {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+    print PUITS "      dm(1)%var_keep($variable) = .false.\n";
+  }
+}
+########################################################################
+sub setleq{
+  if (scalar @list < 3) {die "Error on line $nline: missing arguments\n";}
+  if (scalar @list > 3) 
+  {
+    $list[2] = join(" ",@list[2..(scalar @list - 2)]);
+    splice @list,3;
+  }
+  $equation = 0;
+  for($i=0;$i < scalar @eqlist;$i++)
+  {
+    if ($list[1] eq $eqlist[$i]) {$equation = $i+1;}
+  }
+  if ($equation == 0)
+    {die "Error on line $nline: \"$list[1]\" unknown equation.\n";}
+
+  print PUITS "      dm(1)%leq(1,$equation) = $list[2]\n";
+  print PUITS "      do j=2,nt\n";
+  print PUITS "        dm(1)%leq(j,$equation) = $lincr + dm(1)%leq(j-1,$equation)\n";
+  print PUITS "      enddo\n";
+}
+########################################################################
+sub setlvar{
+  if (scalar @list < 3) {die "Error on line $nline: missing arguments\n";}
+  if (scalar @list > 3) 
+  {
+    $list[2] = join(" ",@list[2..(scalar @list - 2)]);
+    splice @list,3;
+  }
+  $variable = 0;
+  for($i=0;$i < scalar @varlist;$i++)
+  {
+    if ($list[1] eq $varlist[$i]) {$variable = $i+1;}
+  }
+  if ($variable == 0)
+    {die "Error on line $nline: \"$list[1]\" unknown variable.\n";}
+
+  print PUITS "      dm(1)%lvar(1,$variable) = $list[2]\n";
+  print PUITS "      do j=2,nt\n";
+  print PUITS "        dm(1)%lvar(j,$variable) = $lincr + dm(1)%lvar(j-1,$variable)\n";
+  print PUITS "      enddo\n";
+}
+########################################################################
+sub readvarlist{
+  if (scalar @list < 2) {die "Error on line $nline: empty variable list!\n";}
+  @varlist = ();
+  for($i=1;$i < scalar @list;$i++)
+  {
+    for($j=0;$j < scalar @varlist;$j++)
+    {
+      if ($list[$i] eq $varlist[$j])
+        {die "Error on line $nline: repeated variable name.\n";}
+    }
+    push @varlist, $list[$i];
+  }
+  if ($nvar == 0)
+    {$nvar = scalar @varlist;}
+  else
+    {
+      if ($nvar != scalar @varlist) 
+      {die "Error on line $nline: number of equations and variables differ.\n"}
+    }
+  print PUITS "      dm(1)%nvar=$nvar\n";
+  print PUITS "      allocate(dm(1)%var_name($nvar))\n";
+  for ($i=1;$i <= $nvar;$i++)
+    {print PUITS "      dm(1)%var_name($i)='$varlist[$i-1]'\n";}
+  print PUITS "      allocate(dm(1)%lvar(nt,$nvar))\n";
+  print PUITS "      dm(1)%lvar = 0\n";
+  print PUITS "      allocate(dm(1)%var_keep($nvar))\n";
+  print PUITS "      dm(1)%var_keep = .true.\n";
+  print PUITS "\n";
+}
+########################################################################
+sub readeqlist{
+  if (scalar @list < 2) {die "Error on line $nline: empty equation list!\n";}
+  @eqlist = ();
+  for($i=1;$i < scalar @list;$i++)
+  {
+    for($j=0;$j < scalar @eqlist;$j++)
+    {
+      if ($list[$i] eq $eqlist[$j])
+        {die "Error on line $nline: repeated equation name.\n";}
+    }
+    push @eqlist, $list[$i];
+  }
+  if ($nvar == 0)
+    {$nvar = scalar @eqlist;}
+  else
+    {
+      if ($nvar != scalar @eqlist) 
+      {die "Error on line $nline: number of equations and variables differ.\n"}
+    }
+  print PUITS "      allocate(dm(1)%eq_name($nvar))\n";
+  for ($i=1; $i <= $nvar;$i++)
+    {print PUITS "      dm(1)%eq_name($i)='$eqlist[$i-1]'\n";}
+  print PUITS "      allocate(dm(1)%leq(nt,$nvar))\n";
+  print PUITS "      dm(1)%leq = 0\n";
+}
+########################################################################
+sub seteq{
+  if (scalar @list < 2) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 2) {die "Error on line $nline: too many terms.\n";}
+
+  if ($current_equation ne "no_eq") {
+    push @imat, "      end subroutine eqi_$current_equation\n";
+  }
+  push @amat, "      end subroutine eq_$current_equation\n";
+  $equation = 0;
+  for($i=0;$i < scalar @eqlist;$i++)
+  {
+    if ($list[1] eq $eqlist[$i]) {$equation = $i+1;}
+  }
+  if ($equation == 0)
+    {die "Error on line $nline: \"$list[1]\" unknown equation.\n";}
+  $current_equation = $list[1];
+  push @asub, "      call eq_$current_equation()\n";
+  push @isub, "      call eqi_$current_equation()\n";
+  push @amat, "!".("-"x60)."\n";
+  push @amat, "! Coupling coefficients for equation $list[1]\n";
+  push @amat, "!".("-"x60)."\n";
+  push @amat, "      subroutine eq_$current_equation()\n\n";
+  push @amat, "      use model\n";
+  push @amat, "      use inputs\n";
+  push @amat, "      use integrales\n";
+  push @amat, "      implicit none\n";
+  push @amat, "      integer i, j, jj\n";
+  push @imat, "!".("-"x60)."\n";
+  push @imat, "! Indices for equation $list[1]\n";
+  push @imat, "!".("-"x60)."\n";
+  push @imat, "      subroutine eqi_$current_equation()\n\n";
+  push @imat, "      use model\n";
+  push @imat, "      use inputs\n";
+  push @imat, "      implicit none\n";
+}
+########################################################################
+sub addterm{
+  if (scalar @list < 5) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 5) 
+  {
+    $list[3] = join(" ",@list[3..(scalar @list - 2)]);
+    splice @list,4,-1;
+  }
+
+  $power = $list[2];
+  $power =~ s/w(\d*)/$1/;
+  if ($power eq "") {$power = 1;}
+  if ($power > $power_max) {$power_max = $power;}
+
+  $der = $list[4];
+  if ($der =~ /\^/) {
+    $der =~ s/.*\^(.*)/$1/;
+  }
+  else {
+    $der =~ s/[^']//g;
+    $der = length($der);
+  }
+
+  $varname = $list[4];
+  $varname =~ s/'//g;
+  $varname =~ s/\^.*//;
+  $variable = 0;
+  for($i=0;$i < scalar @varlist;$i++)
+  {
+    if ($varname eq $varlist[$i]) {$variable = $i+1;}
+  }
+  if ($variable == 0)
+    {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+
+  $string = $list[3];
+  &treat_string;
+
+  if ($list[1] eq "s")
+  {
+    $nas++;
+    push @amat, mywrap("      dm(1)%as($nas) = $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      dm(1)%asi(1,$nas) = $power\n";
+    push @imat,"      dm(1)%asi(2,$nas) = $der\n";
+    push @imat,"      dm(1)%asi(3,$nas) = $equation\n";
+    push @imat,"      dm(1)%asi(4,$nas) = $variable\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "rt")
+  {
+    $nart++;
+    push @amat, mywrap("      dm(1)%art($i_index,$j_index,$nart) = $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      dm(1)%arti(1,$nart) = $power\n";
+    push @imat,"      dm(1)%arti(2,$nart) = $der\n";
+    push @imat,"      dm(1)%arti(3,$nart) = $equation\n";
+    push @imat,"      dm(1)%arti(4,$nart) = $variable\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "rtt")
+  {
+    $nartt++;
+    push @amat, mywrap("      dm(1)%artt($i_index,$j_index,$jj_index,$nartt) = $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      dm(1)%artti(1,$nartt) = $power\n";
+    push @imat,"      dm(1)%artti(2,$nartt) = $der\n";
+    push @imat,"      dm(1)%artti(3,$nartt) = $equation\n";
+    push @imat,"      dm(1)%artti(4,$nartt) = $variable\n";
+    push @imat,"\n";
+  }
+  else {die "Error on line $nline: unrecognised term type.\n";}
+  $prev = $list[1];
+
+}
+########################################################################
+sub addtermbc{
+  if (scalar @list < 6) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 6)
+  {
+    $list[4] = join(" ",@list[4..(scalar @list - 2)]);
+    splice @list,5,-1;
+  }
+
+  $eqloc = $list[2];
+
+  $power = $list[3];
+  $power =~ s/w(\d*)/$1/;
+  if ($power eq "") {$power = 1;}
+  if ($power > $power_max) {$power_max = $power;}
+
+  $varloc = $list[5];
+  $varloc =~ s/.*\((.*)\)/$1/;
+  $list[5] =~ s/\(.*\)//;
+
+  $der = $list[5];
+  if ($der =~ /\^/) {
+    $der =~ s/.*\^(.*)/$1/;
+  }
+  else {
+    $der =~ s/[^']//g;
+    $der = length($der);
+  }
+
+  $varname = $list[5];
+  $varname =~ s/'//g;
+  $varname =~ s/\^.*//;
+  $variable = 0;
+  for($i=0;$i < scalar @varlist;$i++)
+  {
+    if ($varname eq $varlist[$i]) {$variable = $i+1;}
+  }
+  if ($variable == 0)
+    {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+  
+  $string = $list[4];
+  &treat_string;
+
+  if ($list[1] eq "t")
+  {
+    $natbc++;
+    push @amat, mywrap("      idm(1,1)%atbc($j_index,$natbc) = $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      idm(1,1)%atbci(1,$natbc) = $power\n";
+    push @imat,"      idm(1,1)%atbci(2,$natbc) = $der\n";
+    push @imat,"      idm(1,1)%atbci(3,$natbc) = $equation\n";
+    push @imat,"      idm(1,1)%atbci(4,$natbc) = $variable\n";
+    push @imat,"      idm(1,1)%atbci(5,$natbc) = $eqloc\n";
+    push @imat,"      idm(1,1)%atbci(6,$natbc) = $varloc\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "tt")
+  {
+    $nattbc++;
+    push @amat, mywrap("      idm(1,1)%attbc($j_index,$jj_index,$nattbc) = $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      idm(1,1)%attbci(1,$nattbc) = $power\n";
+    push @imat,"      idm(1,1)%attbci(2,$nattbc) = $der\n";
+    push @imat,"      idm(1,1)%attbci(3,$nattbc) = $equation\n";
+    push @imat,"      idm(1,1)%attbci(4,$nattbc) = $variable\n";
+    push @imat,"      idm(1,1)%attbci(5,$nattbc) = $eqloc\n";
+    push @imat,"      idm(1,1)%attbci(6,$nattbc) = $varloc\n";
+    push @imat,"\n";
+  }
+  else {die "Error on line $nline: unrecognised term type.\n";}
+
+  $prev = $list[1]."bc";
+}
+########################################################################
+sub callsub{
+  if (scalar @list < 5) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 5)
+  {
+    $list[3] = join(" ",@list[3..(scalar @list - 2)]);
+    splice @list,4,-1;
+  }
+
+  $power = $list[2];
+  $power =~ s/w(\d*)/$1/;
+  if ($power eq "") {$power = 1;}
+  if ($power > $power_max) {$power_max = $power;}
+
+  $der = $list[4];
+  if ($der =~ /\^/) {
+    $der =~ s/.*\^(.*)/$1/;
+  }
+  else {
+    $der =~ s/[^']//g;
+    $der = length($der);
+  }
+
+  $varname = $list[4];
+  $varname =~ s/'//g;
+  $varname =~ s/\^.*//;
+  $variable = 0;
+  for($i=0;$i < scalar @varlist;$i++)
+  {
+    if ($varname eq $varlist[$i]) {$variable = $i+1;}
+  }
+  if ($variable == 0)
+    {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+
+  $string = $list[3];
+  &treat_string;
+
+  if ($list[1] eq "s")
+  {
+    $nas++;
+    $string =~ s/\$a/dm(1)%as($nas)/g;
+    push @amat, mywrap("      call $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      dm(1)%asi(1,$nas) = $power\n";
+    push @imat,"      dm(1)%asi(2,$nas) = $der\n";
+    push @imat,"      dm(1)%asi(3,$nas) = $equation\n";
+    push @imat,"      dm(1)%asi(4,$nas) = $variable\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "rt")
+  {
+    $nart++;
+    $string =~ s/\$a/dm(1)%art($i_index,$j_index,$nart)/g;
+    push @amat, mywrap("      call $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      arti(1,$nart) = $power\n";
+    push @imat,"      arti(2,$nart) = $der\n";
+    push @imat,"      arti(3,$nart) = $equation\n";
+    push @imat,"      arti(4,$nart) = $variable\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "rtt")
+  {
+    $nartt++;
+    $string =~ s/\$a/dm(1)%artt($i_index,$j_index,$jj_index,$nartt)/g;
+    push @amat, mywrap("      call $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      dm(1)%artti(1,$nartt) = $power\n";
+    push @imat,"      dm(1)%artti(2,$nartt) = $der\n";
+    push @imat,"      dm(1)%artti(3,$nartt) = $equation\n";
+    push @imat,"      dm(1)%artti(4,$nartt) = $variable\n";
+    push @imat,"\n";
+  }
+  else {die "Error on line $nline: unrecognised term type.\n";}
+  $prev = $list[1];
+
+}
+########################################################################
+sub callsubbc{
+  if (scalar @list < 6) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 6)
+  {
+    $list[4] = join(" ",@list[4..(scalar @list - 2)]);
+    splice @list,5,-1;
+  }
+
+  $eqloc = $list[2];
+
+  $power = $list[3];
+  $power =~ s/w(\d*)/$1/;
+  if ($power eq "") {$power = 1;}
+  if ($power > $power_max) {$power_max = $power;}
+
+  $varloc = $list[5];
+  $varloc =~ s/.*\((.*)\).*/$1/;
+  $list[5] =~ s/\(.*\)//;
+
+  $der = $list[5];
+  if ($der =~ /\^/) {
+    $der =~ s/.*\^(.*)/$1/;
+  }
+  else {
+    $der =~ s/[^']//g;
+    $der = length($der);
+  }
+
+  $varname = $list[5];
+  $varname =~ s/'//g;
+  $varname =~ s/\^.*//;
+  $variable = 0;
+  for($i=0;$i < scalar @varlist;$i++)
+  {
+    if ($varname eq $varlist[$i]) {$variable = $i+1;}
+  }
+  if ($variable == 0)
+    {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+
+  $string = $list[4];
+  &treat_string;  
+
+  if ($list[1] eq "t")
+  {
+    $natbc++;
+    $string =~ s/\$a/atbc($j_index,$natbc)/;
+    push @amat, mywrap("      call $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      idm(1,1)%atbci(1,$natbc) = $power\n";
+    push @imat,"      idm(1,1)%atbci(2,$natbc) = $der\n";
+    push @imat,"      idm(1,1)%atbci(3,$natbc) = $equation\n";
+    push @imat,"      idm(1,1)%atbci(4,$natbc) = $variable\n";
+    push @imat,"      idm(1,1)%atbci(5,$natbc) = $eqloc\n";
+    push @imat,"      idm(1,1)%atbci(6,$natbc) = $varloc\n";
+    push @imat,"\n";
+  }
+  elsif ($list[1] eq "tt")
+  {
+    $nattbc++;
+    $string =~ s/\$a/idm(1,1)%attbc($j_index,$jj_index,$nattbc)/;
+    push @amat, mywrap("      call $string",$ncols);
+    for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
+    push @imat,"      idm(1,1)%attbci(1,$nattbc) = $power\n";
+    push @imat,"      idm(1,1)%attbci(2,$nattbc) = $der\n";
+    push @imat,"      idm(1,1)%attbci(3,$nattbc) = $equation\n";
+    push @imat,"      idm(1,1)%attbci(4,$nattbc) = $variable\n";
+    push @imat,"      idm(1,1)%attbci(5,$nattbc) = $eqloc\n";
+    push @imat,"      idm(1,1)%attbci(6,$nattbc) = $varloc\n";
+    push @imat,"\n";
+  }
+  else {die "Error on line $nline: unrecognised term type.\n";}
+  $prev = $list[1]."bc";
+}
+########################################################################
+sub addinput{
+  if (scalar @list < 3) {die "Error on line $nline: missing terms.\n";}
+  if (scalar @list > 3) {die "Error on line $nline: too many terms.\n";}
+
+  push @inputs, $list[1];
+  push @inputs_format, $list[2];
+
+  $datatype = "notype";
+  if ($list[2] =~ m/.*[iI].*/)   {$datatype="integer";$value="0";}
+  if ($list[2] =~ m/.*[fF].*/)   {$datatype="double precision";$value="0d0"}
+  if ($list[2] =~ m/.*[eEdD].*/) {$datatype="double precision";$value="0d0"}
+  if ($list[2] =~ m/.*[aA].*/) {
+    $numchar = $list[2];
+    $numchar =~ s/.*[aA](.*)/$1/;
+    $datatype = "character*($numchar)";
+    $value = '" "';
+  }
+
+  if ($datatype eq "notype")
+    {die "Unrecognised format specifier on line $nline.\n";}
+  push @inputs_datatype, $datatype;
+  push @inputs_value, $value;
+}
+########################################################################
+sub writeinputs{
+  $input_file  = "inputs.F90";
+  open(INPUTS, "> $input_file") or die "File $input_file cannot be created.\n";
+  print INPUTS "      module inputs\n\n";
+  print INPUTS "      use mod_grid, only: grd, nt, init_grid\n";
+  for ($i=0; $i < scalar @inputs; $i++)
+    {print INPUTS "      $inputs_datatype[$i], save :: $inputs[$i]\n";}
+  for($i=0; $i < scalar @defs; $i++)
+    {print INPUTS "      $defs_type[$i], save :: $defs[$i]\n";}
+
+  if (length($stamp) > 0) {
+    print INPUTS "      character*(".length($stamp)."), parameter :: stamp = & \n";
+    print INPUTS "       \"$stamp\"\n";
+  }
+
+  print INPUTS "\ncontains\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      subroutine read_inputs(dati)\n\n";
+  print INPUTS "      use mgetpar\n";
+  print INPUTS "      implicit none\n\n";
+  print INPUTS "      character(len=*), intent(in) :: dati\n\n";
+  print INPUTS "      call init_grid(1)\n";
+  print INPUTS "      call read_file(trim(dati))\n";
+  print INPUTS "      grd(1)%nr = fetch('nr',0)\n";
+  print INPUTS "      nt = fetch('nt',0)\n";
+  for ($i=0; $i < scalar @inputs; $i++)
+    {print INPUTS "      $inputs[$i] = fetch('$inputs[$i]',$inputs_value[$i])\n";}
+  print INPUTS "\n      end subroutine\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      subroutine write_inputs(iu)\n\n";
+  print INPUTS "      implicit none\n\n";
+  print INPUTS "      integer iu\n\n";
+  print INPUTS "      write(iu,101) &\n";  
+  print INPUTS "          grd(1)%nr, & ! this corresponds to nr+1 when using postvecp \n"; 
+  print INPUTS "          nt, &\n";
+  for ($i=0; $i < scalar @inputs-1; $i++) {
+    if ($inputs_format[$i] =~ m/.*[aA].*/) {
+      print INPUTS "          trim($inputs[$i]), &\n";
+    } else {
+      print INPUTS "          $inputs[$i], &\n";
+    }
+  }
+  $i = scalar @inputs - 1;
+  if ($inputs_format[$i] =~ m/.*[aA].*/) {
+    print INPUTS "          trim($inputs[$i])\n";
+  } else {
+    print INPUTS "          $inputs[$i]\n";
+  }
+  print INPUTS "101   format( &\n";
+  print INPUTS "          '  grd(1)%nr=',I4, &\n";
+  print INPUTS "          '  nt=',I3, &\n";
+  for ($i=0; $i < scalar @inputs-1; $i++) {
+    if ($inputs_format[$i] =~ m/.*[aA].*/) {
+      print INPUTS "          '  $inputs[$i]=',A, &\n";
+    } else {
+      print INPUTS "          '  $inputs[$i]=',$inputs_format[$i], &\n";
+    }
+  }
+  $i = scalar @inputs - 1;
+  if ($inputs_format[$i] =~ m/.*[aA].*/) {
+    print INPUTS "          '  $inputs[$i]=',A)\n";
+  } else {
+    print INPUTS "          '  $inputs[$i]=',$inputs_format[$i])\n";
+  }
+  print INPUTS "      end subroutine\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      subroutine write_inputs_bin(iu)\n\n";
+  print INPUTS "      implicit none\n\n";
+  print INPUTS "      integer iu\n";
+  print INPUTS "      character*(10240) str\n\n";
+  print INPUTS "      write(str,101) &\n";  
+  print INPUTS "          grd(1)%nr, &\n";
+  print INPUTS "          nt, &\n";
+  for ($i=0; $i < scalar @inputs-1; $i++) {
+    if ($inputs_format[$i] =~ m/.*[aA].*/) {
+      print INPUTS "          trim($inputs[$i]), &\n";
+    } else {
+      print INPUTS "          $inputs[$i], &\n";
+    }
+  }
+  $i = scalar @inputs - 1;
+  if ($inputs_format[$i] =~ m/.*[aA].*/) {
+    print INPUTS "          trim($inputs[$i])\n";
+  } else {
+    print INPUTS "          $inputs[$i]\n";
+  }
+  print INPUTS "101   format( &\n";
+  print INPUTS "          '  nr=',I4, &\n";
+  print INPUTS "          '  nt=',I3, &\n";
+  for ($i=0; $i < scalar @inputs-1; $i++) {
+    if ($inputs_format[$i] =~ m/.*[aA].*/) {
+      print INPUTS "          '  $inputs[$i]=',A, &\n";
+    } else {
+      print INPUTS "          '  $inputs[$i]=',$inputs_format[$i], &\n";
+    }
+  }
+  $i = scalar @inputs - 1;
+  if ($inputs_format[$i] =~ m/.*[aA].*/) {
+    print INPUTS "          '  $inputs[$i]=',A,10240X)\n";
+  } else {
+    print INPUTS "          '  $inputs[$i]=',$inputs_format[$i],10240X)\n";
+  }
+  print INPUTS "      write(iu) len(trim(str)),trim(str)\n";
+  print INPUTS "      if (len(trim(str)).gt.10220) then\n";
+  print INPUTS "        print*,'Warning: itemlist may have been truncated'\n";
+  print INPUTS "      endif\n\n";
+  print INPUTS "      end subroutine\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      subroutine write_stamp(iu)\n\n";
+  print INPUTS "      implicit none\n\n";
+  print INPUTS "      integer iu\n\n";
+  print INPUTS "      write(iu,'(\"stamp = \",a".length($stamp).")') stamp\n";  
+  print INPUTS "      end subroutine\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      subroutine write_stamp_bin(iu)\n\n";
+  print INPUTS "      implicit none\n\n";
+  print INPUTS "      integer iu, lngth\n\n";
+  print INPUTS "      lngth = ".length($stamp)."\n";
+  print INPUTS "      write(iu) lngth, stamp\n";
+  print INPUTS "      end subroutine\n";
+  print INPUTS "!".("-"x60)."\n";
+  print INPUTS "      end module\n";
+  close INPUTS ;
+}
+
+########################################################################
+# Function copied and adapted from LSB, written by L. Valdetarro
+# This wraps a text ($_[0]) to $_[1] columns
+sub mywrap{
+   my $str   = $_[0];
+   my $ncols = $_[1];
+   my $str1  = "";
+   @strsplit=split(/\n/,$str);
+
+   foreach $str (@strsplit){
+      $str =~ s/\s+$//; # remove trailing blanks (just in case)
+      while(length($str) > $ncols) {
+        $str1.=substr($str,0,$ncols)."&\n&";
+        $str2=substr($str,$ncols);
+        $str=$str2;
+      }
+      $str1.=$str."\n";
+   }
+   return $str1;
+}
+########################################################################
+sub treat_string{
+  $nloops = 0;
+  $i_index = "1:grd(1)%nr";
+  $j_index = "1:nt";
+  $jj_index = "1:nt";
+
+  while ($string =~ m/\$lvar\(.*\)/) {$string =~ s/\$lvar\(([^)]*)\)/dm(1)%lvar($1,$variable)/;}
+  $string =~ s/\$lvar/dm(1)%lvar(1:nt,$variable)/g;
+  while ($string =~ m/\$leq\(.*\)/) {$string =~ s/\$leq\(([^)]*)\)/leq($1,$equation)/g;}
+  $string =~ s/\$leq/dm(1)%leq(1:nt,$equation)/g;
+  $string =~ s/\$var/$variable/g;
+  $string =~ s/\$eq/$equation/g; 
+
+  if ($string =~ m/\$i/)
+  {
+    push @amat, "      do i=1,grd(1)%nr\n";
+    $nloops++;
+    $i_index = "i";
+  }
+
+  if ($string =~ m/\$j1/)
+  {
+    push @amat, "      do j=1,nt\n";
+    $nloops++;
+    $j_index = "j";
+  }
+
+  if ($string =~ m/\$j2/)
+  {
+    push @amat, "      do jj=1,nt\n";
+    $nloops++;
+    $jj_index = "jj";
+  }
+
+  $string =~ s/\$i/i/g;
+  $string =~ s/\$j1/j/g;
+  $string =~ s/\$j2/jj/g;
+
+  if ($string =~ m/\$prev/)
+  {
+       if ($prev eq "s")     {$string =~ s/\$prev/dm(1)%as($nas)/g;}
+    elsif ($prev eq "rt")    {$string =~ s/\$prev/dm(1)%art($i_index,$j_index,$nart)/g;}
+    elsif ($prev eq "rtt")   {$string =~ s/\$prev/dm(1)%artt($i_index,$j_index,$jj_index,$nartt)/g;}
+    elsif ($prev eq "tbc")   {$string =~ s/\$prev/idm(1,1)%atbc($j_index,$natbc)/g;}
+    elsif ($prev eq "ttbc")  {$string =~ s/\$prev/idm(1,1)%attbc($j_index,$jj_index,$nattbc)/g;}
+    elsif ($prev eq "empty") {die "Error on line $nline: instruction on non-existant term\n";}
+    else {die "Error on line $nline: Programming error in readeq\n";}
+  }
+}
+########################################################################

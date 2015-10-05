@@ -4,7 +4,7 @@
       integer, parameter :: max_data=1000
       integer, save, dimension(max_data) :: ll, nn, mm
       double precision, save, dimension(max_data) :: ww, ff
-      integer, save :: ndata 
+      integer, save :: ndata
 
 !****************************************************************************
 ! ll = degree l,
@@ -23,7 +23,7 @@ contains
 ! for use in non-perturbative code.
 !****************************************************************************
 
-      subroutine readfreq() 
+      subroutine readfreq()
 
       use inputs, only: splitfile
       IMPLICIT NONE

@@ -21,8 +21,8 @@
       call complete_list()
       call sort_list(dcompare)
       call init_mat()
-    
-      call system("echo '-' >> vecp_list.unsorted") 
+
+      call system("echo '-' >> vecp_list.unsorted")
       do i = nfreq_input+1,nfreq
 
         ! set some initial values
@@ -60,7 +60,7 @@
         call run_arncheb(dcmplx(shift_real,shift_imag))
         call write_output()
 
-        isol = 1 
+        isol = 1
         do j=2,nsol_out
           if (abs(ldom(isol)-ltarget).gt.abs(ldom(j)-ltarget)) isol = j
           if (abs(ldom(isol)-ltarget).eq.abs(ldom(j)-ltarget)) then

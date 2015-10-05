@@ -4,7 +4,7 @@
       integer, parameter :: max_data=1000
       integer, save, dimension(max_data) :: ll, mm
       double precision, save, dimension(max_data) :: fr, fi
-      integer, save :: ndata 
+      integer, save :: ndata
 
 !****************************************************************************
 ! ll = parity
@@ -21,7 +21,7 @@ contains
 ! for use in non-perturbative code.
 !****************************************************************************
 
-      subroutine readfreq() 
+      subroutine readfreq()
 
       use inputs, only: freqlist
       IMPLICIT NONE

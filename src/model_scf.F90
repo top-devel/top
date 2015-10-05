@@ -1,6 +1,6 @@
 #include "config.h"
        module model
-       use grid
+       use mod_grid
        use inputs
        ! works with MacGregor et al. models (2D)
 
@@ -33,7 +33,7 @@
        double precision,allocatable,dimension(:),save::cth,sth,r
        double precision,save::K,epsilon
        integer, save :: nr
-        
+
 
        ! different physical constants
        double precision, parameter :: solar_mass = 1.9891d33    !g
@@ -108,7 +108,7 @@ contains
        allocate(theta(0:ntheta_mod), gravity(0:ntheta_mod), temp(0:ntheta_mod))
        allocate(xk(nr_mod,2*ntheta_mod-1))
 
-      
+
        open(unit=2,file=trim(filename),status="old")
 
        call read_next_line(2,oneline)
@@ -135,7 +135,7 @@ contains
 
        call read_next_line(2,oneline)
        read(2,*) (theta(i), gravity(i), temp(i),i=(1+ntheta_mod)/2,0,-1)
-       
+
        call read_next_line(2,oneline)
        call read_next_line(2,oneline)
        read(2,*) mass4, alfa2, eta2, Log_L2, Req, Rp_over_Req, Z_over_Req, &
@@ -143,9 +143,9 @@ contains
 
        call read_next_line(2,oneline)
        read(2,*) ((xk(i,j),j=(1+ntheta_mod)/2,1,-1),i=1,nr_mod)
-       
+
        close(2)
-       
+
        ! This constructs the rest of the arrays theta(:), gravity(:), temp(:)
        ! and xk(:,:) by equatorial symmetry.
        do j=1,ntheta_mod/2
@@ -170,7 +170,7 @@ contains
 !  by spectral methods involving Legendre polynomials.
 !--------------------------------------------------------------------------
         subroutine make_mapping()
-        
+
         use mod_legendre
 
         implicit none
@@ -179,7 +179,7 @@ contains
         double precision, allocatable :: rs_aux(:,:)
         double precision xi
         integer i,j,l
-        
+
         if (lres.lt.ntheta_mod)  &
                 stop 'Case lres < ntheta_mod not implemented'
 
@@ -258,7 +258,7 @@ contains
         enddo
 
         ! spectral-real transformation
-        call legendre(rs_spec(1:lres),rs(1:lres),lres,0,-1) 
+        call legendre(rs_spec(1:lres),rs(1:lres),lres,0,-1)
         call legendrep(rs_spec(1:lres),rsp(1:lres),lres,0)
         call legendre(rs_ll(1:lres),rss(1:lres),lres,0,-1)
         rss = rss - cott(1,:)*rsp
@@ -266,7 +266,7 @@ contains
         ! Find the inner domain:
         K = eval_ylm(rs_spec(1:ntheta_mod),ntheta_mod,dcos(0d0))
         epsilon = 1d0-K
-        
+
         do i=1,nr
           do j=1,lres
             r_map(i,j) = K*r(i) + 0.5d0*(5d0*r(i)**3-3d0*r(i)**5)*(rs(j)-K)
@@ -311,14 +311,14 @@ contains
 ! spherical harmonic basis at a given z = cos(theta)
 !--------------------------------------------------------------
         double precision function eval_ylm(f,nn,z)
-        
+
         implicit none
         integer nn
         double precision f(1:nn), z
         double precision, parameter :: pi = 3.14159265358979d0
         double precision yl1, yl2, yl3
         integer l
-        
+
         yl1 = sqrt(0.25d0/pi)
         yl2 = sqrt(0.75d0/pi)*z
         eval_ylm = yl1*f(1)+yl2*f(2)
@@ -358,7 +358,7 @@ contains
          allocate(rhom(nr,lres), rhom_z(nr,lres), rhom_t(nr,lres), &
                   pm(nr,lres), pm_z(nr,lres), pm_t(nr,lres),       &
                   c2(nr,lres), Gamma1(nr,lres))
-         
+
          allocate(rho_aux(nr_mod), p_aux(nr_mod),     &
                   c2_aux(nr_mod), Gamma1_aux(nr_mod))
 
@@ -371,13 +371,13 @@ contains
                            (1d0-beta(i))*(4d0+beta(i)))
            c2_aux(i)     = Gamma1_aux(i)* p1D(i)/rho1D(i)*rho1D(1)/p1D(1)
          enddo
-         
+
          allocate(aux(nr,lres))
          call map2D(Gamma1_aux, Gamma1)
          call map2D(c2_aux, c2)
          call map2D_der(rho_aux, rhom, rhom_t, rhom_z, aux)
          call map2D_der(p_aux, pm, pm_t, pm_z, aux)
-         
+
          deallocate(rho_aux, p_aux, Gamma1_aux, c2_aux, aux)
 
          end subroutine
@@ -399,7 +399,7 @@ contains
            call interpolate(r_aux(1:nr_mod,j),f1D,nr_mod,r_map(1:nr,j),f2D(1:nr,j),nr)
            f2D(1:nr,lres+1-j) = f2D(1:nr,j)
          enddo
-         
+
          end subroutine
 
 !--------------------------------------------------------------------------
@@ -566,7 +566,7 @@ contains
        character*(*), parameter :: blanks = ' '
        logical bool
        integer i
-       
+
        bool = .true.
        do i=1,len(string)
          if (index(blanks,string(i:i)) == 0) then
@@ -597,14 +597,14 @@ contains
        end subroutine
 !-------------------------------------------------------------------
 !  This subroutine filters a string so as to only leave
-!  numeric characters and 'D' or 'E' (in the middle of a string). 
+!  numeric characters and 'D' or 'E' (in the middle of a string).
 !-------------------------------------------------------------------
        subroutine make_numeric(string)
        implicit none
        character*(*) string
        character*(*), parameter :: numerics = '0123456789+-.DE '
        integer i
-       
+
        do i=1,len(string)
          if (index(numerics,string(i:i)) == 0) string(i:i) = ' '
        enddo

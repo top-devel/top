@@ -49,6 +49,6 @@
       enddo
 
 101   format("echo '# mass=",0pf5.2,", eta=",0pf4.2, &
-             ", alpha=",0pf4.2,"' >> valps") 
+             ", alpha=",0pf4.2,"' >> valps")
 102   format("echo '# m=",I2,", ",a10,"' >> valps")
       end program TOP

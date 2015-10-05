@@ -7,18 +7,18 @@
 
 !-------------------------------------------------------------------------
 ! Model file structure
-! 
+!
 ! nrm: Number of radial points
 ! nthm: Number of angular points
 ! ndom: Number of domains
 ! nconv: Number of convective domains from the center of the star
 ! npts_i: Number of radial points in the i-th domain
 ! R_i(th): External boundary of the i-th domain
-! 
+!
 ! Xc gives the Hydrogen abundance in the convective core X(core)=Xc*X
 ! The units are cgs
 ! Rotation is in radians/sec
-! 
+!
 !-------------------------------------------------------------------------
 
       ! domain dependant variables
@@ -162,8 +162,8 @@ contains
       enddo
 
       ! Find refence quantities
-      rho_ref = mass_input/Req**3 
-      p_ref   = G*mass_input**2/Req**4 
+      rho_ref = mass_input/Req**3
+      p_ref   = G*mass_input**2/Req**4
       t_ref   = sqrt(Req**3/(G*mass_input))
       mass    = mass_input/solar_mass
       rota_avg= rotation*t_ref
@@ -320,7 +320,7 @@ contains
 
       use mod_legendre
       use derivative
-      
+
       implicit none
       integer i, j, id, npid, nrs, nrf
       double precision, allocatable :: mat_raw(:,:), mat(:,:)
@@ -350,7 +350,7 @@ contains
       enddo
 
       allocate(mat_raw(npts_max,nthm*2),mat(npts_max,lres))
-      
+
       do id=1,ndom-1
         npid = grd(id)%nr
         do j=1,nthm
@@ -444,7 +444,7 @@ contains
 
       implicit none
       integer id, i, j
-      
+
       id = 1
       do j=1,lres
         do i=2,grd(id)%nr
@@ -463,7 +463,7 @@ contains
 
       use mod_legendre
       use derivative
-      
+
       implicit none
       integer i, j, id, npid, nrs, nrf
       double precision, allocatable :: mat(:,:), smat(:,:)
@@ -535,7 +535,7 @@ contains
 
        do id=1,ndomains-1
          call init_derive_cheb(dm,grd(id)%r,grd(id)%nr,1,0)
-       
+
          s(id)%det_rhom_pm = s(id)%zeta*(s(id)%rhom_z*s(id)%pm_t &
                         - s(id)%pm_z*s(id)%rhom_t)               &
                         / (s(id)%r_map**2*s(id)%r_z*s(id)%rhom**2)
@@ -609,7 +609,7 @@ contains
       sth = sqrt(1-cth**2)
 
       npts_sum = 0
-      
+
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! inner domain
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -657,7 +657,7 @@ contains
         s(1)%r_zt(i,:) =        ap(i)* rsp(:)
         s(1)%r_tt(i,:) =         a(i)* rss(:)
       enddo
-      
+
       ! find extra geometrical terms
       do i=1,grd(1)%nr
         s(1)%cost(i,:) = cth(:)
@@ -674,7 +674,7 @@ contains
       s(1)%rrt(1,:) = s(1)%r_zt(1,:)/s(1)%r_z(1,:)
 
       npts_sum = grd(1)%nr
- 
+
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! intermediate domains
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -727,7 +727,7 @@ contains
           s(id)%r_zt(i,:) =       ap(i)*rsp(:)          -    ap(i) *rsp_prev(:)
           s(id)%r_tt(i,:) =        a(i)*rss(:)          +(1d0-a(i))*rss_prev(:)
         enddo
-        
+
         ! find extra geometrical terms
         do i=1,grd(id)%nr
           s(id)%cost(i,:) = cth(:)
@@ -738,11 +738,11 @@ contains
         npts_sum = npts_sum + grd(id)%nr
 
       enddo
-      
+
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! outer domain
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      
+
       do i=1,grd(ndom)%nr
         zz = 1d0+0.5d0*(1d0-dcos(dble(i-1)*pi/dble(grd(ndom)%nr-1)))
         grd(ndom)%r(i) = zz
@@ -804,13 +804,13 @@ contains
 ! spherical harmonic basis at a given z = cos(theta)
 !--------------------------------------------------------------
       double precision function eval_ylm(f,nn,z)
-        
+
       implicit none
       integer nn
       double precision f(1:nn), z
       double precision yl1, yl2, yl3
       integer l
-        
+
       yl1 = sqrt(0.25d0/pi)
       yl2 = sqrt(0.75d0/pi)*z
       eval_ylm = yl1*f(1)+yl2*f(2)

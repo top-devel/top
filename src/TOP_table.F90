@@ -28,7 +28,7 @@
       do
         read(3,*,end=99)
         nshifts = nshifts + 1
-      enddo 
+      enddo
 99    rewind(3)
       allocate(shift_table(nshifts))
       do i=1,nshifts
@@ -67,6 +67,6 @@
       enddo
 
 101   format("echo '# mass=",0pf5.2,", eta=",0pf4.2, &
-             ", alpha=",0pf4.2,"' >> valps") 
+             ", alpha=",0pf4.2,"' >> valps")
 102   format("echo '# m=",I2,", ",a6,"' >> valps")
       end program TOP

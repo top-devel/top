@@ -223,7 +223,7 @@ contains
        type(MODE_ID) :: a_mode
 
        if (nfreq.lt.2) return
-       
+
          ! The index l will be decremented from its initial value down to 1
          ! during the "hiring" (heap creation) phase.  Once it reaches 1, the
          ! index ir will be decremented from its initial value down to 1 during
@@ -281,7 +281,7 @@ contains
 !-------------------------------------------------------------
 !  This compares two MODE_ID type elements.  It returns
 !  .true. if mode1(l,n,m) comes before mode2(l,n,m) in
-!  terms of lexicographic order. 
+!  terms of lexicographic order.
 !-------------------------------------------------------------
        logical function lcompare(mode1,mode2)
 
@@ -385,14 +385,14 @@ contains
            enddo
            call swap(v_temp(i),v_temp(icolumn))
          endif
-         
+
          ! normalise row icolumn so that its pivot is 1:
          r = 1d0/matrix(icolumn,icolumn)
          do j=icolumn+1,taille
            matrix(icolumn,j) = matrix(icolumn,j)*r
          enddo
          v_temp(icolumn) = r*v_temp(icolumn)
-         
+
          ! cancel out the elements beneath the pivot:
          do i=icolumn+1,taille
            r = -matrix(i,icolumn)
@@ -402,7 +402,7 @@ contains
            v_temp(i) = v_temp(i) + r*v_temp(icolumn)
          enddo
        enddo
-       
+
        ! By this point, the matrix should be in upper triangular form.
        ! We finish solving the system:
        do i=taille,debut,-1

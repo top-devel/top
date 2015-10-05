@@ -3,7 +3,7 @@ c***********************************************************************
 c***
       INCLUDE 'undefined.h'
       INCLUDE 'GP_common.h'
-      CHARACTER*(*) name
+      CHARACTER(len=*) name
       CHARACTER*1024 line_of_text, line_aux
       CHARACTER*1 blank, eq_char, tab, com_1, com_2, char
       INTEGER i, k, m, count, len_line
@@ -13,7 +13,7 @@ c repetitive read:
 c     count = nlines
 c or refresh read:
       count=0
-      open(unit=10,file=name,status='old',ERR=100)  
+      open(unit=10,file=name,status='old',ERR=101)
       do k = 1,nlines_max
          read (10,'(A1024)',ERR=100,END=100) line_of_text  
          len_line = LEN(line_of_text)
@@ -77,4 +77,6 @@ c***
 c---      call GPsort
 c***
       return 
+  101 print*, "error opening ", name
+      stop "error opening input file"
       end

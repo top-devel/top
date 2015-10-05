@@ -1,0 +1,92 @@
+#!@PYTHON@
+
+import sys
+import os
+import shutil
+import subprocess
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('type',
+        choices=['real', 'cplx'],
+        help='problem type (real or cplx)')
+
+parser.add_argument('dim',
+        choices=['1D', '2D'],
+        help='dimension (1D or 2D)')
+
+parser.add_argument('multi',
+        nargs='?',
+        choices=['multi'],
+        help='multi-domain (default: mono domain)')
+
+parser.add_argument('mpi',
+        nargs='?',
+        choices=['mpi'],
+        help='Enable MPI (default: disabled)')
+
+parser.add_argument('file',
+        help='equation file')
+
+parser.add_argument('--model',
+        required=True,
+        help='input model (SCF, ester or poly)')
+
+args = parser.parse_args()
+
+eqfile = args.file
+if not os.path.isfile(eqfile):
+    print("Error: file `" + eqfile + "' does not exists")
+    parser.print_help()
+    sys.exit(1)
+
+# get abs path for equation file
+eqfile = os.path.dirname(os.path.abspath(eqfile)) + "/" + os.path.basename(eqfile)
+readeq = "@abs_top_builddir@/utils/readeq"
+
+flags="top_flags="
+if args.type == "cplx":
+    readeq += "-cplx"
+    flags += " -DUSE_COMPLEX"
+else:
+    readeq += "-real"
+
+if args.dim == "2D":
+    readeq += "-2D"
+else:
+    readeq += "-1D"
+    flags += " -DUSE_1D"
+
+if args.multi == "multi":
+    readeq += "-multi"
+    flags += " -DUSE_MULTI"
+else:
+    readeq += "-mono"
+
+if args.mpi == "mpi":
+    readeq += "-mpi"
+
+
+print("TOP flavor: " + readeq + " " + eqfile)
+if not os.path.isfile(readeq):
+    print("Error incompatible options")
+    sys.exit(1)
+
+os.chdir("@abs_top_builddir@/src")
+subprocess.check_call(["make",
+    "clean",
+    "-C",
+    "@abs_top_builddir@/src"])
+subprocess.check_call(["@PERL@", readeq, eqfile])
+subprocess.check_call(["make",
+    "install",
+    "-C",
+    "@abs_top_builddir@/src",
+    "model=" + args.model,
+    "prefix=@abs_top_builddir@/src",
+    flags])
+shutil.copy('@abs_top_builddir@/src/lib/libtop.so',
+        '@abs_top_builddir@/src/lib/' + os.path.basename(eqfile) + '.so')
+
+

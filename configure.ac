@@ -8,6 +8,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-bzip2 tar-ustar -Wall
                   subdir-objects foreign])
+
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -28,20 +29,6 @@ AC_ARG_WITH([model],
             [model=ester])
 AC_SUBST(model, $model)
 
-AC_ARG_WITH([type],
-            AS_HELP_STRING([--with-type],
-                           [Select TOP verison: real or complex]),
-            [AS_IF([test "x$withval" == "xreal"],
-                   [type=real],
-                   [AS_IF([test "x$withval" == "xcomplex"],
-                          [type=complex],
-                          [AC_ERROR(--with-type should be real or complex)])])],
-            [type=real])
-
-AS_IF([test "x$type" == "xcomplex"],
-      [AC_DEFINE([USE_COMPLEX], [1], [Should the complex version be used])])
-
-AM_CONDITIONAL(IS_COMPLEX_TYPE, [test "x$type" == "xcomplex"])
 
 # MPI support?
 AC_ARG_ENABLE([mpi],
@@ -57,6 +44,8 @@ AS_IF([test "x$enable_mpi" == "xyes"],
 AC_PROG_F77($FC)
 AC_PROG_LIBTOOL
 AC_PATH_PROG(PERL, perl)
+
+AM_PATH_PYTHON
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
@@ -123,26 +112,36 @@ AC_CONFIG_FILES([Makefile
                  lib/itemlist/Makefile
                  lib/lapack_extra/Makefile
                  utils/Makefile
-                 utils/top-ec
+                 utils/top-build
+                 python/top.py
+                 utils/readeq-real-2D-mono
+                 utils/readeq-cplx-2D-mono
+                 utils/readeq-real-1D-mono
+                 utils/readeq-cplx-1D-mono
+                 utils/readeq-real-2D-multi
+                 utils/readeq-cplx-2D-multi-mpi
+                 utils/readeq-real-2D-multi-mpi
+                 utils/readeq-cplx-2D-multi
                  src/Makefile])
 
 AC_OUTPUT
 
+# 
+# --------------------------------------------------------------------------------
+# TOP build configuration:
+# 
+# FC:         $FC
+# FCFLAGS:    $FCFLAGS
+# 
+# TOP version:
+# model:      $model
+# type:       $type
+# dimension:  $dimension
+# parallel:   $enable_mpi
+# --------------------------------------------------------------------------------
+# 
 cat << EOF
-
---------------------------------------------------------------------------------
-TOP build configuration:
-
-FC:         $FC
-FCFLAGS:    $FCFLAGS
-LIBS:       $LIBS
 prefix:     $prefix
-
-TOP version:
-model:      $model
-type:       $type
-dimension:  2D
-parallel:   $enable_mpi
---------------------------------------------------------------------------------
-
+LDLFAGS:    $LDFLAGS
+LIBS:       $LIBS
 EOF

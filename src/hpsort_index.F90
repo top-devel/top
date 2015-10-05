@@ -26,7 +26,7 @@
        enddo
 
        if (n.lt.2) return
-       
+
          ! The index l will be decremented from its initial value down to 1
          ! during the "hiring" (heap creation) phase.  Once it reaches 1, the
          ! index ir will be decremented from its initial value down to 1 during

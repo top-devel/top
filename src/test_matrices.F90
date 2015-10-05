@@ -153,7 +153,7 @@ contains
         else
           ku = dm(id)%ku
           kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
+          lda = 2*kl + ku + 1
           allocate(asigma(id)%mat(lda,d_dim))
           call make_asigma_band_local(sigma,asigma(id)%mat,id)
           if (id.gt.1) call correct_asigma_downward(id,sigma)
@@ -233,13 +233,13 @@ contains
 ! sigma = eigenvalue shift
 !--------------------------------------------------------------
       subroutine correct_asigma_downward(id,sigma)
-      
+
       implicit none
       integer, intent(in)         :: id
       double complex, intent(in)  :: sigma
       double complex, allocatable :: aiip(:,:)
       integer info_lapack, ku, kl, lda, d_dim, n_h_bc
-      
+
       ! Just in case:
       if (id.eq.1) return
 
@@ -248,8 +248,8 @@ contains
       if (idm(id,id-1)%n_v_bc.eq.0) return
 
       d_dim = dm(id-1)%d_dim
-      n_h_bc = idm(id-1,id)%n_h_bc 
-      
+      n_h_bc = idm(id-1,id)%n_h_bc
+
       allocate(aiip(d_dim,n_h_bc))
       call make_asigma_full_local_hcomp(sigma,aiip,id-1,id)
       if (grd(id-1)%mattype.eq.'FULL') then
@@ -258,7 +258,7 @@ contains
       else
         ku = dm(id-1)%ku
         kl = dm(id-1)%kl
-        lda = 2*kl + ku + 1 
+        lda = 2*kl + ku + 1
         call ZGBTRS('N',d_dim,kl,ku,n_h_bc,asigma(id-1)%mat,lda, &
                     asigma(id-1)%ipiv,aiip,d_dim,info_lapack)
       endif
@@ -272,7 +272,7 @@ contains
       endif
       deallocate(aiip)
       end subroutine correct_asigma_downward
-      
+
 !--------------------------------------------------------------
 ! Solve the system in a multi-domain context:
 !    vect <- inv(asigma) vect
@@ -284,7 +284,7 @@ contains
 ! vect  = input and output vector
 !--------------------------------------------------------------
       subroutine solve_multi_domain(sigma,vect)
-      
+
       implicit none
       double complex, intent(in)    :: sigma
       double complex, intent(inout) :: vect(a_dim)
@@ -315,7 +315,7 @@ contains
         else
           ku = dm(id-1)%ku
           kl = dm(id-1)%kl
-          lda = 2*kl + ku + 1 
+          lda = 2*kl + ku + 1
           call ZGBTRS('N',d_dim,kl,ku,1,asigma(id-1)%mat,lda,            &
                       asigma(id-1)%ipiv,tmp_s((offset+1):(offset+d_dim)),&
                       d_dim,info_lapack)
@@ -333,7 +333,7 @@ contains
       else
         ku = dm(ndomains)%ku
         kl = dm(ndomains)%kl
-        lda = 2*kl + ku + 1 
+        lda = 2*kl + ku + 1
         call ZGBTRS('N',d_dimn,kl,ku,1,asigma(ndomains)%mat,lda, &
                     asigma(ndomains)%ipiv,                       &
                     vect((offsetn+1):(offsetn+d_dimn)),          &
@@ -355,7 +355,7 @@ contains
         else
           ku = dm(id)%ku
           kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
+          lda = 2*kl + ku + 1
           call ZGBTRS('N',d_dimn,kl,ku,1,asigma(id)%mat,lda, &
                       asigma(id)%ipiv,                       &
                       vect((offsetn+1):(offsetn+d_dimn)),    &
@@ -376,7 +376,7 @@ contains
 ! vect  = input and output vector
 !--------------------------------------------------------------
       subroutine solve_multi_domain_transpose(sigma,vect)
-      
+
       implicit none
       double complex, intent(in)    :: sigma
       double complex, intent(inout) :: vect(a_dim)
@@ -427,7 +427,7 @@ contains
       else
         ku = dm(ndomains)%ku
         kl = dm(ndomains)%kl
-        lda = 2*kl + ku + 1 
+        lda = 2*kl + ku + 1
         call ZGBTRS('C',d_dimn,kl,ku,1,asigma(ndomains)%mat,lda, &
                     asigma(ndomains)%ipiv,                       &
                     vect((offsetn+1):(offsetn+d_dimn)),          &
@@ -448,14 +448,14 @@ contains
         else
           ku = dm(id)%ku
           kl = dm(id)%kl
-          lda = 2*kl + ku + 1 
+          lda = 2*kl + ku + 1
           call ZGBTRS('C',d_dimn,kl,ku,1,asigma(id)%mat,lda, &
                       asigma(id)%ipiv,                       &
                       vect((offsetn+1):(offsetn+d_dimn)),    &
                       d_dimn,info_lapack)
         endif
       enddo
- 
+
       end subroutine solve_multi_domain_transpose
 !--------------------------------------------------------------
       end module

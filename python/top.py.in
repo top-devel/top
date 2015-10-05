@@ -1,0 +1,104 @@
+#!@PYTHON@
+
+import os
+import shutil as sh
+import ctypes as ct
+import numpy as np
+
+__all__ = ['load', 'init', 'run_arncheb', 'get_valps', "get_vecps"]
+
+def error(msg):
+    print('[error]: ' + msg)
+
+def load(name):
+    global libtop
+    global lib_read_inputs
+    global lib_init_grid
+    global lib_init_model
+    global lib_init_a
+    global lib_init_order
+    global lib_init_bc_flag
+    global lib_run_arncheb
+    global lib_get_valps
+    global lib_get_vecps
+
+    lib = '@abs_top_builddir@/src/lib/' + name + '.so'
+    if not os.path.isfile(lib):
+        error('no such file: ' + lib)
+        error('did you run top-build?')
+        libtop = None
+        return
+    libtop = ct.cdll.LoadLibrary(lib)
+    lib_read_inputs     = libtop.__inputs_MOD_read_inputs
+    lib_init_grid       = libtop.__mod_grid_MOD_init_grid
+    lib_init_model      = libtop.__model_MOD_init_model
+    lib_init_a          = libtop.__matrices_MOD_init_a
+    lib_init_order      = libtop.__matrices_MOD_init_order
+    lib_init_bc_flag    = libtop.__matrices_MOD_init_bc_flag
+    lib_run_arncheb     = libtop.__eigensolve_MOD_run_arncheb
+    lib_get_valps       = libtop.__python_MOD_get_valps
+    lib_get_vecps       = libtop.__python_MOD_get_vecps
+
+def init(dati):
+    if libtop == None:
+        error('no library loaded')
+        return
+    if not type(dati) is str:
+        error('init takes a filename as parameter')
+        return
+    ndoms = get_ndomains()
+    buf = ct.create_string_buffer(len(dati)+1)
+    buf.value = dati
+
+    lib_read_inputs(ct.byref(buf), ct.c_int(len(dati)+1))
+    lib_init_model()
+    lib_init_a()
+    lib_init_order()
+    lib_init_bc_flag()
+
+def get_ndomains():
+    if libtop == None:
+        error('No library loaded')
+        return
+    return int(ct.c_int.in_dll(libtop, "__mod_grid_MOD_ndomains").value)
+
+def run_arncheb(shift):
+    if libtop == None:
+        error('No library loaded')
+        return
+    if not type(shift) is float:
+        error('shift should be a float')
+        return
+    lib_run_arncheb(ct.byref(ct.c_double(shift)))
+
+def get_nsol():
+    if libtop == None:
+        error('No library loaded')
+        return
+    return int(ct.c_int.in_dll(libtop, "__eigensolve_MOD_nsol_out").value)
+
+def get_a_dim():
+    if libtop == None:
+        error('No library loaded')
+        return
+    return int(ct.c_int.in_dll(libtop, "__matrices_MOD_a_dim").value)
+
+def get_valps():
+    if libtop == None:
+        error('No library loaded')
+        return
+    n = get_nsol()
+    valps = np.zeros(shape=(n), dtype=np.double)
+    lib_get_valps(valps.ctypes.data)
+    return valps
+
+def get_vecps():
+    if libtop == None:
+        error('No library loaded')
+        return
+    n = get_nsol()
+    a_dim = get_a_dim()
+    vecps = np.zeros(shape=(a_dim, n), dtype=np.double)
+    lib_get_vecps(vecps.ctypes.data)
+    return vecps
+

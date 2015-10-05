@@ -35,7 +35,7 @@ contains
 !   IMPORTANT: the first two masses are associated with freq1 and freq2.
 !              Therefore the program will start calculating frequencies
 !              from mass3 and onwards.
-! 
+!
 ! The follow command gives two frequencies, a target l value and an
 ! m value with which to track frequencies.
 !----------------------------------------------------------------------

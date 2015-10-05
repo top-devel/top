@@ -30,12 +30,12 @@ contains
       implicit none
       character*100 string1,string2,string3,string4,string5,string6
 
-      write(string1,'("rotation = ",1pd12.5)') rota 
+      write(string1,'("rotation = ",1pd12.5)') rota
       write(string2,'("p_index = ",f6.3)') pindex
       write(string3,'("iz = ",i6)') nr*2-2
       write(string4,'("nzd(1) = ",i6)') nr
       write(string5,'("nzd(2) = ",i6)') nr-1
-      write(string6,'("lmax =  ",i6)') lmod 
+      write(string6,'("lmax =  ",i6)') lmod
       open(unit=1,file='param',status='unknown')
        write(1,*) string1
        write(1,*) string2
@@ -67,7 +67,7 @@ contains
       double precision aux
       character*(3) str
 !      character*(512) filename
-      
+
       filename = "enthalpy"
       open(unit=2,file=filename,status="old")
       read(2,*) pindex_temp        ! this is in case I use a preexisting model
@@ -76,7 +76,7 @@ contains
       read(2,*) nr,lmod_temp  ! this is in case I use a preexisting model
       if (lmod.ne.lmod_temp) print*,"Warning: new value for lmod"
       lmod   = lmod_temp
-      
+
       lmod = lmod - 1
 
       if (lmod.ge.lres) stop 'lmod.ge.lres: case not implemented'
@@ -204,7 +204,7 @@ contains
 
       filename = "surface_b"
       open(unit=3,file=filename,status="old")
-      read(3,*) aux 
+      read(3,*) aux
       read(3,*) aux,lmod
       if (lmod.ge.lres) stop 'lmod.ge.lres: not implemented'
       allocate(r_spec(lres),rs(lres),rsp(lres),                    &
@@ -249,7 +249,7 @@ contains
       do l=1,lres ! Beware: r_spec(l) is r_spec of (l-1)
         llr_spec(l)=-l*(l-1)*r_spec(l)
       enddo
-      call legendre(llr_spec(1:lres),rss(1:lres),lres,0,-1) 
+      call legendre(llr_spec(1:lres),rss(1:lres),lres,0,-1)
       rss = rss - cth*rsp/sth
 
       pi = dacos(-1d0)
