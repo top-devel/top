@@ -23,12 +23,6 @@ libtop_la_SOURCES = grid.F90 \
 					inputs.F90 \
 					matrices.F90
 
-bin_PROGRAMS = TOP
-TOP_LDADD = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
-			-litemlist -llapack_extra
-
-TOP_SOURCES = TOP.F90 postproc.F90
-
 EXTRA_DIST = order.inc \
 			 model_ester.F90 \
 			 model_scf.F90 \
@@ -38,8 +32,7 @@ EXTRA_DIST = order.inc \
 			 udirectory.F90 \
 			 matrices.F90 \
 			 eigensolve.F90 \
-			 postproc.F90 \
-			 TOP.F90
+			 postproc.F90
 
 model.F90:
 	cp $(srcdir)/model_$(model).F90 model.F90

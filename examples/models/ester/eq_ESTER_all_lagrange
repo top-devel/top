@@ -5,7 +5,6 @@ input lres I4
 input iparity I1
 input mass 0pf5.2
 input rota_avg 0pf4.2
-input filename a256
 input nr_cesam I5
 input gridtype a2
 input freqlist a256

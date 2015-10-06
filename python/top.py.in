@@ -5,12 +5,25 @@ import shutil as sh
 import ctypes as ct
 import numpy as np
 
-__all__ = ['load', 'init', 'run_arncheb', 'get_valps', "get_vecps"]
+__all__ = ['load', 'read_dati', 'run_arncheb', 'get_valps', 'get_vecps',
+        'init_model', 'get_from_dati']
+
 
 def error(msg):
     print('[error]: ' + msg)
 
+def get_from_dati(key):
+    f = file(datifile)
+    for line in f:
+        if key in line:
+            index = line.find('=')
+            eindex = line.find('#')
+            return line[index+1:eindex].strip()
+    print(key + ' not found in ' + datifile)
+    return None
+
 def load(name):
+    """ Loads a compiled equation file """
     global libtop
     global lib_read_inputs
     global lib_init_grid
@@ -39,22 +52,21 @@ def load(name):
     lib_get_valps       = libtop.__python_MOD_get_valps
     lib_get_vecps       = libtop.__python_MOD_get_vecps
 
-def init(dati):
+def read_dati(dati):
+    global datifile
+
     if libtop == None:
         error('no library loaded')
         return
+    datifile = dati
     if not type(dati) is str:
         error('init takes a filename as parameter')
         return
-    ndoms = get_ndomains()
+
     buf = ct.create_string_buffer(len(dati)+1)
     buf.value = dati
 
     lib_read_inputs(ct.byref(buf), ct.c_int(len(dati)+1))
-    lib_init_model()
-    lib_init_a()
-    lib_init_order()
-    lib_init_bc_flag()
 
 def get_ndomains():
     if libtop == None:
@@ -69,13 +81,22 @@ def run_arncheb(shift):
     if not type(shift) is float:
         error('shift should be a float')
         return
+    lib_init_a()
+    lib_init_order()
+    lib_init_bc_flag()
     lib_run_arncheb(ct.byref(ct.c_double(shift)))
+
+def get_nsol_out():
+    if libtop == None:
+        error('No library loaded')
+        return
+    return int(ct.c_int.in_dll(libtop, "__eigensolve_MOD_nsol_out").value)
 
 def get_nsol():
     if libtop == None:
         error('No library loaded')
         return
-    return int(ct.c_int.in_dll(libtop, "__eigensolve_MOD_nsol_out").value)
+    return int(ct.c_int.in_dll(libtop, "__inputs_MOD_nsol").value)
 
 def get_a_dim():
     if libtop == None:
@@ -87,7 +108,7 @@ def get_valps():
     if libtop == None:
         error('No library loaded')
         return
-    n = get_nsol()
+    n = get_nsol_out()
     valps = np.zeros(shape=(n), dtype=np.double)
     lib_get_valps(valps.ctypes.data)
     return valps
@@ -96,9 +117,17 @@ def get_vecps():
     if libtop == None:
         error('No library loaded')
         return
-    n = get_nsol()
+    n = get_nsol_out()
     a_dim = get_a_dim()
     vecps = np.zeros(shape=(a_dim, n), dtype=np.double)
     lib_get_vecps(vecps.ctypes.data)
     return vecps
 
+def init_model(filename):
+    if libtop == None:
+        error('No library loaded')
+        return
+    buf = ct.create_string_buffer(len(filename))
+    buf.value = filename
+
+    lib_init_model(ct.byref(buf), ct.c_int(len(buf)))

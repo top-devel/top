@@ -12,25 +12,31 @@
 contains
 
 !------------------------------------------------------------------------
-      subroutine init_model()
+      subroutine init_model(filename)
       use inputs, only: lres
+
       implicit none
-      call read_global ()
+      character(len=*), intent(in) :: filename
+
+      call read_model(filename)
       call read_poly()
       call init_radial_grid()
       call write_grid()
       call make_mapping(lres)
       end subroutine
 !------------------------------------------------------------------------
-      subroutine read_global ()
+      subroutine read_model(dirmodel)
 
-        use inputs, only: rota, pindex, dirmodel
+        use inputs, only: rota, pindex
         use mod_grid
 
         implicit none
+        character(len=*), intent(in) :: dirmodel
+
         integer :: nr_tmp
         double precision :: tmp,pindex1,pindex2,rota_tmp
-        character(512) :: filename
+        character(len=255) :: filename
+
         filename = "lambda_eps"
         write(*,*) trim(dirmodel)
         open(unit=2,file=trim(dirmodel)//filename,&
@@ -60,7 +66,7 @@ contains
         grd(1)%nr=nr_tmp
         close(2)
 
-      end subroutine read_global
+      end subroutine read_model
 
 !------------------------------------------------------------------------
       subroutine read_poly()

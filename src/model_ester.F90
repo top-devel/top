@@ -65,12 +65,14 @@ contains
 ! This suboutine calls all of the relevant subroutines for initialising
 ! a model.
 !-------------------------------------------------------------------------
-      subroutine init_model()
+      subroutine init_model(filename)
 
       implicit none
+      character(len=*), intent(in) :: filename
+
       integer id,j
 
-      call read_model()
+      call read_model(filename)
       call interpolate_model()
       call make_mapping()
       call find_NNtoz()
@@ -83,11 +85,13 @@ contains
 !-------------------------------------------------------------------------
 ! This suboutine reads the model
 !-------------------------------------------------------------------------
-      subroutine read_model()
+      subroutine read_model(filename)
 
       use mod_legendre
 
       implicit none
+      character(len=*), intent(in) :: filename
+
       integer i, j, id
       double precision, allocatable :: r_spec(:), r_temp(:)
       double precision :: aux

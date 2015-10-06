@@ -6,17 +6,31 @@ sys.path.append('@prefix@/bin')
 import top
 
 top.load('eq_poly_ester')
-top.init('@datadir@/top/models/poly_ester/dati')
-top.run_arncheb(0.791171838986203e-01)
+top.read_dati('@datadir@/top/models/poly_ester/dati')
+model = top.get_from_dati('dirmodel')
+shift = float(top.get_from_dati('shift'))
+top.init_model(model)
+print('dirmodel: ' + model)
+print('shift: %e' % shift)
+top.run_arncheb(shift)
 
 vecps = top.get_vecps()
 valps = top.get_valps()
-print("valps:" + str(valps))
+for v in valps:
+    print("%e" % v)
+
 
 top.load('eq_ESTER_all_lagrange')
-top.init('@datadir@/top/models/ester/dati')
+top.read_dati('@datadir@/top/models/ester/dati')
+model = top.get_from_dati('filename')
+shift = float(top.get_from_dati('shift'))
+print('filename: ' + model)
+print('shift: %e' % shift)
+top.init_model(model)
 top.run_arncheb(18.484)
 
 vecps = top.get_vecps()
 valps = top.get_valps()
-print("valps:" + str(valps))
+for v in valps:
+    print("%e" % v)
+
