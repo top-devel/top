@@ -1,13 +1,12 @@
-#!/usr/bin/python
+#!@PYTHON@
 
 import os
 import sys
-sys.path.append(os.environ['HOME'] + '/local/bin')
-
+sys.path.append('@prefix@/bin')
 import top
 
-top.load('eq_poly_esther')
-top.init('/home/bputigny/Work/Code/top/models/poly_ester/dati')
+top.load('eq_poly_ester')
+top.init('@datadir@/top/models/poly_ester/dati')
 top.run_arncheb(0.791171838986203e-01)
 
 vecps = top.get_vecps()
@@ -15,7 +14,7 @@ valps = top.get_valps()
 print("valps:" + str(valps))
 
 top.load('eq_ESTER_all_lagrange')
-top.init('/home/bputigny/Work/Code/top/models/ester/dati')
+top.init('@datadir@/top/models/ester/dati')
 top.run_arncheb(18.484)
 
 vecps = top.get_vecps()

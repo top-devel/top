@@ -1,0 +1,27 @@
+nr(9) = 30             # the radial resolution
+nt =  30                # the number of spherical harmonics (lmax = |m| + 2*nt)
+lres = 300              # the number of points used in calculating coupling integrals
+dertype(1) = CHEB       # derivation type
+dertype(2) = CHEB       # derivation type
+dertype(3) = CHEB       # derivation type
+dertype(4) = CHEB       # derivation type
+dertype(5) = CHEB       # derivation type
+dertype(6) = CHEB       # derivation type
+dertype(7) = CHEB       # derivation type
+dertype(8) = CHEB       # derivation type
+dertype(9) = CHEB       # derivation type
+mattype(1) = FULL       # matrix structure
+mattype(2) = FULL       # matrix structure
+mattype(3) = FULL       # matrix structure
+mattype(4) = FULL       # matrix structure
+mattype(5) = FULL       # matrix structure
+mattype(6) = FULL       # matrix structure
+mattype(7) = FULL       # matrix structure
+mattype(8) = FULL       # matrix structure
+mattype(9) = FULL       # matrix structure
+iparity = 0
+m = 0
+shift = 18.484d0 # 18.48490552055010d0
+nsol = 4
+filename = @datadir@/top/models/ester/d.dat
+rootdir = ./

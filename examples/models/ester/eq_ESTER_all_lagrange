@@ -1,0 +1,552 @@
+stamp eq_ESTER_all_lagrange
+
+input m I3
+input lres I4
+input iparity I1
+input mass 0pf5.2
+input rota_avg 0pf4.2
+input filename a256
+input nr_cesam I5
+input gridtype a2
+input freqlist a256
+input shift_start 0pf6.3
+input shift_end   0pf6.3
+input shift_incr  0pf6.3
+input m_start I3
+input m_end   I3
+input m_incr  I3
+#input nt_start I3
+#input nt_end   I3
+#input nt_incr  I3
+
+domains star1 star2 star3 star4 star5 star6 star7 star8 vacuum
+
+macro %nm 7   # number of stellar domains - 1
+macro %nd 8   # number of stellar domains
+macro %np 9   # number of stellar domains + 1
+macro %1%  s(1)%
+macro %2%  s(2)%
+macro %%   s(%id)%
+macro %sm% s(%nm)% 
+macro %sd% s(%nd)% 
+macro %sp% s(%np)% 
+
+do %id 1 %nd
+  eqlist  star%id eqdP_P%id eqEr%id eqEt%id eqPhi%id eqEp%id
+  varlist star%id dP_P%id Er%id Et%id Phi%id Ep%id
+enddo
+
+eqlist  vacuum eqPhie
+varlist vacuum Phie
+
+do %id 1 %nd
+  lvar dP_P%id  abs(m)+iparity
+  lvar Er%id   abs(m)+iparity
+  lvar Et%id   abs(m)+iparity
+  lvar Phi%id  abs(m)+iparity
+  lvar Ep%id   abs(m)+1-iparity
+
+  leq eqdP_P%id  abs(m)+iparity
+  leq eqEr%id   abs(m)+iparity
+  leq eqEt%id   abs(m)+iparity
+  leq eqPhi%id  abs(m)+iparity
+  leq eqEp%id   abs(m)+1-iparity
+enddo
+
+lvar Phie abs(m)+iparity
+leq eqPhie abs(m)+iparity
+
+#-------------------------------------------------------------------------------------
+instruction call initialisation(nt,grd(1)%nr,m,lres,llmax) # this initialises the integrales module
+#-------------------------------------------------------------------------------------
+equation eqdP_P1
+
+sub rtt w0 Illm(%1%r_map*%1%roz*%1%r_z/%1%Gamma1,$a,$leq,$lvar) dP_P1
+sub rtt w0 Illm(%1%zeta,$a,$leq,$lvar)                          Er1'
+term s w0 2d0                                                   Er1
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                     Et1
+
+termbc t 1 w0 1d0                                               Er1(1)
+termbc t 1 w0 -dble($lvar($j1))                                 Et1(1)
+#-------------------------------------------------------------------------------------
+equation eqEr1
+
+sub rtt w2 Illm(%1%r_z/%1%roz**2,$a,$leq,$lvar)                  Er1
+sub rtt w1 Illm(2d0*m*%1%Rota*%1%r_z/%1%roz**2,$a,$leq,$lvar)    Er1
+sub rtt w0 Illm(m**2*%1%Rota**2*%1%r_z/%1%roz**2,$a,$leq,$lvar)  Er1
+sub rtt w2 Jllm(%1%rrt/%1%roz,$a,$leq,$lvar)                     Et1
+sub rtt w1 Jllm(2d0*m*%1%Rota*%1%rrt/%1%roz,$a,$leq,$lvar)       Et1
+sub rtt w0 Jllm(m**2*%1%Rota**2*%1%rrt/%1%roz,$a,$leq,$lvar)     Et1
+sub rtt w2 Kllm(%1%rrt/%1%roz,$a,$leq,$lvar)                     Ep1
+sub rtt w1 Kllm(2d0*m*%1%Rota*%1%rrt/%1%roz,$a,$leq,$lvar)       Ep1
+sub rtt w0 Kllm(m**2*%1%Rota**2*%1%rrt/%1%roz,$a,$leq,$lvar)     Ep1
+sub rtt w1 Kllm(-2d0*%1%Rota*%1%sint/%1%roz,$a,$leq,$lvar)       Et1
+sub rtt w0 Kllm(-2d0*m*%1%Rota**2*%1%sint/%1%roz,$a,$leq,$lvar)  Et1
+sub rtt w1 Jllm(-2d0*%1%Rota*%1%sint/%1%roz,$a,$leq,$lvar)       Ep1
+sub rtt w0 Jllm(-2d0*m*%1%Rota**2*%1%sint/%1%roz,$a,$leq,$lvar)  Ep1
+sub rtt w0 Illm(-%1%zeta*%1%sint**2*2d0*%1%Rota*%1%Rota_z/%1%roz,$a,$leq,$lvar) Er1
+sub rtt w0 Jllm(-%1%sint**2*2d0*%1%Rota*%1%Rota_t/%1%roz,$a,$leq,$lvar)           Et1
+sub rtt w0 Kllm(-%1%sint**2*2d0*%1%Rota*%1%Rota_t/%1%roz,$a,$leq,$lvar)           Ep1
+sub rtt w0 Illm(-%1%pm/%1%rhom,$a,$leq,$lvar)                    dP_P1'
+sub rtt w0 Illm((1d0/%1%Gamma1-1d0)*%1%pm_z/%1%rhom,$a,$leq,$lvar)                  dP_P1
+term s w0 -1d0                                                   Phi1'
+sub rtt w0 Jllm(%1%det_rhom_pm,$a,$leq,$lvar)                    Et1
+sub rtt w0 Kllm(%1%det_rhom_pm,$a,$leq,$lvar)                    Ep1
+sub rtt w0 Illm(-%1%grd_pe_z,$a,$leq,$lvar)                      Er1'
+sub rtt w0 Illm(-%1%grd_pe_zz,$a,$leq,$lvar)                     Er1
+sub rtt w0 Jllm(-%1%grd_pe_t,$a,$leq,$lvar)                      Et1'
+sub rtt w0 Jllm(-%1%grd_pe_zt,$a,$leq,$lvar)                     Et1
+sub rtt w0 Kllm(-%1%grd_pe_t,$a,$leq,$lvar)                      Ep1'
+sub rtt w0 Kllm(-%1%grd_pe_zt,$a,$leq,$lvar)                     Ep1
+
+# continuity of the Lagrangian pressure perturbation:
+termbc t $nr w0  1d0                                             dP_P1($nr)
+termbc t $nr w0 -1d0                                             dP_P2(1)
+#subbc tt $nr w0 Illmbc(-%1%zeta($nr,:)**2/(%1%r_map($nr,:)**2*%1%r_z($nr,:)),$a,$leq,$lvar)   Er1($nr)
+#subbc tt $nr w0 Jllmbc(-%1%zeta($nr,:)/(%1%r_map($nr,:)**2*%1%r_z($nr,:)),$a,$leq,$lvar)   Et1($nr)
+#subbc tt $nr w0 Kllmbc(-%1%zeta($nr,:)/(%1%r_map($nr,:)**2*%1%r_z($nr,:)),$a,$leq,$lvar)   Ep1($nr)
+#subbc tt $nr w0 Illmbc(%1%zeta(grd(1)%nr,:)**2/(%1%r_map(grd(1)%nr,:)**2*%1%r_z(grd(1)%nr,:)),$a,$leq,$lvar)   Er2(1)
+#subbc tt $nr w0 Jllmbc(%1%zeta(grd(1)%nr,:)/(%1%r_map(grd(1)%nr,:)**2*%1%r_z(grd(1)%nr,:)),$a,$leq,$lvar)   Et2(1)
+#subbc tt $nr w0 Kllmbc(%1%zeta(grd(1)%nr,:)/(%1%r_map(grd(1)%nr,:)**2*%1%r_z(grd(1)%nr,:)),$a,$leq,$lvar)   Ep2(1)
+#-------------------------------------------------------------------------------------
+equation eqEt1
+
+sub rtt w2 Jllmc(%1%r_t/%1%roz**2,$a,$leq,$lvar)                                                      Er1
+sub rtt w1 Jllmc(2d0*m*%1%Rota*%1%r_t/%1%roz**2,$a,$leq,$lvar)                                        Er1
+sub rtt w0 Jllmc(m**2*%1%Rota**2*%1%r_t/%1%roz**2,$a,$leq,$lvar)                                      Er1
+sub rtt w2 Lllm(%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                                         Et1
+instruction call modify_l0($prev,$nr,abs(m)+iparity) 
+sub rtt w1 Lllm(2d0*m*%1%Rota*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                           Et1
+sub rtt w0 Lllm(m**2*%1%Rota**2*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                         Et1
+sub rtt w2 Nllm(%1%zeta/%1%r_z,$a,$leq,$lvar)                                                         Et1
+sub rtt w1 Nllm(2d0*m*%1%Rota*%1%zeta/%1%r_z,$a,$leq,$lvar)                                           Et1
+sub rtt w0 Nllm(m**2*%1%Rota**2*%1%zeta/%1%r_z,$a,$leq,$lvar)                                         Et1
+sub rtt w2 Mllm(%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                                         Ep1
+sub rtt w1 Mllm(2d0*m*%1%Rota*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                           Ep1
+sub rtt w0 Mllm(m**2*%1%Rota**2*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                         Ep1
+sub rtt w2 Mllmc(-%1%zeta/%1%r_z,$a,$leq,$lvar)                                                       Ep1
+sub rtt w1 Mllmc(-2d0*m*%1%Rota*%1%zeta/%1%r_z,$a,$leq,$lvar)                                         Ep1
+sub rtt w0 Mllmc(-m**2*%1%Rota**2*%1%zeta/%1%r_z,$a,$leq,$lvar)                                       Ep1
+sub rtt w1 Kllmc(2d0*%1%Rota*%1%zeta*%1%sint/%1%roz,$a,$leq,$lvar)                                    Er1
+sub rtt w0 Kllmc(2d0*m*%1%Rota**2*%1%zeta*%1%sint/%1%roz,$a,$leq,$lvar)                               Er1
+sub rtt w1 Mllm(-2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)         Et1
+sub rtt w1 Mllmc(2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)         Et1
+sub rtt w0 Mllm(-2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)    Et1
+sub rtt w0 Mllmc(2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)    Et1
+sub rtt w1 Lllm(-2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)         Ep1
+sub rtt w1 Nllm(-2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)         Ep1
+sub rtt w0 Lllm(-2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)    Ep1
+sub rtt w0 Nllm(-2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)    Ep1
+sub rtt w0 Jllmc(-%1%zeta*(%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_z/(%1%roz*%1%r_z),$a,$leq,$lvar)   Er1
+sub rtt w0 Lllm(-(%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_t/(%1%roz*%1%r_z),$a,$leq,$lvar)              Et1
+sub rtt w0 Mllm(-(%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_t/(%1%roz*%1%r_z),$a,$leq,$lvar)              Ep1
+sub rtt w0 Lllm(-%1%pm/%1%rhom,$a,$leq,$lvar)                                                         dP_P1
+sub rtt w0 Nllm(-%1%pm/%1%rhom,$a,$leq,$lvar)                                                         dP_P1
+sub rtt w0 Jllmc((1d0/%1%Gamma1-1d0)*%1%pm_t/%1%rhom,$a,$leq,$lvar)                                   dP_P1
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                                           Phi1
+sub rtt w0 Jllmc(-%1%zeta*%1%det_rhom_pm,$a,$leq,$lvar)                                               Er1
+sub rtt w0 Jllmc(-%1%grd_pe_tz,$a,$leq,$lvar)                                                         Er1
+sub rtt w0 Lllm(-%1%grd_pe_tt,$a,$leq,$lvar)                                                          Et1
+sub rtt w0 Mllm(-%1%grd_pe_tt,$a,$leq,$lvar)                                                          Ep1
+sub rtt w0 Lllm(-%1%grd_pe_z,$a,$leq,$lvar)                                                           Er1
+sub rtt w0 Nllm(-%1%grd_pe_z,$a,$leq,$lvar)                                                           Er1
+sub rtt w0 Tllm(-%1%grd_pe_t,$a,$leq,$lvar)                                                           Et1
+sub rtt w0 Mllmc(dble(m)*%1%grd_pe_t/%1%sint,$a,$leq,$lvar)                                           Et1
+sub rtt w0 Ullm(-%1%grd_pe_t,$a,$leq,$lvar)                                                           Ep1
+sub rtt w0 Nllm(-dble(m)*%1%grd_pe_t/%1%sint,$a,$leq,$lvar)                                           Ep1
+#-------------------------------------------------------------------------------------
+equation eqEp1
+
+sub rtt w2 Kllmc(%1%r_t/%1%roz**2,$a,$leq,$lvar)                                                      Er1
+sub rtt w1 Kllmc(2d0*m*%1%Rota*%1%r_t/%1%roz**2,$a,$leq,$lvar)                                        Er1
+sub rtt w0 Kllmc(m**2*%1%Rota**2*%1%r_t/%1%roz**2,$a,$leq,$lvar)                                      Er1
+sub rtt w2 Mllmc(%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                                        Et1
+sub rtt w1 Mllmc(2d0*m*%1%Rota*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                          Et1
+sub rtt w0 Mllmc(m**2*%1%Rota**2*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                        Et1
+sub rtt w2 Mllm(-%1%zeta/%1%r_z,$a,$leq,$lvar)                                                        Et1
+sub rtt w1 Mllm(-2d0*m*%1%Rota*%1%zeta/%1%r_z,$a,$leq,$lvar)                                          Et1
+sub rtt w0 Mllm(-m**2*%1%Rota**2*%1%zeta/%1%r_z,$a,$leq,$lvar)                                        Et1
+sub rtt w2 Nllm(-%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                                        Ep1
+sub rtt w1 Nllm(-2d0*m*%1%Rota*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                          Ep1
+sub rtt w0 Nllm(-m**2*%1%Rota**2*%1%zeta*(1d0+%1%rrt**2)/%1%r_z,$a,$leq,$lvar)                        Ep1
+sub rtt w2 Lllm(-%1%zeta/%1%r_z,$a,$leq,$lvar)                                                        Ep1
+instruction call modify_l0($prev,$nr,abs(m)+modulo(1+iparity,2)) 
+sub rtt w1 Lllm(-2d0*m*%1%Rota*%1%zeta/%1%r_z,$a,$leq,$lvar)                                          Ep1
+sub rtt w0 Lllm(-m**2*%1%Rota**2*%1%zeta/%1%r_z,$a,$leq,$lvar)                                        Ep1
+sub rtt w1 Jllmc(2d0*%1%Rota*%1%zeta*%1%sint/%1%roz,$a,$leq,$lvar)                                    Er1
+sub rtt w0 Jllmc(2d0*m*%1%Rota**2*%1%zeta*%1%sint/%1%roz,$a,$leq,$lvar)                               Er1
+sub rtt w1 Lllm(2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)          Et1
+sub rtt w0 Lllm(2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)     Et1
+sub rtt w1 Nllm(2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)          Et1
+sub rtt w0 Nllm(2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)     Et1
+sub rtt w1 Mllm(2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)          Ep1
+sub rtt w0 Mllm(2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)     Ep1
+sub rtt w1 Mllmc(-2d0*%1%Rota*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)        Ep1
+sub rtt w0 Mllmc(-2d0*m*%1%Rota**2*(%1%r_t*%1%sint+%1%r_map*%1%cost)/(%1%roz*%1%r_z),$a,$leq,$lvar)   Ep1
+sub rtt w0 Kllmc(-%1%zeta*(%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_z/(%1%roz*%1%r_z),$a,$leq,$lvar)   Er1
+sub rtt w0 Mllmc(-(%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_t/(%1%roz*%1%r_z),$a,$leq,$lvar)             Et1
+sub rtt w0 Nllm((%1%r_t*%1%sint+%1%r_map*%1%cost)*%1%sint*2d0*%1%Rota*%1%Rota_t/(%1%roz*%1%r_z),$a,$leq,$lvar)               Ep1
+sub rtt w0 Mllm(%1%pm/%1%rhom,$a,$leq,$lvar)                                                          dP_P1
+sub rtt w0 Mllmc(-%1%pm/%1%rhom,$a,$leq,$lvar)                                                        dP_P1
+sub rtt w0 Kllmc((1d0/%1%Gamma1-1d0)*%1%pm_t/%1%rhom,$a,$leq,$lvar)                                   dP_P1
+sub rtt w0 Kllmc(-%1%det_rhom_pm*%1%zeta,$a,$leq,$lvar)                                               Er1
+sub rtt w0 Kllmc(-%1%grd_pe_tz,$a,$leq,$lvar)                                                         Er1
+sub rtt w0 Mllmc(-%1%grd_pe_tt,$a,$leq,$lvar)                                                         Et1
+sub rtt w0 Nllm(%1%grd_pe_tt,$a,$leq,$lvar)                                                           Ep1
+sub rtt w0 Mllm(%1%grd_pe_z,$a,$leq,$lvar)                                                            Er1
+sub rtt w0 Mllmc(-%1%grd_pe_z,$a,$leq,$lvar)                                                          Er1
+sub rtt w0 Xllm(-%1%grd_pe_t,$a,$leq,$lvar)                                                           Et1
+sub rtt w0 Lllm(dble(m)*%1%grd_pe_t/%1%sint,$a,$leq,$lvar)                                            Et1
+sub rtt w0 Yllm(%1%grd_pe_t,$a,$leq,$lvar)                                                            Ep1
+sub rtt w0 Mllm(dble(m)*%1%grd_pe_t/%1%sint,$a,$leq,$lvar)                                            Ep1
+
+termbc t 1 w0 1d0                                                                     Ep1(1)
+#-------------------------------------------------------------------------------------
+equation eqPhi1
+
+sub rtt w0 Illm((%1%r_map**2+%1%r_t**2)/%1%r_z**2,$a,$leq,$lvar)              Phi1''
+sub rtt w0 Illm((2d0*%1%r_z*%1%r_t*%1%r_zt-%1%r_map**2*%1%r_zz-%1%r_z**2*%1%r_tt+2d0*%1%r_map*%1%r_z**2-%1%r_t**2*%1%r_zz-%1%r_z**2*%1%r_t*%1%cott)/%1%r_z**3,$a,$leq,$lvar) Phi1'
+sub rtt w0 Jllm(-2d0*%1%r_t/%1%r_z,$a,$leq,$lvar)                             Phi1'
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                   Phi1
+sub rtt w0 Illm(-4d0*pi*%1%r_map**2*%1%rhom/%1%Gamma1,$a,$leq,$lvar)          dP_P1
+sub rtt w0 Illm(4d0*pi*%1%zeta**2*%1%rhom_z/%1%r_z,$a,$leq,$lvar)             Er1
+sub rtt w0 Jllm(4d0*pi*%1%zeta*%1%rhom_t/%1%r_z,$a,$leq,$lvar)                Et1
+sub rtt w0 Kllm(4d0*pi*%1%zeta*%1%rhom_t/%1%r_z,$a,$leq,$lvar)                Ep1
+
+termbc t 1 w0 dble($lvar($j1))                  Phi1(1)
+termbc t 1 w0 dble(max(0,1-$lvar($j1)))         Phi1'(1)
+termbc t $nr w0  1d0                            Phi1($nr)
+termbc t $nr w0 -1d0                            Phi2(1)
+
+do %id 2 %nm
+#-------------------------------------------------------------------------------------
+instruction call initialisation(nt,grd(%id)%nr,m,lres,llmax) # this initialises the integrales module
+#-------------------------------------------------------------------------------------
+equation eqdP_P%id
+
+sub rtt w0 Illm(%%r_map**2*%%r_z/(%%Gamma1*%%zeta),$a,$leq,$lvar)             dP_P%id
+sub rtt w0 Illm(%%zeta,$a,$leq,$lvar)                                         Er%id'
+term s w0 2d0                                                                 Er%id
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                   Et%id
+
+termbc t 1 w0  1d0                                                            Er%id--($nr)
+termbc t 1 w0 -1d0                                                            Er%id(1)
+#-------------------------------------------------------------------------------------
+equation eqEr%id
+
+sub rtt w2 Illm(%%zeta**2*%%r_z/%%r_map**2,$a,$leq,$lvar)                       Er%id
+sub rtt w1 Illm(2d0*m*%%Rota*%%zeta**2*%%r_z/%%r_map**2,$a,$leq,$lvar)          Er%id
+sub rtt w0 Illm(m**2*%%Rota**2*%%zeta**2*%%r_z/%%r_map**2,$a,$leq,$lvar)        Er%id
+sub rtt w2 Jllm(%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                          Et%id
+sub rtt w1 Jllm(2d0*m*%%Rota*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)             Et%id
+sub rtt w0 Jllm(m**2*%%Rota**2*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)           Et%id
+sub rtt w2 Kllm(%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                          Ep%id
+sub rtt w1 Kllm(2d0*m*%%Rota*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)             Ep%id
+sub rtt w0 Kllm(m**2*%%Rota**2*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)           Ep%id
+sub rtt w1 Kllm(-2d0*%%Rota*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                Et%id
+sub rtt w0 Kllm(-2d0*m*%%Rota**2*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)           Et%id
+sub rtt w1 Jllm(-2d0*%%Rota*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                Ep%id
+sub rtt w0 Jllm(-2d0*m*%%Rota**2*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)           Ep%id
+sub rtt w0 Illm(-%%zeta**2*%%sint**2*2d0*%%Rota*%%Rota_z/%%r_map,$a,$leq,$lvar) Er%id
+sub rtt w0 Jllm(-%%zeta*%%sint**2*2d0*%%Rota*%%Rota_t/%%r_map,$a,$leq,$lvar)    Et%id
+sub rtt w0 Kllm(-%%zeta*%%sint**2*2d0*%%Rota*%%Rota_t/%%r_map,$a,$leq,$lvar)    Ep%id
+sub rtt w0 Illm(-%%pm/%%rhom,$a,$leq,$lvar)                                     dP_P%id'
+sub rtt w0 Illm((1d0/%%Gamma1-1d0)*%%pm_z/%%rhom,$a,$leq,$lvar)                 dP_P%id
+term s w0 -1d0                                                                  Phi%id'
+sub rtt w0 Jllm(%%det_rhom_pm,$a,$leq,$lvar)                                    Et%id
+sub rtt w0 Kllm(%%det_rhom_pm,$a,$leq,$lvar)                                    Ep%id
+sub rtt w0 Illm(-%%grd_pe_z,$a,$leq,$lvar)                                      Er%id'
+sub rtt w0 Illm(-%%grd_pe_zz,$a,$leq,$lvar)                                     Er%id
+sub rtt w0 Jllm(-%%grd_pe_t,$a,$leq,$lvar)                                      Et%id'
+sub rtt w0 Jllm(-%%grd_pe_zt,$a,$leq,$lvar)                                     Et%id
+sub rtt w0 Kllm(-%%grd_pe_t,$a,$leq,$lvar)                                      Ep%id'
+sub rtt w0 Kllm(-%%grd_pe_zt,$a,$leq,$lvar)                                     Ep%id
+
+# continuity of the Lagrangian pressure perturbation:
+termbc t $nr w0  1d0                                                            dP_P%id($nr)
+termbc t $nr w0 -1d0                                                            dP_P%id++(1)
+#-------------------------------------------------------------------------------------
+equation eqEt%id
+
+sub rtt w2 Jllmc(%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                                        Er%id
+sub rtt w1 Jllmc(2d0*m*%%Rota*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                           Er%id
+sub rtt w0 Jllmc(m**2*%%Rota**2*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                         Er%id
+sub rtt w2 Lllm((%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)                        Et%id
+instruction call modify_l0($prev,$nr,abs(m)+iparity) 
+sub rtt w1 Lllm(2d0*m*%%Rota*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)           Et%id
+sub rtt w0 Lllm(m**2*%%Rota**2*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)         Et%id
+sub rtt w2 Nllm(1d0/%%r_z,$a,$leq,$lvar)                                                       Et%id
+sub rtt w1 Nllm(2d0*m*%%Rota/%%r_z,$a,$leq,$lvar)                                              Et%id
+sub rtt w0 Nllm(m**2*%%Rota**2/%%r_z,$a,$leq,$lvar)                                            Et%id
+sub rtt w2 Mllm((%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)                        Ep%id
+sub rtt w1 Mllm(2d0*m*%%Rota*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)           Ep%id
+sub rtt w0 Mllm(m**2*%%Rota**2*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)         Ep%id
+sub rtt w2 Mllmc(-1d0/%%r_z,$a,$leq,$lvar)                                                     Ep%id
+sub rtt w1 Mllmc(-2d0*m*%%Rota/%%r_z,$a,$leq,$lvar)                                            Ep%id
+sub rtt w0 Mllmc(-m**2*%%Rota**2/%%r_z,$a,$leq,$lvar)                                          Ep%id
+sub rtt w1 Kllmc(2d0*%%Rota*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                               Er%id
+sub rtt w0 Kllmc(2d0*m*%%Rota**2*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                          Er%id
+sub rtt w1 Mllm(-2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)       Et%id
+sub rtt w1 Mllmc(2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)       Et%id
+sub rtt w0 Mllm(-2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)  Et%id
+sub rtt w0 Mllmc(2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)  Et%id
+sub rtt w1 Lllm(-2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)       Ep%id
+sub rtt w1 Nllm(-2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)       Ep%id
+sub rtt w0 Lllm(-2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)  Ep%id
+sub rtt w0 Nllm(-2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)  Ep%id
+sub rtt w0 Jllmc(-%%zeta*(%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_z/(%%r_map*%%r_z),$a,$leq,$lvar) Er%id
+sub rtt w0 Lllm(-(%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_t/(%%r_map*%%r_z),$a,$leq,$lvar)              Et%id
+sub rtt w0 Mllm(-(%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_t/(%%r_map*%%r_z),$a,$leq,$lvar)              Ep%id
+sub rtt w0 Lllm(-%%pm/(%%zeta*%%rhom),$a,$leq,$lvar)                                           dP_P%id
+sub rtt w0 Nllm(-%%pm/(%%zeta*%%rhom),$a,$leq,$lvar)                                           dP_P%id
+sub rtt w0 Jllmc((1d0/%%Gamma1-1d0)*%%pm_t/(%%zeta*%%rhom),$a,$leq,$lvar)                      dP_P%id
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))/%%zeta(1:$nr,1)                                    Phi%id
+sub rtt w0 Jllmc(-%%det_rhom_pm,$a,$leq,$lvar)                                                 Er%id
+sub rtt w0 Jllmc(-%%grd_pe_tz/%%zeta,$a,$leq,$lvar)                                            Er%id
+sub rtt w0 Lllm(-%%grd_pe_tt/%%zeta,$a,$leq,$lvar)                                             Et%id
+sub rtt w0 Mllm(-%%grd_pe_tt/%%zeta,$a,$leq,$lvar)                                             Ep%id
+sub rtt w0 Lllm(-%%grd_pe_z/%%zeta,$a,$leq,$lvar)                                              Er%id
+sub rtt w0 Nllm(-%%grd_pe_z/%%zeta,$a,$leq,$lvar)                                              Er%id
+sub rtt w0 Tllm(-%%grd_pe_t/%%zeta,$a,$leq,$lvar)                                              Et%id
+sub rtt w0 Mllmc(dble(m)*%%grd_pe_t/(%%zeta*%%sint),$a,$leq,$lvar)                             Et%id
+sub rtt w0 Ullm(-%%grd_pe_t/%%zeta,$a,$leq,$lvar)                                              Ep%id
+sub rtt w0 Nllm(-dble(m)*%%grd_pe_t/(%%zeta*%%sint),$a,$leq,$lvar)                             Ep%id
+#-------------------------------------------------------------------------------------
+equation eqEp%id
+
+sub rtt w2 Kllmc(%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                                        Er%id
+sub rtt w1 Kllmc(2d0*m*%%Rota*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                           Er%id
+sub rtt w0 Kllmc(m**2*%%Rota**2*%%zeta*%%r_t/%%r_map**2,$a,$leq,$lvar)                         Er%id
+sub rtt w2 Mllmc((%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)                       Et%id
+sub rtt w1 Mllmc(2d0*m*%%Rota*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)          Et%id
+sub rtt w0 Mllmc(m**2*%%Rota**2*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)        Et%id
+sub rtt w2 Mllm(-1d0/%%r_z,$a,$leq,$lvar)                                                      Et%id
+sub rtt w1 Mllm(-2d0*m*%%Rota/%%r_z,$a,$leq,$lvar)                                             Et%id
+sub rtt w0 Mllm(-m**2*%%Rota**2/%%r_z,$a,$leq,$lvar)                                           Et%id
+sub rtt w2 Nllm(-(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)                       Ep%id
+sub rtt w1 Nllm(-2d0*m*%%Rota*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)          Ep%id
+sub rtt w0 Nllm(-m**2*%%Rota**2*(%%r_map**2+%%r_t**2)/(%%r_map**2*%%r_z),$a,$leq,$lvar)        Ep%id
+sub rtt w2 Lllm(-1d0/%%r_z,$a,$leq,$lvar)                                                      Ep%id
+instruction call modify_l0($prev,$nr,abs(m)+modulo(1+iparity,2)) 
+sub rtt w1 Lllm(-2d0*m*%%Rota/%%r_z,$a,$leq,$lvar)                                             Ep%id
+sub rtt w0 Lllm(-m**2*%%Rota**2/%%r_z,$a,$leq,$lvar)                                           Ep%id
+sub rtt w1 Jllmc(2d0*%%Rota*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                               Er%id
+sub rtt w0 Jllmc(2d0*m*%%Rota**2*%%zeta*%%sint/%%r_map,$a,$leq,$lvar)                          Er%id
+sub rtt w1 Lllm(2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)        Et%id
+sub rtt w0 Lllm(2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)   Et%id
+sub rtt w1 Nllm(2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)        Et%id
+sub rtt w0 Nllm(2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)   Et%id
+sub rtt w1 Mllm(2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)        Ep%id
+sub rtt w0 Mllm(2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)   Ep%id
+sub rtt w1 Mllmc(-2d0*%%Rota*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar)      Ep%id
+sub rtt w0 Mllmc(-2d0*m*%%Rota**2*(%%r_t*%%sint+%%r_map*%%cost)/(%%r_map*%%r_z),$a,$leq,$lvar) Ep%id
+sub rtt w0 Kllmc(-%%zeta*(%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_z/(%%r_map*%%r_z),$a,$leq,$lvar) Er%id
+sub rtt w0 Mllmc(-(%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_t/(%%r_map*%%r_z),$a,$leq,$lvar)             Et%id
+sub rtt w0 Nllm((%%r_t*%%sint+%%r_map*%%cost)*%%sint*2d0*%%Rota*%%Rota_t/(%%r_map*%%r_z),$a,$leq,$lvar)               Ep%id
+sub rtt w0 Mllm(%%pm/(%%zeta*%%rhom),$a,$leq,$lvar)                                            dP_P%id
+sub rtt w0 Mllmc(-%%pm/(%%zeta*%%rhom),$a,$leq,$lvar)                                          dP_P%id
+sub rtt w0 Kllmc((1d0/%%Gamma1-1d0)*%%pm_t/(%%zeta*%%rhom),$a,$leq,$lvar)                      dP_P%id
+sub rtt w0 Kllmc(-%%det_rhom_pm,$a,$leq,$lvar)                                                 Er%id
+sub rtt w0 Kllmc(-%%grd_pe_tz/%%zeta,$a,$leq,$lvar)                                            Er%id
+sub rtt w0 Mllmc(-%%grd_pe_tt/%%zeta,$a,$leq,$lvar)                                            Et%id
+sub rtt w0 Nllm(%%grd_pe_tt/%%zeta,$a,$leq,$lvar)                                              Ep%id
+sub rtt w0 Mllm(%%grd_pe_z/%%zeta,$a,$leq,$lvar)                                               Er%id
+sub rtt w0 Mllmc(-%%grd_pe_z/%%zeta,$a,$leq,$lvar)                                             Er%id
+sub rtt w0 Xllm(-%%grd_pe_t/%%zeta,$a,$leq,$lvar)                                              Et%id
+sub rtt w0 Lllm(dble(m)*%%grd_pe_t/(%%zeta*%%sint),$a,$leq,$lvar)                              Et%id
+sub rtt w0 Yllm(%%grd_pe_t/%%zeta,$a,$leq,$lvar)                                               Ep%id
+sub rtt w0 Mllm(dble(m)*%%grd_pe_t/(%%zeta*%%sint),$a,$leq,$lvar)                              Ep%id
+#-------------------------------------------------------------------------------------
+equation eqPhi%id
+
+sub rtt w0 Illm((%%r_map**2+%%r_t**2)/%%r_z**2,$a,$leq,$lvar)              Phi%id''
+sub rtt w0 Illm((2d0*%%r_z*%%r_t*%%r_zt-%%r_map**2*%%r_zz-%%r_z**2*%%r_tt+2d0*%%r_map*%%r_z**2-%%r_t**2*%%r_zz-%%r_z**2*%%r_t*%%cott)/%%r_z**3,$a,$leq,$lvar) Phi%id'
+sub rtt w0 Jllm(-2d0*%%r_t/%%r_z,$a,$leq,$lvar)                            Phi%id'
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                Phi%id
+sub rtt w0 Illm(-4d0*pi*%%r_map**2*%%rhom/%%Gamma1,$a,$leq,$lvar)          dP_P%id
+sub rtt w0 Illm(4d0*pi*%%zeta**2*%%rhom_z/%%r_z,$a,$leq,$lvar)             Er%id
+sub rtt w0 Jllm(4d0*pi*%%zeta*%%rhom_t/%%r_z,$a,$leq,$lvar)                Et%id
+sub rtt w0 Kllm(4d0*pi*%%zeta*%%rhom_t/%%r_z,$a,$leq,$lvar)                Ep%id
+
+termbc t   1 w0  1d0 Phi%id--'($nr)
+subbc tt   1 w0 Illmbc(4d0*pi*s(%id--)%rhom($nr,1:lres)*s(%id--)%zeta($nr,1:lres)**2*s(%id--)%r_z($nr,1:lres)/(s(%id--)%r_map($nr,1:lres)**2+s(%id--)%r_t($nr,1:lres)**2),$a,$leq,$lvar)   Er%id--($nr)
+termbc t   1 w0 -1d0 Phi%id'(1)
+subbc tt   1 w0 Illmbc(-4d0*pi*%%rhom(1,1:lres)*%%zeta(1,1:lres)**2*%%r_z(1,1:lres)/(%%r_map(1,1:lres)**2+%%r_t(1,1:lres)**2),$a,$leq,$lvar)            Er%id(1)
+termbc t $nr w0  1d0 Phi%id($nr)
+termbc t $nr w0 -1d0 Phi%id++(1)
+enddo
+
+#-------------------------------------------------------------------------------------
+instruction call initialisation(nt,grd(%nd)%nr,m,lres,llmax) # this initialises the integrales module
+#-------------------------------------------------------------------------------------
+equation eqdP_P%nd
+
+sub rtt w0 Illm(%sd%r_map**2*%sd%r_z/(%sd%Gamma1*%sd%zeta),$a,$leq,$lvar)  dP_P%nd
+sub rtt w0 Illm(%sd%zeta,$a,$leq,$lvar)                                    Er%nd'
+term s w0 2d0                                                              Er%nd
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                Et%nd
+
+termbc t 1 w0  1d0                                                         Er%nm($nr)
+termbc t 1 w0 -1d0                                                         Er%nd(1)
+#-------------------------------------------------------------------------------------
+equation eqEr%nd
+
+sub rtt w2 Illm(%sd%zeta**2*%sd%r_z/%sd%r_map**2,$a,$leq,$lvar)                             Er%nd
+sub rtt w1 Illm(2d0*m*%sd%Rota*%sd%zeta**2*%sd%r_z/%sd%r_map**2,$a,$leq,$lvar)              Er%nd
+sub rtt w0 Illm(m**2*%sd%Rota**2*%sd%zeta**2*%sd%r_z/%sd%r_map**2,$a,$leq,$lvar)            Er%nd
+sub rtt w2 Jllm(%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                Et%nd
+sub rtt w1 Jllm(2d0*m*%sd%Rota*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                 Et%nd
+sub rtt w0 Jllm(m**2*%sd%Rota**2*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)               Et%nd
+sub rtt w2 Kllm(%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                Ep%nd
+sub rtt w1 Kllm(2d0*m*%sd%Rota*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                 Ep%nd
+sub rtt w0 Kllm(m**2*%sd%Rota**2*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)               Ep%nd
+sub rtt w1 Kllm(-2d0*%sd%Rota*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                    Et%nd
+sub rtt w0 Kllm(-2d0*m*%sd%Rota**2*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)               Et%nd
+sub rtt w1 Jllm(-2d0*%sd%Rota*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                    Ep%nd
+sub rtt w0 Jllm(-2d0*m*%sd%Rota**2*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)               Ep%nd
+sub rtt w0 Illm(-%sd%zeta**2*%sd%sint**2*2d0*%sd%Rota*%sd%Rota_z/%sd%r_map,$a,$leq,$lvar)   Er%nd
+sub rtt w0 Jllm(-%sd%zeta*%sd%sint**2*2d0*%sd%Rota*%sd%Rota_t/%sd%r_map,$a,$leq,$lvar)      Et%nd
+sub rtt w0 Kllm(-%sd%zeta*%sd%sint**2*2d0*%sd%Rota*%sd%Rota_t/%sd%r_map,$a,$leq,$lvar)      Ep%nd
+sub rtt w0 Illm(-%sd%pm/%sd%rhom,$a,$leq,$lvar)                                             dP_P%nd'
+sub rtt w0 Illm((1d0/%sd%Gamma1-1d0)*%sd%pm_z/%sd%rhom,$a,$leq,$lvar)                       dP_P%nd
+term s w0 -1d0                                                                              Phi%nd'
+sub rtt w0 Jllm(%sd%det_rhom_pm,$a,$leq,$lvar)                                              Et%nd
+sub rtt w0 Kllm(%sd%det_rhom_pm,$a,$leq,$lvar)                                              Ep%nd
+sub rtt w0 Illm(-%sd%grd_pe_z,$a,$leq,$lvar)                                                Er%nd'
+sub rtt w0 Illm(-%sd%grd_pe_zz,$a,$leq,$lvar)                                               Er%nd
+sub rtt w0 Jllm(-%sd%grd_pe_t,$a,$leq,$lvar)                                                Et%nd'
+sub rtt w0 Jllm(-%sd%grd_pe_zt,$a,$leq,$lvar)                                               Et%nd
+sub rtt w0 Kllm(-%sd%grd_pe_t,$a,$leq,$lvar)                                                Ep%nd'
+sub rtt w0 Kllm(-%sd%grd_pe_zt,$a,$leq,$lvar)                                               Ep%nd
+
+# this is equivalent to taking the above equation and setting c2 = 0 on the edge:
+termbc t $nr w0  1d0                                                                        dP_P%nd($nr)
+
+# set the VERTICAL gradient of dP_P to zero:
+#subbc tt $nr w0 Illmbc((%sd%r_map($nr,:)**2+%sd%r_t($nr,:)**2)/(%sd%r_map($nr,:)**2*%sd%r_z($nr,:)**2),$a,$leq,$lvar)  dP_P%nd'($nr)
+#subbc tt $nr w0 Jllmbc(-%sd%r_t($nr,:)/(%sd%r_map($nr,:)**2*%sd%r_z($nr,:)),$a,$leq,$lvar)                             dP_P%nd($nr)
+#-------------------------------------------------------------------------------------
+equation eqEt%nd
+
+sub rtt w2 Jllmc(%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                                          Er%nd
+sub rtt w1 Jllmc(2d0*m*%sd%Rota*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                           Er%nd
+sub rtt w0 Jllmc(m**2*%sd%Rota**2*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                         Er%nd
+sub rtt w2 Lllm((%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                                        Et%nd
+instruction call modify_l0($prev,$nr,abs(m)+iparity) 
+sub rtt w1 Lllm(2d0*m*%sd%Rota*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                         Et%nd
+sub rtt w0 Lllm(m**2*%sd%Rota**2*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                       Et%nd
+sub rtt w2 Nllm(1d0/%sd%r_z,$a,$leq,$lvar)                                                                             Et%nd
+sub rtt w1 Nllm(2d0*m*%sd%Rota/%sd%r_z,$a,$leq,$lvar)                                                                  Et%nd
+sub rtt w0 Nllm(m**2*%sd%Rota**2/%sd%r_z,$a,$leq,$lvar)                                                                Et%nd
+sub rtt w2 Mllm((%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                                        Ep%nd
+sub rtt w1 Mllm(2d0*m*%sd%Rota*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                         Ep%nd
+sub rtt w0 Mllm(m**2*%sd%Rota**2*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                       Ep%nd
+sub rtt w2 Mllmc(-1d0/%sd%r_z,$a,$leq,$lvar)                                                                           Ep%nd
+sub rtt w1 Mllmc(-2d0*m*%sd%Rota/%sd%r_z,$a,$leq,$lvar)                                                                Ep%nd
+sub rtt w0 Mllmc(-m**2*%sd%Rota**2/%sd%r_z,$a,$leq,$lvar)                                                              Ep%nd
+sub rtt w1 Kllmc(2d0*%sd%Rota*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                                               Er%nd
+sub rtt w0 Kllmc(2d0*m*%sd%Rota**2*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                                          Er%nd
+sub rtt w1 Mllm(-2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)                 Et%nd
+sub rtt w1 Mllmc(2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)                 Et%nd
+sub rtt w0 Mllm(-2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Et%nd
+sub rtt w0 Mllmc(2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Et%nd
+sub rtt w1 Lllm(-2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)                 Ep%nd
+sub rtt w1 Nllm(-2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)                 Ep%nd
+sub rtt w0 Lllm(-2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Ep%nd
+sub rtt w0 Nllm(-2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Ep%nd
+sub rtt w0 Jllmc(-%sd%zeta*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_z/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)   Er%nd
+sub rtt w0 Lllm(-(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_t/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Et%nd
+sub rtt w0 Mllm(-(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_t/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Ep%nd
+sub rtt w0 Lllm(-%sd%pm/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                                             dP_P%nd
+sub rtt w0 Nllm(-%sd%pm/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                                             dP_P%nd
+sub rtt w0 Jllmc((1d0/%sd%Gamma1-1d0)*%sd%pm_t/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                      dP_P%nd
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))/%sd%zeta(1:$nr,1)                                                          Phi%nd
+sub rtt w0 Jllmc(-%sd%det_rhom_pm,$a,$leq,$lvar)                                                                       Er%nd
+sub rtt w0 Jllmc(-%sd%grd_pe_tz/%sd%zeta,$a,$leq,$lvar)                                                                Er%nd
+sub rtt w0 Lllm(-%sd%grd_pe_tt/%sd%zeta,$a,$leq,$lvar)                                                                 Et%nd
+sub rtt w0 Mllm(-%sd%grd_pe_tt/%sd%zeta,$a,$leq,$lvar)                                                                 Ep%nd
+sub rtt w0 Lllm(-%sd%grd_pe_z/%sd%zeta,$a,$leq,$lvar)                                                                  Er%nd
+sub rtt w0 Nllm(-%sd%grd_pe_z/%sd%zeta,$a,$leq,$lvar)                                                                  Er%nd
+sub rtt w0 Tllm(-%sd%grd_pe_t/%sd%zeta,$a,$leq,$lvar)                                                                  Et%nd
+sub rtt w0 Mllmc(dble(m)*%sd%grd_pe_t/(%sd%zeta*%sd%sint),$a,$leq,$lvar)                                               Et%nd
+sub rtt w0 Ullm(-%sd%grd_pe_t/%sd%zeta,$a,$leq,$lvar)                                                                  Ep%nd
+sub rtt w0 Nllm(-dble(m)*%sd%grd_pe_t/(%sd%zeta*%sd%sint),$a,$leq,$lvar)                                               Ep%nd
+#-------------------------------------------------------------------------------------
+equation eqEp%nd
+
+sub rtt w2 Kllmc(%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                                      Er%nd
+sub rtt w1 Kllmc(2d0*m*%sd%Rota*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                       Er%nd
+sub rtt w0 Kllmc(m**2*%sd%Rota**2*%sd%zeta*%sd%r_t/%sd%r_map**2,$a,$leq,$lvar)                                     Er%nd
+sub rtt w2 Mllmc((%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                                   Et%nd
+sub rtt w1 Mllmc(2d0*m*%sd%Rota*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                    Et%nd
+sub rtt w0 Mllmc(m**2*%sd%Rota**2*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                  Et%nd
+sub rtt w2 Mllm(-1d0/%sd%r_z,$a,$leq,$lvar)                                                                        Et%nd
+sub rtt w1 Mllm(-2d0*m*%sd%Rota/%sd%r_z,$a,$leq,$lvar)                                                             Et%nd
+sub rtt w0 Mllm(-m**2*%sd%Rota**2/%sd%r_z,$a,$leq,$lvar)                                                           Et%nd
+sub rtt w2 Nllm(-(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                                   Ep%nd
+sub rtt w1 Nllm(-2d0*m*%sd%Rota*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                    Ep%nd
+sub rtt w0 Nllm(-m**2*%sd%Rota**2*(%sd%r_map**2+%sd%r_t**2)/(%sd%r_map**2*%sd%r_z),$a,$leq,$lvar)                  Ep%nd
+sub rtt w2 Lllm(-1d0/%sd%r_z,$a,$leq,$lvar)                                                                        Ep%nd
+instruction call modify_l0($prev,$nr,abs(m)+modulo(1+iparity,2)) 
+sub rtt w1 Lllm(-2d0*m*%sd%Rota/%sd%r_z,$a,$leq,$lvar)                                                             Ep%nd
+sub rtt w0 Lllm(-m**2*%sd%Rota**2/%sd%r_z,$a,$leq,$lvar)                                                           Ep%nd
+sub rtt w1 Jllmc(2d0*%sd%Rota*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                                           Er%nd
+sub rtt w0 Jllmc(2d0*m*%sd%Rota**2*%sd%zeta*%sd%sint/%sd%r_map,$a,$leq,$lvar)                                      Er%nd
+sub rtt w1 Lllm(2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Et%nd
+sub rtt w0 Lllm(2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)         Et%nd
+sub rtt w1 Nllm(2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Et%nd
+sub rtt w0 Nllm(2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)         Et%nd
+sub rtt w1 Mllm(2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Ep%nd
+sub rtt w0 Mllm(2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)         Ep%nd
+sub rtt w1 Mllmc(-2d0*%sd%Rota*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Ep%nd
+sub rtt w0 Mllmc(-2d0*m*%sd%Rota**2*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)       Ep%nd
+sub rtt w0 Kllmc(-%sd%zeta*(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_z/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)   Er%nd
+sub rtt w0 Mllmc(-(%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_t/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)            Et%nd
+sub rtt w0 Nllm((%sd%r_t*%sd%sint+%sd%r_map*%sd%cost)*%sd%sint*2d0*%sd%Rota*%sd%Rota_t/(%sd%r_map*%sd%r_z),$a,$leq,$lvar)              Ep%nd
+sub rtt w0 Mllm(%sd%pm/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                                          dP_P%nd
+sub rtt w0 Mllmc(-%sd%pm/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                                        dP_P%nd
+sub rtt w0 Kllmc((1d0/%sd%Gamma1-1d0)*%sd%pm_t/(%sd%zeta*%sd%rhom),$a,$leq,$lvar)                                  dP_P%nd
+sub rtt w0 Kllmc(-%sd%det_rhom_pm,$a,$leq,$lvar)                                                                   Er%nd
+sub rtt w0 Kllmc(-%sd%grd_pe_tz/%sd%zeta,$a,$leq,$lvar)                                                            Er%nd
+sub rtt w0 Mllmc(-%sd%grd_pe_tt/%sd%zeta,$a,$leq,$lvar)                                                            Et%nd
+sub rtt w0 Nllm(%sd%grd_pe_tt/%sd%zeta,$a,$leq,$lvar)                                                              Ep%nd
+sub rtt w0 Mllm(%sd%grd_pe_z/%sd%zeta,$a,$leq,$lvar)                                                               Er%nd
+sub rtt w0 Mllmc(-%sd%grd_pe_z/%sd%zeta,$a,$leq,$lvar)                                                             Er%nd
+sub rtt w0 Xllm(-%sd%grd_pe_t/%sd%zeta,$a,$leq,$lvar)                                                              Et%nd
+sub rtt w0 Lllm(dble(m)*%sd%grd_pe_t/(%sd%zeta*%sd%sint),$a,$leq,$lvar)                                            Et%nd
+sub rtt w0 Yllm(%sd%grd_pe_t/%sd%zeta,$a,$leq,$lvar)                                                               Ep%nd
+sub rtt w0 Mllm(dble(m)*%sd%grd_pe_t/(%sd%zeta*%sd%sint),$a,$leq,$lvar)                                            Ep%nd
+#-------------------------------------------------------------------------------------
+equation eqPhi%nd
+
+sub rtt w0 Illm((%sd%r_map**2+%sd%r_t**2)/%sd%r_z**2,$a,$leq,$lvar)              Phi%nd''
+sub rtt w0 Illm((2d0*%sd%r_z*%sd%r_t*%sd%r_zt-%sd%r_map**2*%sd%r_zz-%sd%r_z**2*%sd%r_tt+2d0*%sd%r_map*%sd%r_z**2-%sd%r_t**2*%sd%r_zz-%sd%r_z**2*%sd%r_t*%sd%cott)/%sd%r_z**3,$a,$leq,$lvar) Phi%nd'
+sub rtt w0 Jllm(-2d0*%sd%r_t/%sd%r_z,$a,$leq,$lvar)                              Phi%nd'
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                      Phi%nd
+sub rtt w0 Illm(-4d0*pi*%sd%r_map**2*%sd%rhom/%sd%Gamma1,$a,$leq,$lvar)          dP_P%nd
+sub rtt w0 Illm(4d0*pi*%sd%zeta**2*%sd%rhom_z/%sd%r_z,$a,$leq,$lvar)             Er%nd
+sub rtt w0 Jllm(4d0*pi*%sd%zeta*%sd%rhom_t/%sd%r_z,$a,$leq,$lvar)                Et%nd
+sub rtt w0 Kllm(4d0*pi*%sd%zeta*%sd%rhom_t/%sd%r_z,$a,$leq,$lvar)                Ep%nd
+
+termbc t   1 w0 1d0              Phi%nm'($nr)
+subbc tt   1 w0 Illmbc(4d0*pi*%sm%rhom($nr,1:lres)*%sm%zeta($nr,1:lres)**2*%sm%r_z($nr,1:lres)/(%sm%r_map($nr,1:lres)**2+%sm%r_t($nr,1:lres)**2),$a,$leq,$lvar)   Er%nm($nr)
+termbc t   1 w0 -1d0             Phi%nd'(1)
+subbc tt   1 w0 Illmbc(-4d0*pi*%sd%rhom(1,1:lres)*%sd%zeta(1,1:lres)**2*%sd%r_z(1,1:lres)/(%sd%r_map(1,1:lres)**2+%sd%r_t(1,1:lres)**2),$a,$leq,$lvar)            Er%nd(1)
+termbc t $nr w0  1d0             Phi%nd($nr)
+termbc t $nr w0 -1d0             Phie(1)
+#-------------------------------------------------------------------------------------
+instruction call initialisation(nt,grd(%np)%nr,m,lres,llmax) # this initialises the integrales module
+#-------------------------------------------------------------------------------------
+equation eqPhie
+
+sub rtt w0 Illm((%sp%r_map**2+%sp%r_t**2)/%sp%r_z**2,$a,$leq,$lvar)              Phie''
+sub rtt w0 Illm((2d0*%sp%r_z*%sp%r_t*%sp%r_zt-%sp%r_map**2*%sp%r_zz-%sp%r_z**2*%sp%r_tt+2d0*%sp%r_map*%sp%r_z**2-%sp%r_t**2*%sp%r_zz-%sp%r_z**2*%sp%r_t*%sp%cott)/%sp%r_z**3,$a,$leq,$lvar) Phie'
+sub rtt w0 Jllm(-2d0*%sp%r_t/%sp%r_z,$a,$leq,$lvar)                              Phie'
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                      Phie
+
+termbc t   1 w0  1d0                     Phi%nd'($nr)
+subbc tt   1 w0 Illmbc(4d0*pi*%sd%rhom($nr,1:lres)*%sd%zeta($nr,1:lres)**2*%sd%r_z($nr,1:lres)/(%sd%r_map($nr,1:lres)**2+%sd%r_t($nr,1:lres)**2),$a,$leq,$lvar)     Er%nd($nr)
+termbc t   1 w0 -1d0                     Phie'(1)
+termbc t $nr w0 Req/Rp                   Phie'($nr)
+termbc t $nr w0 dble($lvar($j1)+1)/2d0   Phie($nr)
+#-------------------------------------------------------------------------------------

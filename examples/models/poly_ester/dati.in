@@ -1,0 +1,13 @@
+nt =  10                # the number of spherical harmonics (lmax = |m| + 2*nt)
+lres = 250              # the number of points used in calculating integrals
+iparity = 1             # mode symmetry with respect to the equator
+iCor = 1
+dertype = CHEB          # FD = finite differences, CHEB = Chebyshev spectral method
+orderFD = 2             # order of the method when using finite differences
+mattype = FULL          # BAND = banded structure for the matrix, FULL = full structure for the matrix
+nsol=10
+shift =  0.791171838986203E-01
+dirmodel = @datadir@/top/models/poly_ester/
+rootdir = ./
+m  = 0
+tagdir = test1
