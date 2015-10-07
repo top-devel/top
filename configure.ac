@@ -113,7 +113,6 @@ AC_CONFIG_FILES([Makefile
                  lib/lapack_extra/Makefile
                  utils/Makefile
                  utils/top-build
-                 python/top.py
                  python/Makefile
                  examples/Makefile
                  utils/readeq-real-2D-mono

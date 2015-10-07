@@ -8,7 +8,6 @@ import numpy as np
 __all__ = ['load', 'read_dati', 'run_arncheb', 'get_valps', 'get_vecps',
         'init_model', 'get_from_dati']
 
-
 def error(msg):
     print('[error]: ' + msg)
 

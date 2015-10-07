@@ -5,10 +5,12 @@ do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
 
 BUILT_SOURCES = top-script.py
 
-.in.py: Makefile createdirtree
+.in.py: Makefile
+	make createdirtree
 	$(do_subst) < $< > $@
 
 .in: Makefile createdirtree
+	make createdirtree
 	$(do_subst) < $< > $@
 
 ester_exdir	= @datadir@/top/models/ester
