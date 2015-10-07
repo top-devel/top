@@ -1,3 +1,4 @@
+#include "config.h"
 module python
 contains
     subroutine get_valps(valps)
@@ -42,12 +43,17 @@ contains
 
         ir = 1
         do id=1, ndomains
-            print*, "dom: ", id, "size: ", grd(id)%nr
-            print*, "write: ", ir, ir+grd(id)%nr-1
             grid(ir:ir+grd(id)%nr-1) = grd(id)%r(:)
             ir = ir + grd(id)%nr
         enddo
 
+    end subroutine
+
+    subroutine get_version(version)
+        implicit none
+        character(len=256), intent(out) :: version
+
+        version = VERSION
     end subroutine
 
 end module python

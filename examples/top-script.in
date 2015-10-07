@@ -22,8 +22,7 @@ for v in valps:
 print('grid: ' + str(top.get_grid()))
 
 
-print()
-print('eq_ESTER_all_lagrange:')
+print('\neq_ESTER_all_lagrange:')
 top.load('eq_ESTER_all_lagrange')
 top.read_dati('@datadir@/top/models/ester/dati')
 model = top.get_from_dati('filename')

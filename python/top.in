@@ -5,10 +5,9 @@ import shutil as sh
 import ctypes as ct
 import numpy as np
 
-__all__ = ['load', 'read_dati', 'run_arncheb', 'get_valps', 'get_vecps',
-        'init_model', 'get_from_dati', 'get_grid']
+version = "@VERSION@"
 
-def error(msg):
+def _error(msg):
     print('[error]: ' + msg)
 
 def get_from_dati(key):
@@ -46,11 +45,12 @@ def load(name):
     global lib_get_vecps
     global lib_get_nr
     global lib_get_grid
+    global lib_get_version
 
     lib = '@abs_top_builddir@/src/lib/' + name + '.so'
     if not os.path.isfile(lib):
-        error('no such file: ' + lib)
-        error('did you run top-build?')
+        _error('no such file: ' + lib)
+        _error('did you run top-build?')
         libtop = None
         return
     libtop = ct.cdll.LoadLibrary(lib)
@@ -65,6 +65,25 @@ def load(name):
     lib_get_vecps       = libtop.__python_MOD_get_vecps
     lib_get_nr          = libtop.__python_MOD_get_nr
     lib_get_grid        = libtop.__python_MOD_get_grid
+    lib_get_version     = libtop.__python_MOD_get_version
+    lib_version = get_version()
+    if lib_version != version:
+        print('[warning] - top module version: ' + version)
+        print('          - library version:    ' + lib_version)
+        print('         version mismatch, you could experience troubles.')
+        print('         Try re-building your equation file.')
+
+def get_version():
+    """
+    Get loaded library TOP version
+    """
+    if libtop == None:
+        _error('no library loaded')
+        return
+
+    buf = ct.create_string_buffer(256)
+    lib_get_version(ct.byref(buf), ct.c_int(255))
+    return buf.value.strip()
 
 def read_dati(dati):
     """
@@ -75,21 +94,21 @@ def read_dati(dati):
     global datifile
 
     if libtop == None:
-        error('no library loaded')
+        _error('no library loaded')
         return
     datifile = dati
     if not type(dati) is str:
-        error('init takes a filename as parameter')
+        _error('init takes a filename as parameter')
         return
 
-    buf = ct.create_string_buffer(len(dati)+1)
+    buf = ct.create_string_buffer(len(dati))
     buf.value = dati
 
-    lib_read_inputs(ct.byref(buf), ct.c_int(len(dati)+1))
+    lib_read_inputs(ct.byref(buf), ct.c_int(len(dati)))
 
-def get_ndomains():
+def _get_ndomains():
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     return int(ct.c_int.in_dll(libtop, "__mod_grid_MOD_ndomains").value)
 
@@ -100,31 +119,31 @@ def run_arncheb(shift):
     :param float shift: Initial shift
     """
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     if not type(shift) is float:
-        error('shift should be a float')
+        _error('shift should be a float')
         return
     lib_init_a()
     lib_init_order()
     lib_init_bc_flag()
     lib_run_arncheb(ct.byref(ct.c_double(shift)))
 
-def get_nsol_out():
+def _get_nsol_out():
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     return int(ct.c_int.in_dll(libtop, "__eigensolve_MOD_nsol_out").value)
 
-def get_nsol():
+def _get_nsol():
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     return int(ct.c_int.in_dll(libtop, "__inputs_MOD_nsol").value)
 
-def get_a_dim():
+def _get_a_dim():
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     return int(ct.c_int.in_dll(libtop, "__matrices_MOD_a_dim").value)
 
@@ -136,9 +155,9 @@ def get_valps():
     :return: An array of eigenvalue
     """
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
-    n = get_nsol_out()
+    n = _get_nsol_out()
     valps = np.zeros(shape=(n), dtype=np.double)
     lib_get_valps(valps.ctypes.data)
     return valps
@@ -151,10 +170,10 @@ def get_vecps():
     :return: An array of eigenvector
     """
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
-    n = get_nsol_out()
-    a_dim = get_a_dim()
+    n = _get_nsol_out()
+    a_dim = _get_a_dim()
     vecps = np.zeros(shape=(a_dim, n), dtype=np.double)
     lib_get_vecps(vecps.ctypes.data)
     return vecps
@@ -167,16 +186,16 @@ def init_model(filename):
     :param str filename: Filename or directory to read in order to initialize the model
     """
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     buf = ct.create_string_buffer(len(filename))
     buf.value = filename
 
     lib_init_model(ct.byref(buf), ct.c_int(len(buf)))
 
-def get_nr():
+def _get_nr():
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
     nr = ct.c_int(0)
     lib_get_nr(ct.byref(nr))
@@ -190,9 +209,9 @@ def get_grid():
     :return: The grid of the model
     """
     if libtop == None:
-        error('No library loaded')
+        _error('No library loaded')
         return
-    nr = get_nr()
+    nr = _get_nr()
     grid = np.zeros(shape=(nr), dtype=np.double)
     lib_get_grid(ct.byref(ct.c_int(nr)), grid.ctypes.data)
     return grid

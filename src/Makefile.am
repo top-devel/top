@@ -52,3 +52,4 @@ clean-local:
 	rm -f *.mod *.lo
 	rm -f inputs.F90 matrices.inc model.F90 mod_grid.F90
 
+DISTCLEANFILES = Makefile

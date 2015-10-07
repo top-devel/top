@@ -2,7 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([TOP], [0.8])
+m4_include([version.m4])
+AC_INIT([TOP],
+        TOP_VERSION)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -112,7 +114,6 @@ AC_CONFIG_FILES([Makefile
                  lib/itemlist/Makefile
                  lib/lapack_extra/Makefile
                  utils/Makefile
-                 utils/top-build
                  python/Makefile
                  examples/Makefile
                  utils/readeq-real-2D-mono
@@ -125,7 +126,11 @@ AC_CONFIG_FILES([Makefile
                  utils/readeq-cplx-2D-multi
                  src/Makefile])
 
+AM_ENABLE_SHARED
+AM_DISABLE_STATIC
+
 AC_OUTPUT
+
 
 # 
 # --------------------------------------------------------------------------------
@@ -145,4 +150,5 @@ cat << EOF
 prefix:     $prefix
 LDLFAGS:    $LDFLAGS
 LIBS:       $LIBS
+VERSION:    $VERSION
 EOF
