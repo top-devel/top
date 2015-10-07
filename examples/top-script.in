@@ -5,6 +5,7 @@ import sys
 sys.path.append('@prefix@/bin')
 import top
 
+print('eq_poly_ester:')
 top.load('eq_poly_ester')
 top.read_dati('@datadir@/top/models/poly_ester/dati')
 model = top.get_from_dati('dirmodel')
@@ -18,8 +19,11 @@ vecps = top.get_vecps()
 valps = top.get_valps()
 for v in valps:
     print("%e" % v)
+print('grid: ' + str(top.get_grid()))
 
 
+print()
+print('eq_ESTER_all_lagrange:')
 top.load('eq_ESTER_all_lagrange')
 top.read_dati('@datadir@/top/models/ester/dati')
 model = top.get_from_dati('filename')

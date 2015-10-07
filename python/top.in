@@ -6,7 +6,7 @@ import ctypes as ct
 import numpy as np
 
 __all__ = ['load', 'read_dati', 'run_arncheb', 'get_valps', 'get_vecps',
-        'init_model', 'get_from_dati']
+        'init_model', 'get_from_dati', 'get_grid']
 
 def error(msg):
     print('[error]: ' + msg)
@@ -33,6 +33,8 @@ def load(name):
     global lib_run_arncheb
     global lib_get_valps
     global lib_get_vecps
+    global lib_get_nr
+    global lib_get_grid
 
     lib = '@abs_top_builddir@/src/lib/' + name + '.so'
     if not os.path.isfile(lib):
@@ -50,6 +52,8 @@ def load(name):
     lib_run_arncheb     = libtop.__eigensolve_MOD_run_arncheb
     lib_get_valps       = libtop.__python_MOD_get_valps
     lib_get_vecps       = libtop.__python_MOD_get_vecps
+    lib_get_nr          = libtop.__python_MOD_get_nr
+    lib_get_grid        = libtop.__python_MOD_get_grid
 
 def read_dati(dati):
     global datifile
@@ -130,3 +134,21 @@ def init_model(filename):
     buf.value = filename
 
     lib_init_model(ct.byref(buf), ct.c_int(len(buf)))
+
+def get_nr():
+    if libtop == None:
+        error('No library loaded')
+        return
+    nr = ct.c_int(0)
+    lib_get_nr(ct.byref(nr))
+    return nr.value
+
+def get_grid():
+    if libtop == None:
+        error('No library loaded')
+        return
+    nr = get_nr()
+    grid = np.zeros(shape=(nr), dtype=np.double)
+    lib_get_grid(ct.byref(ct.c_int(nr)), grid.ctypes.data)
+    return grid
+
