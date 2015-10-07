@@ -12,6 +12,13 @@ def error(msg):
     print('[error]: ' + msg)
 
 def get_from_dati(key):
+    """
+    Get a parameter from the dati file
+
+    :param str key: Name of the parameter to read
+    :rtype: str
+    :return: Value of the parameter in the file
+    """
     f = file(datifile)
     for line in f:
         if key in line:
@@ -22,7 +29,11 @@ def get_from_dati(key):
     return None
 
 def load(name):
-    """ Loads a compiled equation file """
+    """
+    Load a compiled equation file
+
+    :param str name: Name of the compiled equation file
+    """
     global libtop
     global lib_read_inputs
     global lib_init_grid
@@ -56,6 +67,11 @@ def load(name):
     lib_get_grid        = libtop.__python_MOD_get_grid
 
 def read_dati(dati):
+    """
+    Read a 'dati' file and initialize internal variables with values defined in it
+
+    :param str dati: File to read
+    """
     global datifile
 
     if libtop == None:
@@ -78,6 +94,11 @@ def get_ndomains():
     return int(ct.c_int.in_dll(libtop, "__mod_grid_MOD_ndomains").value)
 
 def run_arncheb(shift):
+    """
+    Run the Arnoldi-Chebyshev method
+
+    :param float shift: Initial shift
+    """
     if libtop == None:
         error('No library loaded')
         return
@@ -108,6 +129,12 @@ def get_a_dim():
     return int(ct.c_int.in_dll(libtop, "__matrices_MOD_a_dim").value)
 
 def get_valps():
+    """
+    Retrieve eigenvalues computed by :py:func:`top.run_arncheb`
+
+    :rtype: numpy.ndarry
+    :return: An array of eigenvalue
+    """
     if libtop == None:
         error('No library loaded')
         return
@@ -117,6 +144,12 @@ def get_valps():
     return valps
 
 def get_vecps():
+    """
+    Return the eigenvectors computed by :py:func:`top.run_arncheb`
+
+    :rtype: numpy.ndarry
+    :return: An array of eigenvector
+    """
     if libtop == None:
         error('No library loaded')
         return
@@ -127,6 +160,12 @@ def get_vecps():
     return vecps
 
 def init_model(filename):
+    """
+    Initialize the model by calling the Fortran routine init_model of the model
+    compiled with the equation file currently loaded.
+
+    :param str filename: Filename or directory to read in order to initialize the model
+    """
     if libtop == None:
         error('No library loaded')
         return
@@ -144,6 +183,12 @@ def get_nr():
     return nr.value
 
 def get_grid():
+    """
+    Return the grid
+
+    :rtype: numpy.ndarry
+    :return: The grid of the model
+    """
     if libtop == None:
         error('No library loaded')
         return
