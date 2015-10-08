@@ -5,11 +5,11 @@ do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]PYTHON[@],$(PYTHON),g'
 
 EXTRA_DIST = top.in top-build.in
-BUILT_SOURCES = top.py top-build.py
+BUILT_SOURCES = top.py top-build
 
-bin_SCRIPTS = top.py
+bin_SCRIPTS = top.py top-build
 
-top-build.py: top-build.in Makefile
+top-build: top-build.in Makefile
 	$(do_subst) < $< > $@
 
 top.py: top.in Makefile

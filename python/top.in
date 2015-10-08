@@ -5,10 +5,25 @@ import shutil as sh
 import ctypes as ct
 import numpy as np
 
-version = "@VERSION@"
+version = '@VERSION@'
 
 def _error(msg):
     print('[error]: ' + msg)
+
+def get_compiled_files():
+    """
+    Get the list of compiled equation files (that can be loaded with
+    :py:func:`load`)
+
+    :rtype: [str]
+    :return: List of compiled equation files
+    """
+    files = []
+    for dirpath, dirnames, filenames in os.walk('@abs_top_builddir@'):
+        for filename in filenames:
+            if not filename.startswith('lib') and filename.endswith('.so'):
+                files.append(filename[0:-3])
+    return files
 
 def get_from_dati(key):
     """
@@ -110,7 +125,7 @@ def _get_ndomains():
     if libtop == None:
         _error('No library loaded')
         return
-    return int(ct.c_int.in_dll(libtop, "__mod_grid_MOD_ndomains").value)
+    return int(ct.c_int.in_dll(libtop, '__mod_grid_MOD_ndomains').value)
 
 def run_arncheb(shift):
     """
@@ -133,19 +148,19 @@ def _get_nsol_out():
     if libtop == None:
         _error('No library loaded')
         return
-    return int(ct.c_int.in_dll(libtop, "__eigensolve_MOD_nsol_out").value)
+    return int(ct.c_int.in_dll(libtop, '__eigensolve_MOD_nsol_out').value)
 
 def _get_nsol():
     if libtop == None:
         _error('No library loaded')
         return
-    return int(ct.c_int.in_dll(libtop, "__inputs_MOD_nsol").value)
+    return int(ct.c_int.in_dll(libtop, '__inputs_MOD_nsol').value)
 
 def _get_a_dim():
     if libtop == None:
         _error('No library loaded')
         return
-    return int(ct.c_int.in_dll(libtop, "__matrices_MOD_a_dim").value)
+    return int(ct.c_int.in_dll(libtop, '__matrices_MOD_a_dim').value)
 
 def get_valps():
     """

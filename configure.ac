@@ -47,7 +47,7 @@ AC_PROG_F77($FC)
 AC_PROG_LIBTOOL
 AC_PATH_PROG(PERL, perl)
 
-AM_PATH_PYTHON
+AM_PATH_PYTHON([2.7])
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
@@ -147,8 +147,13 @@ AC_OUTPUT
 # --------------------------------------------------------------------------------
 # 
 cat << EOF
-prefix:     $prefix
-LDLFAGS:    $LDFLAGS
-LIBS:       $LIBS
-VERSION:    $VERSION
+-------------------------------
+top version:    $VERSION
+python version: $PYTHON_VERSION
+install prefix: $prefix
+
+FC:             $FC
+LDLFAGS:        $LDFLAGS
+LIBS:           $LIBS
+-------------------------------
 EOF
