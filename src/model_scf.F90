@@ -65,7 +65,7 @@ contains
 !  This subroutine calls all the necessary subroutines to set up the a model
 !  from MacGregor et al.
 !----------------------------------------------------------------------------------
-       subroutine init_model()
+       subroutine init_model() bind(c)
 
        call read_model()
        call make_mapping()

@@ -596,7 +596,7 @@ contains
 ! This must come after init_order.
 !------------------------------------------------------------------------------
 
-      subroutine init_bc_flag()
+      subroutine init_bc_flag() bind(c)
 
       implicit none
       integer id,id2,n,j,eq,loc

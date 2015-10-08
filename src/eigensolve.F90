@@ -50,7 +50,7 @@ contains
 ! sigma = eigenvalue shift
 !--------------------------------------------------------------
 
-      subroutine run_arncheb(sigma)
+      subroutine run_arncheb(sigma) bind(c)
 
       implicit none
 

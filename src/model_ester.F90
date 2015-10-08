@@ -3,7 +3,7 @@
 
       use inputs
       use mod_grid
-
+      use iso_c_binding
 
 !-------------------------------------------------------------------------
 ! Model file structure

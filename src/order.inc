@@ -4,7 +4,7 @@
 ! The following is a generic form:
 !------------------------------------------------------------------------------ 
 
-      subroutine init_order()
+      subroutine init_order() bind(c, name="init_order")
       implicit none
       integer i,j,id,var,eq
 

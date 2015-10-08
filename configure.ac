@@ -19,19 +19,6 @@ AC_PREFIX_DEFAULT(${HOME}/local)
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([config.h.in])
 
-# Configure TOP version
-AC_ARG_WITH([model],
-            AS_HELP_STRING([--with-model],
-                           [Select model: ester, scf or polytrope]),
-            [AS_IF([test "x$withval" != "xester" -o \
-                         "x$withval" != "xscf" -o \
-                         "x$withval" != "xpolytrope"],
-             [model=$withval],
-             [AC_ERROR(--with-model should be ester, scf or polytrope)])],
-            [model=ester])
-AC_SUBST(model, $model)
-
-
 # MPI support?
 AC_ARG_ENABLE([mpi],
               AS_HELP_STRING([--enable-mpi],
@@ -131,29 +118,15 @@ AM_DISABLE_STATIC
 
 AC_OUTPUT
 
-
-# 
-# --------------------------------------------------------------------------------
-# TOP build configuration:
-# 
-# FC:         $FC
-# FCFLAGS:    $FCFLAGS
-# 
-# TOP version:
-# model:      $model
-# type:       $type
-# dimension:  $dimension
-# parallel:   $enable_mpi
-# --------------------------------------------------------------------------------
-# 
 cat << EOF
--------------------------------
-top version:    $VERSION
+
+TOP configuration:
+------------------
+TOP version:    $VERSION
 python version: $PYTHON_VERSION
 install prefix: $prefix
-
 FC:             $FC
 LDLFAGS:        $LDFLAGS
 LIBS:           $LIBS
--------------------------------
+
 EOF

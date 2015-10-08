@@ -33,8 +33,8 @@ def get_from_dati(key):
     :rtype: str
     :return: Value of the parameter in the file
     """
-    f = file(datifile)
-    for line in f:
+    f = open(datifile)
+    for line in f.readlines():
         if key in line:
             index = line.find('=')
             eindex = line.find('#')
@@ -50,7 +50,6 @@ def load(name):
     """
     global libtop
     global lib_read_inputs
-    global lib_init_grid
     global lib_init_model
     global lib_init_a
     global lib_init_order
@@ -69,18 +68,17 @@ def load(name):
         libtop = None
         return
     libtop = ct.cdll.LoadLibrary(lib)
-    lib_read_inputs     = libtop.__inputs_MOD_read_inputs
-    lib_init_grid       = libtop.__mod_grid_MOD_init_grid
-    lib_init_model      = libtop.__model_MOD_init_model
-    lib_init_a          = libtop.__matrices_MOD_init_a
-    lib_init_order      = libtop.__matrices_MOD_init_order
-    lib_init_bc_flag    = libtop.__matrices_MOD_init_bc_flag
-    lib_run_arncheb     = libtop.__eigensolve_MOD_run_arncheb
-    lib_get_valps       = libtop.__python_MOD_get_valps
-    lib_get_vecps       = libtop.__python_MOD_get_vecps
-    lib_get_nr          = libtop.__python_MOD_get_nr
-    lib_get_grid        = libtop.__python_MOD_get_grid
-    lib_get_version     = libtop.__python_MOD_get_version
+    lib_read_inputs     = libtop.read_inputs
+    lib_init_model      = libtop.python_init_model
+    lib_init_a          = libtop.init_a
+    lib_init_order      = libtop.init_order
+    lib_init_bc_flag    = libtop.init_bc_flag
+    lib_run_arncheb     = libtop.run_arncheb
+    lib_get_valps       = libtop.get_valps
+    lib_get_vecps       = libtop.get_vecps
+    lib_get_nr          = libtop.get_nr
+    lib_get_grid        = libtop.get_grid
+    lib_get_version     = libtop.get_version
     lib_version = get_version()
     if lib_version != version:
         print('[warning] - top module version: ' + version)
@@ -97,8 +95,8 @@ def get_version():
         return
 
     buf = ct.create_string_buffer(256)
-    lib_get_version(ct.byref(buf), ct.c_int(255))
-    return buf.value.strip()
+    lib_get_version(ct.byref(buf), ct.byref(ct.c_int(256)))
+    return buf.value.strip().decode()
 
 def read_dati(dati):
     """
@@ -117,9 +115,9 @@ def read_dati(dati):
         return
 
     buf = ct.create_string_buffer(len(dati))
-    buf.value = dati
+    buf.value = dati.encode()
 
-    lib_read_inputs(ct.byref(buf), ct.c_int(len(dati)))
+    lib_read_inputs(ct.byref(buf), ct.byref(ct.c_int(len(dati))))
 
 def _get_ndomains():
     if libtop == None:
@@ -204,9 +202,9 @@ def init_model(filename):
         _error('No library loaded')
         return
     buf = ct.create_string_buffer(len(filename))
-    buf.value = filename
+    buf.value = filename.encode()
 
-    lib_init_model(ct.byref(buf), ct.c_int(len(buf)))
+    lib_init_model(ct.byref(buf), ct.byref(ct.c_int(len(buf))))
 
 def _get_nr():
     if libtop == None:

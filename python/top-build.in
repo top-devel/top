@@ -6,9 +6,7 @@ import shutil
 import subprocess
 import argparse
 
-logfilename = 'build-err.log'
-devnull = open(os.devnull, 'w')
-logfile = open(logfilename, 'w')
+oldwd = os.getcwd()
 
 def is_multi(f):
     if 'domains' in open(f).read():
@@ -100,31 +98,53 @@ sys.stdout.write(": ")
 sys.stdout.flush()
 
 try:
-    os.chdir("@abs_top_builddir@/src")
-    subprocess.check_call(["make",
+    subprocess.check_output(["make",
         "clean",
         "-C",
         "@abs_top_builddir@/src"],
-        stdout=devnull,
-        stderr=logfile)
-    subprocess.check_call(["@PERL@", readeq, eqfile],
-            stdout=devnull,
-            stderr=logfile)
+        stderr=subprocess.STDOUT)
 
-    subprocess.check_call(["make",
+    os.chdir("@abs_top_builddir@/src")
+    subprocess.check_output(["@PERL@", readeq, eqfile],
+            stderr=subprocess.STDOUT)
+    os.chdir(oldwd)
+
+    subprocess.check_output(["make",
         "install",
         "-C",
         "@abs_top_builddir@/src",
         "model=" + args.model,
-        "prefix=@abs_top_builddir@/src",
         flags],
-        stdout=devnull,
-        stderr=logfile)
+        stderr=subprocess.STDOUT)
 
-    shutil.copy('@abs_top_builddir@/src/lib/libtop.so',
+    subprocess.check_output(["mkdir",
+        "-p",
+        "@abs_top_builddir@/src/lib"],
+        stderr=subprocess.STDOUT)
+
+    shutil.copy('@libdir@/libtop.so',
             '@abs_top_builddir@/src/lib/' + os.path.basename(eqfile) + '.so')
+
+    subprocess.check_output(["make",
+        "uninstall",
+        "-C",
+        "@abs_top_builddir@/src"],
+        stderr=subprocess.STDOUT)
+
     print("[OK]")
-except:
+    sys.exit(0)
+
+except subprocess.CalledProcessError as e:
     print("[Failed]")
-    print("check " + logfilename)
+    os.chdir(oldwd)
+    f = open('top-build.err', 'w')
+    print('Check `top-build.err\'')
+    f.write(e.output.decode())
+    f.close()
+    sys.exit(1)
+
+except Exception as e:
+    print("[Failed]")
+    print(e)
+    sys.exit(1)
 

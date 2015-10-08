@@ -13,7 +13,7 @@
 
 contains
 !------------------------------------------------------------------------
-      subroutine init_model()
+      subroutine init_model() bind(c)
       use inputs, only: lres
       implicit none
       !call run_bckg2D()

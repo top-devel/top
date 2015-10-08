@@ -1,7 +1,9 @@
 do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]prefix[@],$(prefix),g'   \
+               -e 's,[@]libdir[@],$(libdir),g'   \
                -e 's,[@]abs_top_builddir[@],$(abs_top_builddir),g'   \
                -e 's,[@]VERSION[@],$(VERSION),g' \
+               -e 's,[@]PERL[@],$(PERL),g' \
                -e 's,[@]PYTHON[@],$(PYTHON),g'
 
 EXTRA_DIST = top.in top-build.in

@@ -1,5 +1,6 @@
       module model
       use mod_grid
+      use iso_c_binding
 
       double precision,allocatable,dimension(:,:),save::hh,hht,hhz,&
               hhzz, hhzt, lnhht

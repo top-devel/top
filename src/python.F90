@@ -1,7 +1,11 @@
 #include "config.h"
 module python
+    use iso_c_binding
+    use string
+
 contains
-    subroutine get_valps(valps)
+
+    subroutine get_valps(valps) bind(c)
         use eigensolve, only: omega, nsol_out
         use inputs, only: nsol
         implicit none
@@ -10,7 +14,7 @@ contains
         valps = omega
     end subroutine
 
-    subroutine get_vecps(vecps)
+    subroutine get_vecps(vecps) bind(c)
         use eigensolve, only: vec, a_dim, nsol_out
         use inputs, only: nsol
         implicit none
@@ -19,7 +23,7 @@ contains
         vecps = vec
     end subroutine
 
-    subroutine get_nr(nr)
+    subroutine get_nr(nr) bind(c)
         use mod_grid, only: ndomains, grd
         implicit none
         integer, intent(out) :: nr
@@ -33,7 +37,7 @@ contains
 
     end subroutine
 
-    subroutine get_grid(nr, grid)
+    subroutine get_grid(nr, grid) bind(c)
         use mod_grid, only: ndomains, grd
         implicit none
         integer, intent(in) :: nr
@@ -49,11 +53,22 @@ contains
 
     end subroutine
 
-    subroutine get_version(version)
+    subroutine get_version(v, n) bind(c)
         implicit none
-        character(len=256), intent(out) :: version
+        integer, intent(in) :: n
+        character(kind=c_char), intent(out) :: v(n)
 
-        version = VERSION
+        v = transfer(VERSION, " ", size=len_trim(VERSION))
+    end subroutine
+
+    subroutine python_init_model(filename, n) bind(c)
+        use model
+        implicit none
+        integer(kind=c_int), intent(in) :: n
+        character(kind=c_char), intent(in) :: filename(n)
+
+        print*, "model: ", cpy_str(filename)
+        call init_model(cpy_str(filename))
     end subroutine
 
 end module python
