@@ -3237,8 +3237,13 @@ contains
       subroutine a_product_transpose(vect_in,vect_out,power)
 
       implicit none
+#ifdef USE_COMPLEX
+      double complex, intent(in) :: vect_in(a_dim)
+      double complex, intent(out):: vect_out(a_dim)
+#else
       double precision, intent(in) :: vect_in(a_dim)
       double precision, intent(out):: vect_out(a_dim)
+#endif
       integer, intent(in) :: power
       integer i,j,ii,jj,n,der,eq,var,eqloc,varloc,a_index,v_index
 
@@ -3355,9 +3360,15 @@ contains
       subroutine make_asigma_band(sigma, asigma)
 
       implicit none
+#ifdef USE_COMPLEX
+      double complex sigma
+      double complex asigma(2*dm(1)%kl+dm(1)%ku+1,a_dim)
+      double complex sigmap, temp
+#else
       double precision sigma
       double precision asigma(2*dm(1)%kl+dm(1)%ku+1,a_dim)
       double precision sigmap, temp
+#endif
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
       integer pos
 
@@ -3471,8 +3482,13 @@ contains
       subroutine a_product(vect_in, vect_out, power)
 
       implicit none
+#ifdef USE_COMPLEX
+      double complex, intent(in)  :: vect_in(a_dim)
+      double complex, intent(out) :: vect_out(a_dim)
+#else
       double precision, intent(in)  :: vect_in(a_dim)
       double precision, intent(out) :: vect_out(a_dim)
+#endif
       integer, intent(in) :: power
       integer i, j, ii, jj, n, der, eq, var, a_index, v_index
       integer eqloc, varloc

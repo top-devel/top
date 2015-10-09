@@ -139,7 +139,10 @@ except subprocess.CalledProcessError as e:
     os.chdir(oldwd)
     f = open('top-build.err', 'w')
     print('Check `top-build.err\'')
-    f.write(e.output.decode())
+    try:
+        f.write(e.output.decode())
+    except:
+        f.write(e.output)
     f.close()
     sys.exit(1)
 

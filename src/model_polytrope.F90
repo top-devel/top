@@ -13,12 +13,14 @@
 
 contains
 !------------------------------------------------------------------------
-      subroutine init_model() bind(c)
+      subroutine init_model(filename)
       use inputs, only: lres
       implicit none
+      character(len=*), intent(in) :: filename
+
       !call run_bckg2D()
-      call read_poly()
-      call read_lambda()
+      call read_poly(filename)
+      call read_lambda(filename)
       call write_grids()
       call make_mapping(lres)
       end subroutine
@@ -54,22 +56,22 @@ contains
 
       end subroutine
 !------------------------------------------------------------------------
-      subroutine read_poly()
+      subroutine read_poly(filename)
 
       use mod_legendre
       use inputs
 
       implicit none
+      character(len=*), intent(in) :: filename
+
       integer i,j,l,k,lmod_temp
       double precision pindex_temp
       double precision, allocatable :: hh_spec(:,:),hhz_spec(:,:)
       double precision, allocatable :: hhzz_spec(:,:)
       double precision aux
-      character*(3) str
-!      character*(512) filename
+      character(len=3) str
 
-      filename = "enthalpy"
-      open(unit=2,file=filename,status="old")
+      open(unit=2,file=filename//"enthalpy",status="old")
       read(2,*) pindex_temp        ! this is in case I use a preexisting model
       if (pindex.ne.pindex_temp) print*,"Warning: new value for pindex"
       pindex = pindex_temp
@@ -99,8 +101,7 @@ contains
       enddo
       close(2)
 
-      filename = "enth_der_final"
-      open(unit=2,file=filename,status="old")
+      open(unit=2,file=filename//"enth_der_final",status="old")
       read(2,*) str
       read(2,*) str
       do l=0,lmod,2
@@ -142,18 +143,18 @@ contains
       enddo
       end subroutine
 !-----------------------------------------------------------------------
-      subroutine read_lambda()
+      subroutine read_lambda(filename)
 
       use inputs, only: rota
 
       implicit none
+      character(len=*), intent(in) :: filename
+
       integer i
       double precision aux
       double precision rota_temp
-      character*(512) filename
 
-      filename = "lambda_relax"
-      open(unit=3,file=filename,status="old")
+      open(unit=3,file=filename//"lambda_relax",status="old")
       read(3,*)
       do
         read(3,*,end=404) i, lambda, aplat, omega_K, alpha
