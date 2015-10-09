@@ -1,15 +1,16 @@
 #include "config.h"
       module mod_grid
+      use iso_c_binding
 
           type GRID
-              character*(4) :: mattype
-              character*(4) :: dertype
-              integer :: order
-              integer :: nr
+              character(len=4) :: mattype
+              character(len=4) :: dertype
+              integer(kind=c_int) :: order
+              integer(kind=c_int) :: nr
               double precision, allocatable :: r(:)
           end type GRID
 
-          integer, save :: ndomains
+          integer(kind=c_int), save, bind(c) :: ndomains
           type(GRID), allocatable, save, target :: grd(:)
 
           integer, save :: nt

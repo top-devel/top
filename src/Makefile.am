@@ -4,11 +4,10 @@ AM_FCFLAGS = -I. \
 			 -I@abs_top_builddir@/lib/getpar \
 			 -I@abs_top_builddir@/lib/itemlist \
 			 -I@abs_top_builddir@/lib/legendre \
-			 $(top_flags) \
-			 -g
+			 $(top_flags)
 
 AM_LDFLAGS = -L@libdir@ \
-			  -Wl,-rpath -Wl,@libdir@
+			 -Wl,-rpath -Wl,@libdir@
 
 lib_LTLIBRARIES   = libtop.la
 libtop_la_LIBADD  = -lgetpar -llegendre -larnoldi -lder -lfit \
@@ -22,6 +21,12 @@ libtop_la_SOURCES = grid.F90 \
 					inputs.F90 \
 					string.F90 \
 					matrices.F90
+
+noinst_bindir = @abs_builddir@/debug
+noinst_bin_PROGRAMS = top-debug
+top_debug_LDADD  = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
+				   -litemlist -llapack_extra
+top_debug_SOURCES = TOP.F90
 
 EXTRA_DIST = order.inc \
 			 model_ester.F90 \
@@ -39,7 +44,7 @@ model.F90:
 	cp $(srcdir)/model_$(model).F90 model.F90
 
 
-TOP.o:				postproc.o libtop.la
+TOP.o:				libtop.la
 postproc.lo:		eigensolve.lo udirectory.lo grid.lo
 eigensolve.lo:		matrices.lo mod_blacs.lo grid.lo
 matrices.lo:		matrices.inc model.lo grid.lo

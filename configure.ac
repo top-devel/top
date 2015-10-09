@@ -126,6 +126,8 @@ TOP version:    $VERSION
 python version: $PYTHON_VERSION
 install prefix: $prefix
 FC:             $FC
+FCFLAGS:        $FCFLAGS
+FFLAGS:         $FFLAGS
 LDLFAGS:        $LDFLAGS
 LIBS:           $LIBS
 

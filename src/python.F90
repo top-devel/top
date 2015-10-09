@@ -9,7 +9,7 @@ contains
         use eigensolve, only: omega, nsol_out
         use inputs, only: nsol
         implicit none
-        double precision, intent(out) :: valps(nsol_out)
+        real(kind=c_double), intent(out) :: valps(nsol_out)
 
         valps = omega
     end subroutine
@@ -18,7 +18,7 @@ contains
         use eigensolve, only: vec, a_dim, nsol_out
         use inputs, only: nsol
         implicit none
-        double precision, intent(out) :: vecps(a_dim, nsol_out)
+        real(kind=c_double), intent(out) :: vecps(a_dim, nsol_out)
 
         vecps = vec
     end subroutine
@@ -26,7 +26,7 @@ contains
     subroutine get_nr(nr) bind(c)
         use mod_grid, only: ndomains, grd
         implicit none
-        integer, intent(out) :: nr
+        integer(kind=c_int), intent(out) :: nr
 
         integer :: id
 
@@ -40,8 +40,8 @@ contains
     subroutine get_grid(nr, grid) bind(c)
         use mod_grid, only: ndomains, grd
         implicit none
-        integer, intent(in) :: nr
-        double precision, intent(out) :: grid(nr)
+        integer(kind=c_int), intent(in) :: nr
+        real(kind=c_double), intent(out) :: grid(nr)
 
         integer :: ir, id
 
@@ -55,7 +55,7 @@ contains
 
     subroutine get_version(v, n) bind(c)
         implicit none
-        integer, intent(in) :: n
+        integer(kind=c_int), intent(in) :: n
         character(kind=c_char), intent(out) :: v(n)
 
         v = transfer(VERSION, " ", size=len_trim(VERSION))

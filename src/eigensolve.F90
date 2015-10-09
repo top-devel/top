@@ -5,6 +5,7 @@
       use mod_blacs
       use matrices
       use inputs, only: nsol
+      use iso_c_binding
 
       type MULTI_MAT
 
@@ -60,7 +61,7 @@ contains
 #ifdef USE_COMPLEX
       double complex, intent(in) :: sigma
 #else
-      double precision, intent(in) :: sigma
+      real(kind=c_double), intent(in) :: sigma
 #endif
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -443,8 +444,10 @@ contains
 
 !
 !  Compute the corresponding eigenvectors
-      if (info /= 0) &
+      if (info /= 0) then
+        print*, "at iteration ", iteration
         stop "Failure in the Arnoldi-Chebyshev process"
+      endif
 
 #ifdef USE_COMPLEX
       allocate(work2(3*iarn+3),z1(iarn+1,iarn+1),z2(iarn+1,iarn+1), &
