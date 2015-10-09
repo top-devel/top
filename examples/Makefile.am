@@ -9,7 +9,7 @@ BUILT_SOURCES = top-script.py
 	make createdirtree
 	$(do_subst) < $< > $@
 
-.in: Makefile createdirtree
+.in: Makefile
 	make createdirtree
 	$(do_subst) < $< > $@
 
@@ -36,10 +36,10 @@ install-data-hook:
 	chmod +x $(DESTDIR)@datadir@/top/top-script.py
 
 EXTRA_DIST = models/ester/eq_ESTER_all_lagrange \
-			 models/ester/dati \
+			 models/ester/dati.in \
 			 models/ester/d.dat \
 			 models/poly_ester/eq_poly_ester \
-			 models/poly_ester/dati \
+			 models/poly_ester/dati.in \
 			 models/poly_ester/model/domains_boundaries \
 			 models/poly_ester/model/enthalpy_et_der \
 			 models/poly_ester/model/lambda_eps \

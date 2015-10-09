@@ -12,7 +12,8 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/eigensolve.F90 \
 			 src/udirectory.F90 \
 			 src/python.F90 \
-			 src/grid.F90
+			 src/grid.F90 \
+			 src/string.F90
 
 
 DISTCLEANFILES = src/Makefile

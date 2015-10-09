@@ -28,18 +28,6 @@ top_debug_LDADD  = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
 				   -litemlist -llapack_extra
 top_debug_SOURCES = TOP.F90
 
-EXTRA_DIST = order.inc \
-			 model_ester.F90 \
-			 model_scf.F90 \
-			 model_polytrope.F90 \
-			 mod_blacs.F90 \
-			 hpsort_index.F90 \
-			 udirectory.F90 \
-			 matrices.F90 \
-			 eigensolve.F90 \
-			 string.F90 \
-			 postproc.F90
-
 model.F90:
 	cp $(srcdir)/model_$(model).F90 model.F90
 
@@ -58,4 +46,3 @@ clean-local:
 	rm -f *.mod *.lo
 	rm -f inputs.F90 matrices.inc model.F90 mod_grid.F90
 
-DISTCLEANFILES = Makefile
