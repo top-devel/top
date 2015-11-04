@@ -30,7 +30,7 @@ shift = float(top.get_from_dati('shift'))
 print('filename: ' + model)
 print('shift: %e' % shift)
 top.init_model(model)
-top.run_arncheb(18.484)
+top.run_arncheb(shift)
 
 vecps = top.get_vecps()
 valps = top.get_valps()

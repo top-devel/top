@@ -17,3 +17,6 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 
 
 DISTCLEANFILES = src/Makefile
+
+docs:
+	$(MAKE) html latexpdf -C $(top_srcdir)/doc

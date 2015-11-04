@@ -134,13 +134,19 @@ def run_arncheb(shift):
     if libtop == None:
         _error('No library loaded')
         return
-    if not type(shift) is float:
-        _error('shift should be a float')
-        return
     lib_init_a()
     lib_init_order()
     lib_init_bc_flag()
-    lib_run_arncheb(ct.byref(ct.c_double(shift)))
+    if type(shift) is float:
+        lib_run_arncheb(ct.byref(ct.c_double(shift)))
+    if type(shift) is complex:
+        cplx = np.zeros(shape=(2), dtype=np.double)
+        cplx[0] = shift.real
+        cplx[1] = shift.imag
+        lib_run_arncheb(cplx.ctypes.data)
+    else:
+        _error('shift should be a float or a complex')
+        return
 
 def _get_nsol_out():
     if libtop == None:

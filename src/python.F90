@@ -61,14 +61,13 @@ contains
         v = transfer(VERSION, " ", size=len_trim(VERSION))
     end subroutine
 
-    subroutine python_init_model(filename, n) bind(c)
+    subroutine python_init_model(modelfile, n) bind(c)
         use model
         implicit none
         integer(kind=c_int), intent(in) :: n
-        character(kind=c_char), intent(in) :: filename(n)
+        character(kind=c_char), intent(in) :: modelfile(n)
 
-        print*, "model: ", cpy_str(filename)
-        call init_model(cpy_str(filename))
+        call init_model(cpy_str(modelfile))
     end subroutine
 
 end module python
