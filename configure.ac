@@ -51,16 +51,15 @@ AC_CHECK_FUNC(dgemm_     , [have_blas=yes],   [have_blas=no])
 AC_CHECK_FUNC(dgetrf_    , [have_lapack=yes], [have_lapack=no])
 
 AS_IF([test "x$have_blas" == "xno" -o "x$have_lapack" == "xno"],
-    [AC_SEARCH_LIBS([dgemm_], [mkl_intel_lp64],
-                    [LIBS="$LIBS -lmkl_intel_thread -lmkl_core -liomp5 -lpthread"],
+    [AC_SEARCH_LIBS([dgemm_], [mkl_rt],
+                    [],
                     [AC_CHECK_LIB([blas], [dgemm_], [],
                                   [AC_ERROR(blas library not found: consider \
                                    setting LDFLAGS)])
                     AC_CHECK_LIB([lapack], [dgetrf_], [],
                                  [AC_ERROR(lapack library not found: consider \
                                   setting LDFLAGS)])],
-                                 [-lmkl_intel_thread -lmkl_core -liomp5
-                                  -lpthread])])
+                                 [-lmkl_intel_thread -lmkl_core -liomp5 -lpthread])])
 
 AC_LANG_PUSH(Fortran)
 
