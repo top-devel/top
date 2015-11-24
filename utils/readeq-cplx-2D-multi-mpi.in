@@ -396,7 +396,7 @@ sub sanity_check{
 }
 ########################################################################
 sub writehead{
-  print PUITS "      subroutine init_a() bind(c)\n\n";
+  print PUITS "      subroutine init_a()\n\n";
   print PUITS "      use model\n";
   print PUITS "      use inputs\n";
   print PUITS "      use integrales\n\n";
@@ -982,7 +982,6 @@ sub writeinputs{
   print INPUTS "#include \"config.h\"\n";
   print INPUTS "      module inputs\n\n";
   print INPUTS "      use iso_c_binding\n";
-  print INPUTS "      use string\n";
   print INPUTS "      use mod_grid\n";
   print INPUTS "      use mod_blacs\n\n";
   print INPUTS "      use itemlist\n\n";
@@ -999,13 +998,15 @@ sub writeinputs{
 
   print INPUTS "\ncontains\n";
   print INPUTS "!".("-"x60)."\n";
-  print INPUTS "      subroutine read_inputs(dati, n) bind(c)\n\n";
+  print INPUTS "      subroutine init_default()\n\n";
+  print INPUTS "      call init_grid($ndomains)\n";
+  print INPUTS "      end subroutine init_default\n\n";
+  print INPUTS "      subroutine read_inputs(dati)\n\n";
   print INPUTS "      use mgetpar\n";
   print INPUTS "      implicit none\n\n";
-  print INPUTS "      integer(kind=c_int), intent(in) :: n\n";
-  print INPUTS "      character(kind=c_char), intent(in) :: dati(n)\n";
+  print INPUTS "      character(len=*), intent(in) :: dati\n";
   print INPUTS "      if (iproc.eq.0) then\n";
-  print INPUTS "        call read_file(trim(cpy_str(dati)))\n";
+  print INPUTS "        call read_file(trim(dati))\n";
   for ($i=1;$i <= $ndomains;$i++) {
     $grd = "grd($i)";
     print INPUTS "        $grd\%nr = fetch('nr($i)',0)\n";

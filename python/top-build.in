@@ -56,11 +56,14 @@ eqfile = os.path.dirname(os.path.abspath(eqfile)) + "/" + os.path.basename(eqfil
 readeq = "@abs_top_builddir@/utils/readeq"
 
 flags="top_flags="
+f2py_def=''
 if is_cplx(eqfile):
     readeq += "-cplx"
     flags += " -DUSE_COMPLEX"
+    f2py_def='-DUSE_COMPLEX'
 else:
     readeq += "-real"
+    f2py_def='-DUSE_REAL'
 
 if is_2D(eqfile):
     readeq += "-2D"
@@ -117,7 +120,12 @@ try:
     os.chdir(oldwd)
 
     subprocess.check_output(["make",
-        "install",
+        "grid.o",
+        "eigensolve.o",
+        "inputs.o",
+        "matrices.o",
+        "mod_blacs.o",
+        "model.o",
         "-C",
         "@abs_top_builddir@/src",
         "model=" + args.model,
@@ -129,19 +137,46 @@ try:
         "@abs_top_builddir@/src/lib"],
         stderr=subprocess.STDOUT)
 
-    shutil.copy('@libdir@/libtop.so',
-            '@abs_top_builddir@/src/lib/' + os.path.basename(eqfile) + '.so')
+    subprocess.check_output(["@F2PY@",
+        "-I@abs_top_builddir@",
+        "-I@abs_top_builddir@/src",
+        "-I@abs_top_builddir@/lib/getpar",
+        "-L@libdir@",
+        f2py_def,
+        "-c",
+        "-m",
+        os.path.basename(eqfile),
+        "-lgetpar",
+        "-llegendre",
+        "-larnoldi",
+        "-lder",
+        "-lfit",
+        "-litemlist",
+        "-llapack_extra",
+        "@libs@",
+        "@abs_top_builddir@/src/eigensolve.o",
+        "@abs_top_builddir@/src/grid.o",
+        "@abs_top_builddir@/src/matrices.o",
+        "@abs_top_builddir@/src/mod_blacs.o",
+        "@abs_top_builddir@/src/model.o",
+        "@abs_top_srcdir@/src/python.F90",
+        "@abs_top_builddir@/src/inputs.F90"],
+        stderr=subprocess.STDOUT)
 
-    if args.debug == False:
-        subprocess.check_output(["make",
-            "uninstall",
-            "-C",
-            "@abs_top_builddir@/src"],
-            stderr=subprocess.STDOUT)
+    shutil.copy(os.path.basename(eqfile) + '.so',
+            '@abs_top_builddir@/src/lib/' + os.path.basename(eqfile) + '.so')
+    os.remove(os.path.basename(eqfile) + '.so')
+
+    # if args.debug == False:
+    #     subprocess.check_output(["make",
+    #         "uninstall",
+    #         "-C",
+    #         "@abs_top_builddir@/src"],
+    #         stderr=subprocess.STDOUT)
 
     print("[OK]")
-    if args.debug:
-        print('Debug binary location: @abs_top_builddir@/src/debug/top-debug')
+    # if args.debug:
+    #     print('Debug binary location: @abs_top_builddir@/src/debug/top-debug')
     sys.exit(0)
 
 except subprocess.CalledProcessError as e:

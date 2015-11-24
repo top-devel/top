@@ -42,6 +42,7 @@ contains
         write(*,*) trim(dirmodel)
         open(unit=2,file=trim(dirmodel)//filename,&
              status="old",action="read")
+
         read(2,*) lambda
         read(2,*) aplat
         read(2,*) alpha
@@ -77,7 +78,7 @@ contains
       implicit none
 
       integer i,j,l,k,nr_temp,lmod_temp
-       double precision, allocatable :: hh_spec(:,:),hhz_spec(:,:)
+      double precision, allocatable :: hh_spec(:,:),hhz_spec(:,:)
       double precision, allocatable :: hhzz_spec(:,:)
       double precision aux
       character*(3) str

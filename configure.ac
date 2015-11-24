@@ -31,8 +31,9 @@ AS_IF([test "x$enable_mpi" == "xyes"],
        enable_mpi=no])
 
 AC_PROG_F77($FC)
-AC_PROG_LIBTOOL
+AC_PROG_LIBTOOL(disable-shared)
 AC_PATH_PROG(PERL, perl)
+AC_PATH_PROG(F2PY, f2py)
 
 AM_PATH_PYTHON([2.7])
 
@@ -113,8 +114,8 @@ AC_CONFIG_FILES([Makefile
                  utils/readeq-cplx-2D-multi
                  src/Makefile])
 
-AM_ENABLE_SHARED
-AM_DISABLE_STATIC
+FCFLAGS+=" -fPIC"
+FFLAGS+=" -fPIC"
 
 AC_OUTPUT
 

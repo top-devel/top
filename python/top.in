@@ -2,7 +2,6 @@
 
 import os
 import shutil as sh
-import ctypes as ct
 import numpy as np
 
 version = '@VERSION@'
@@ -19,7 +18,7 @@ def get_compiled_files():
     :return: List of compiled equation files
     """
     files = []
-    for dirpath, dirnames, filenames in os.walk('@abs_top_builddir@'):
+    for dirpath, dirnames, filenames in os.walk('@abs_top_builddir@/src/lib'):
         for filename in filenames:
             if not filename.startswith('lib') and filename.endswith('.so'):
                 files.append(filename[0:-3])
@@ -48,45 +47,15 @@ def load(name):
 
     :param str name: Name of the compiled equation file
     """
+    import os
+    import sys
+    import importlib
+
+    sys.path.append('@abs_top_builddir@/src/lib/')
     global libtop
-    global lib_read_inputs
-    global lib_init_model
-    global lib_init_a
-    global lib_init_order
-    global lib_init_bc_flag
-    global lib_run_arncheb
-    global lib_get_valps
-    global lib_get_vecps
-    global lib_get_nr
-    global lib_get_grid
-    global lib_get_version
+    libtop = importlib.import_module(name)
 
-    lib = '@abs_top_builddir@/src/lib/' + name + '.so'
-    if not os.path.isfile(lib):
-        _error('no such file: ' + lib)
-        _error('did you run top-build?')
-        libtop = None
-        return
-    libtop = ct.cdll.LoadLibrary(lib)
-    lib_read_inputs     = libtop.read_inputs
-    lib_init_model      = libtop.python_init_model
-    lib_init_a          = libtop.init_a
-    lib_init_order      = libtop.init_order
-    lib_init_bc_flag    = libtop.init_bc_flag
-    lib_run_arncheb     = libtop.run_arncheb
-    lib_get_valps       = libtop.get_valps
-    lib_get_vecps       = libtop.get_vecps
-    lib_get_nr          = libtop.get_nr
-    lib_get_grid        = libtop.get_grid
-    lib_get_version     = libtop.get_version
-    lib_version = get_version()
-    if lib_version != version:
-        print('[warning] - top module version: ' + version)
-        print('          - library version:    ' + lib_version)
-        print('         version mismatch, you could experience troubles.')
-        print('         Try re-building your equation file.')
-
-def get_version():
+def get_lib_version():
     """
     Get loaded library TOP version
     """
@@ -94,9 +63,7 @@ def get_version():
         _error('no library loaded')
         return
 
-    buf = ct.create_string_buffer(256)
-    lib_get_version(ct.byref(buf), ct.byref(ct.c_int(256)))
-    return buf.value.strip().decode()
+    return libtop.toppy.get_version().strip()
 
 def read_dati(dati):
     """
@@ -104,26 +71,12 @@ def read_dati(dati):
 
     :param str dati: File to read
     """
-    global datifile
-
-    if libtop == None:
-        _error('no library loaded')
-        return
-    datifile = dati
-    if not type(dati) is str:
-        _error('init takes a filename as parameter')
-        return
-
-    buf = ct.create_string_buffer(len(dati))
-    buf.value = dati.encode()
-
-    lib_read_inputs(ct.byref(buf), ct.byref(ct.c_int(len(dati))))
-
-def _get_ndomains():
-    if libtop == None:
-        _error('No library loaded')
-        return
-    return int(ct.c_int.in_dll(libtop, 'ndomains').value)
+    if os.access(dati, os.F_OK):
+        global datifile
+        datifile = dati
+        libtop.toppy.read_dati(dati)
+    else:
+        _error('%s: not such file' % dati)
 
 def run_arncheb(shift):
     """
@@ -134,68 +87,61 @@ def run_arncheb(shift):
     if libtop == None:
         _error('No library loaded')
         return
-    lib_init_a()
-    lib_init_order()
-    lib_init_bc_flag()
-    if type(shift) is float:
-        lib_run_arncheb(ct.byref(ct.c_double(shift)))
-        return
-    if type(shift) is complex:
-        cplx = np.zeros(shape=(2), dtype=np.double)
-        cplx[0] = shift.real
-        cplx[1] = shift.imag
-        lib_run_arncheb(cplx.ctypes.data)
-        return
-    _error('shift should be a float or a complex')
+
+    libtop.toppy.init_arncheb()
+    libtop.toppy.py_run_arncheb(shift)
     return
 
-def _get_nsol_out():
-    if libtop == None:
-        _error('No library loaded')
-        return
-    return int(ct.c_int.in_dll(libtop, '__eigensolve_MOD_nsol_out').value)
-
 def _get_nsol():
-    if libtop == None:
-        _error('No library loaded')
-        return
-    return int(ct.c_int.in_dll(libtop, '__inputs_MOD_nsol').value)
+    return libtop.toppy.get_nsol_out()
 
-def _get_a_dim():
-    if libtop == None:
-        _error('No library loaded')
-        return
-    return int(ct.c_int.in_dll(libtop, '__matrices_MOD_a_dim').value)
+def _get_adim():
+    return libtop.toppy.get_adim()
 
 def get_valps():
     """
     Retrieve eigenvalues computed by :py:func:`top.run_arncheb`
 
-    :rtype: numpy.ndarry
+    :rtype: numpy.ndarray
     :return: An array of eigenvalue
     """
     if libtop == None:
         _error('No library loaded')
         return
-    n = _get_nsol_out()
-    valps = np.zeros(shape=(n), dtype=np.double)
-    lib_get_valps(valps.ctypes.data)
-    return valps
+    n = _get_nsol()
+    dtype = get_dtype()
+    if dtype == 'real':
+        valps = libtop.toppy.get_valps_real(n)
+    elif dtype == 'cplx':
+        valps = libtop.toppy.get_valps_cplx(n)
+    else:
+        _error('Unknown type `%s\'' % dtype)
+    return  valps
+
+def get_dtype():
+    return libtop.toppy.dtype().strip()
 
 def get_vecps():
     """
     Return the eigenvectors computed by :py:func:`top.run_arncheb`
 
-    :rtype: numpy.ndarry
+    :rtype: numpy.ndarray
     :return: An array of eigenvector
     """
     if libtop == None:
         _error('No library loaded')
         return
-    n = _get_nsol_out()
-    a_dim = _get_a_dim()
-    vecps = np.zeros(shape=(a_dim, n), dtype=np.double)
-    lib_get_vecps(vecps.ctypes.data)
+
+    n = _get_nsol()
+    adim = _get_adim()
+
+    dtype = get_dtype()
+    if dtype == 'real':
+        vecps = libtop.toppy.get_vecps_real(n, adim)
+    elif dtype == 'cplx':
+        vecps = libtop.toppy.get_vecps_cplx(n, adim)
+    else:
+        _error('Unknown type `%s\'' % dtype)
     return vecps
 
 def init_model(filename):
@@ -208,31 +154,19 @@ def init_model(filename):
     if libtop == None:
         _error('No library loaded')
         return
-    buf = ct.create_string_buffer(len(filename))
-    buf.value = filename.encode()
 
-    lib_init_model(ct.byref(buf), ct.byref(ct.c_int(len(buf))))
-
-def _get_nr():
-    if libtop == None:
-        _error('No library loaded')
-        return
-    nr = ct.c_int(0)
-    lib_get_nr(ct.byref(nr))
-    return nr.value
+    libtop.toppy.py_init_model(filename)
 
 def get_grid():
     """
     Return the grid
 
-    :rtype: numpy.ndarry
+    :rtype: numpy.ndarray
     :return: The grid of the model
     """
     if libtop == None:
         _error('No library loaded')
         return
-    nr = _get_nr()
-    grid = np.zeros(shape=(nr), dtype=np.double)
-    lib_get_grid(ct.byref(ct.c_int(nr)), grid.ctypes.data)
-    return grid
+    nr = libtop.toppy.get_nr()
+    return libtop.toppy.get_grid(nr)
 

@@ -20,10 +20,19 @@ contains
           subroutine init_grid(ndom)
               implicit none
               integer, intent(in) :: ndom
+              integer :: nd
 
               ndomains = ndom
               if (allocated(grd)) deallocate(grd)
               allocate(grd(ndom))
+
+              do nd = 1, ndom
+                  grd(nd)%nr = 0
+                  grd(nd)%order = 2
+                  grd(nd)%dertype = 'CHEB'
+                  grd(nd)%mattype = 'FULL'
+              end do
+
           end subroutine
 
           subroutine init_radial_grid()

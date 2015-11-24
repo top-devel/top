@@ -102,7 +102,10 @@ contains
       open(unit=37,file=trim(filename),status="old")
       read(37,*) nrm, nthm, ndom, nconv
       ndom = ndom + 1 ! add an extra outer domain
-      if (ndom.ne.ndomains) stop "Incorrect number of domains"
+      if (ndom.ne.ndomains) then
+          print*, "Incorrect number of domains"
+          return
+      endif
       allocate(s(ndom), theta(nthm), zeta(nrm))
       read(37,*) (grd(id)%nr,id=1,ndom-1)
       npts_max = 0

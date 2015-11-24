@@ -1,47 +1,87 @@
 #include "config.h"
-module python
-    use iso_c_binding
-    use string
+module toppy
+
+    use eigensolve
+    use inputs
+    use model
+    use matrices, only: a_dim
+
+    implicit none
 
 contains
 
-    subroutine get_valps(valps) bind(c)
-        use eigensolve, only: omega, nsol_out
-        use inputs, only: nsol
-        implicit none
-        real(kind=c_double), intent(out) :: valps(nsol_out)
+    subroutine dtype(ret)
+        character(len=4), intent(out) :: ret
 
-        valps = omega
+#ifdef USE_COMPLEX
+        ret = "cplx"
+#else
+        ret = "real"
+#endif
+
+    end subroutine dtype
+
+    subroutine get_nsol_out(ret)
+        integer, intent(out) :: ret
+
+        ret = nsol_out
     end subroutine
 
-    subroutine get_vecps(vecps) bind(c)
-        use eigensolve, only: vec, a_dim, nsol_out
-        use inputs, only: nsol
-        implicit none
-        real(kind=c_double), intent(out) :: vecps(a_dim, nsol_out)
+    subroutine get_adim(ret)
+        integer, intent(out) :: ret
+
+        ret = a_dim
+    end subroutine
+
+    subroutine get_valps_cplx(ret, n)
+        integer, intent(in) :: n
+        integer :: i
+        complex(kind=8), intent(out) :: ret(n)
+
+        ret = omega
+
+    end subroutine get_valps_cplx
+
+    subroutine get_valps_real(ret, n)
+        integer, intent(in) :: n
+        integer :: i
+        real(kind=8), intent(out) :: ret(n)
+
+        ret = omega
+
+    end subroutine get_valps_real
+
+    subroutine get_vecps_cplx(vecps, n, adim)
+        integer, intent(in) :: n, adim
+        complex(kind=8), intent(out) :: vecps(adim, n)
 
         vecps = vec
-    end subroutine
+    end subroutine get_vecps_cplx
 
-    subroutine get_nr(nr) bind(c)
-        use mod_grid, only: ndomains, grd
-        implicit none
-        integer(kind=c_int), intent(out) :: nr
+    subroutine get_vecps_real(vecps, n, adim)
+        integer, intent(in) :: n, adim
+        real(kind=8), intent(out) :: vecps(adim, n)
+
+        vecps = vec
+    end subroutine get_vecps_real
+
+    subroutine get_nr(n_r)
+        integer, intent(out) :: n_r
 
         integer :: id
 
-        nr = 0
+        n_r = 0
         do id=1, ndomains
-            nr = nr + grd(id)%nr
+            n_r = n_r + grd(id)%nr
         enddo
 
     end subroutine
 
-    subroutine get_grid(nr, grid) bind(c)
+    subroutine get_grid(nr, grid)
         use mod_grid, only: ndomains, grd
         implicit none
-        integer(kind=c_int), intent(in) :: nr
-        real(kind=c_double), intent(out) :: grid(nr)
+        integer, intent(in) :: nr
+        real(kind=8), intent(out) :: grid(nr)
 
         integer :: ir, id
 
@@ -53,21 +93,40 @@ contains
 
     end subroutine
 
-    subroutine get_version(v, n) bind(c)
-        implicit none
-        integer(kind=c_int), intent(in) :: n
-        character(kind=c_char), intent(out) :: v(n)
+    subroutine get_version(v)
+        character(len=*), intent(out) :: v
 
-        v = transfer(VERSION, " ", size=len_trim(VERSION))
+        v = VERSION
     end subroutine
 
-    subroutine python_init_model(modelfile, n) bind(c)
-        use model
-        implicit none
-        integer(kind=c_int), intent(in) :: n
-        character(kind=c_char), intent(in) :: modelfile(n)
+    subroutine py_init_model(modelfile)
+        character(len=*), intent(in) :: modelfile
 
-        call init_model(cpy_str(modelfile))
+        call init_model(modelfile)
     end subroutine
 
-end module python
+    subroutine read_dati(dati)
+        character(len=*), intent(in) :: dati
+
+        call read_inputs(dati)
+    end subroutine read_dati
+
+    subroutine init_arncheb()
+
+        call init_a()
+        call init_order()
+        call init_bc_flag()
+
+    end subroutine init_arncheb
+
+    subroutine py_run_arncheb(shift_in)
+#ifdef USE_COMPLEX
+        complex(kind=8), intent(in) :: shift_in
+#else
+        real(kind=8), intent(in) :: shift_in
+#endif
+
+        call run_arncheb(shift)
+    end subroutine py_run_arncheb
+
+end module toppy
