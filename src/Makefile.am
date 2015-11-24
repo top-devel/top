@@ -43,6 +43,6 @@ model.o:			inputs.o grid.o
 grid.o:				string.o
 
 clean-local:
-	rm -f *.mod *.lo
+	rm -f *.mod *.lo *.o
 	rm -f inputs.F90 matrices.inc model.F90 mod_grid.F90
 

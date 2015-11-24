@@ -7,6 +7,7 @@ do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]VERSION[@],$(VERSION),g' \
                -e 's,[@]PERL[@],$(PERL),g' \
                -e 's,[@]F2PY[@],$(F2PY),g' \
+               -e 's,[@]FC[@],$(FC),g' \
                -e 's,[@]PYTHON[@],$(PYTHON),g'
 
 EXTRA_DIST = top.in top-build.in

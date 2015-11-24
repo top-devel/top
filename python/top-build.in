@@ -138,9 +138,13 @@ try:
         stderr=subprocess.STDOUT)
 
     subprocess.check_output(["@F2PY@",
+        "--f90exec=@FC@",
         "-I@abs_top_builddir@",
         "-I@abs_top_builddir@/src",
+        "-I@abs_top_builddir@/lib/itemlist",
+        "-I@abs_top_builddir@/lib/legendre",
         "-I@abs_top_builddir@/lib/getpar",
+        "-I@abs_top_builddir@/lib/der",
         "-L@libdir@",
         f2py_def,
         "-c",
