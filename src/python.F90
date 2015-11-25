@@ -1,10 +1,13 @@
 #include "config.h"
+
 module toppy
 
-    use eigensolve
-    use inputs
-    use model
-    use matrices, only: a_dim
+    use eigensolve, only: run_arncheb, vec, omega, nsol_out
+    use mod_grid, only: ndomains, grd
+    use abstract_model_mod, only: abstract_model, model_ptr
+    use matrices, only: a_dim, init_order, init_a, init_bc_flag
+    use model, only: init_model
+    use inputs, only: read_inputs
 
     implicit none
 
@@ -35,7 +38,6 @@ contains
 
     subroutine get_valps_cplx(ret, n)
         integer, intent(in) :: n
-        integer :: i
         complex(kind=8), intent(out) :: ret(n)
 
         ret = omega
@@ -44,7 +46,6 @@ contains
 
     subroutine get_valps_real(ret, n)
         integer, intent(in) :: n
-        integer :: i
         real(kind=8), intent(out) :: ret(n)
 
         ret = omega
@@ -78,8 +79,6 @@ contains
     end subroutine
 
     subroutine get_grid(nr, grid)
-        use mod_grid, only: ndomains, grd
-        implicit none
         integer, intent(in) :: nr
         real(kind=8), intent(out) :: grid(nr)
 
@@ -119,14 +118,48 @@ contains
 
     end subroutine init_arncheb
 
-    subroutine py_run_arncheb(shift_in)
+    subroutine py_run_arncheb(shift)
 #ifdef USE_COMPLEX
-        complex(kind=8), intent(in) :: shift_in
+        complex(kind=8), intent(in) :: shift
 #else
-        real(kind=8), intent(in) :: shift_in
+        real(kind=8), intent(in) :: shift
 #endif
 
         call run_arncheb(shift)
     end subroutine py_run_arncheb
 
 end module toppy
+
+module modelpy
+    use abstract_model_mod
+    implicit none
+
+contains
+    subroutine get_field_size(fname, n1, n2)
+        character(len=*), intent(in) :: fname
+        integer, intent(out) :: n1, n2
+
+        real(kind=8), allocatable :: tmp(:, :)
+
+        call model_ptr%get_field(fname, tmp)
+        n1 = size(tmp, 1)
+        n2 = size(tmp, 2)
+        deallocate(tmp)
+    end subroutine get_field_size
+
+    subroutine get_field(fname, field, n1, n2)
+        character(len=*), intent(in) :: fname
+        real(kind=8), intent(out) :: field(n1, n2)
+        integer, intent(in) :: n1, n2
+
+        real(kind=8), allocatable :: tmp(:, :)
+
+        call model_ptr%get_field(fname, tmp)
+
+        field = tmp
+        deallocate(tmp)
+
+    end subroutine get_field
+
+end module modelpy
+

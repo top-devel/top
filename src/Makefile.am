@@ -33,14 +33,14 @@ model.F90:
 	cp $(srcdir)/model_$(model).F90 model.F90
 
 TOP.o:				eigensolve.o mod_blacs.o grid.o
-# postproc.o:		eigensolve.o udirectory.o grid.o
 eigensolve.o:		matrices.o mod_blacs.o grid.o
-matrices.o:		matrices.inc model.o grid.o
+matrices.o:			matrices.inc model.o grid.o
 inputs.o:			grid.o grid.o
 udirectory.o:		inputs.o model.o grid.o
 inputs.o:			mod_blacs.o grid.o string.o
 model.o:			inputs.o grid.o
 grid.o:				string.o
+model.o:			abstract_model.o
 
 clean-local:
 	rm -f *.mod *.lo *.o

@@ -1,10 +1,14 @@
 #!@PYTHON@
 
-import os
-import shutil as sh
-import numpy as np
+import os as _os
+import numpy as _np
 
 version = '@VERSION@'
+
+class abs_model:
+    def get_field(selft, fname):
+        n1, n2 = libtop.modelpy.get_field_size(fname)
+        return libtop.modelpy.get_field(fname, n1, n2)
 
 def _error(msg):
     raise Exception(msg)
@@ -18,28 +22,11 @@ def get_compiled_files():
     :return: List of compiled equation files
     """
     files = []
-    for dirpath, dirnames, filenames in os.walk('@abs_top_builddir@/src/lib'):
+    for dirpath, dirnames, filenames in _os.walk('@abs_top_builddir@/src/lib'):
         for filename in filenames:
             if not filename.startswith('lib') and filename.endswith('.so'):
                 files.append(filename[0:-3])
     return files
-
-def get_from_dati(key):
-    """
-    Get a parameter from the dati file
-
-    :param str key: Name of the parameter to read
-    :rtype: str
-    :return: Value of the parameter in the file
-    """
-    f = open(datifile)
-    for line in f.readlines():
-        if key in line:
-            index = line.find('=')
-            eindex = line.find('#')
-            return line[index+1:eindex].strip()
-    print(key + ' not found in ' + datifile)
-    return None
 
 def load(name):
     """
@@ -47,7 +34,6 @@ def load(name):
 
     :param str name: Name of the compiled equation file
     """
-    import os
     import sys
     import importlib
 
@@ -59,22 +45,18 @@ def get_lib_version():
     """
     Get loaded library TOP version
     """
-    if libtop == None:
-        _error('no library loaded')
-        return
-
     return libtop.toppy.get_version().strip()
 
-def read_dati(dati):
+def read_dati(datifile):
     """
     Read a 'dati' file and initialize internal variables with values defined in it
 
-    :param str dati: File to read
+    :param str datifile: File to read
     """
-    if os.access(dati, os.F_OK):
-        global datifile
-        datifile = dati
-        libtop.toppy.read_dati(dati)
+    if _os.access(datifile, _os.F_OK):
+        libtop.toppy.read_dati(datifile)
+        global dati
+        dati = libtop.inputs
     else:
         _error('%s: not such file' % dati)
 
@@ -84,9 +66,6 @@ def run_arncheb(shift):
 
     :param float shift: Initial shift
     """
-    if libtop == None:
-        _error('No library loaded')
-        return
 
     libtop.toppy.init_arncheb()
     libtop.toppy.py_run_arncheb(shift)
@@ -128,9 +107,6 @@ def get_vecps():
     :rtype: numpy.ndarray
     :return: An array of eigenvector
     """
-    if libtop == None:
-        _error('No library loaded')
-        return
 
     n = _get_nsol()
     adim = _get_adim()
@@ -151,11 +127,10 @@ def init_model(filename):
 
     :param str filename: Filename or directory to read in order to initialize the model
     """
-    if libtop == None:
-        _error('No library loaded')
-        return
 
     libtop.toppy.py_init_model(filename)
+    global model
+    model = abs_model()
 
 def get_grid():
     """
@@ -164,9 +139,11 @@ def get_grid():
     :rtype: numpy.ndarray
     :return: The grid of the model
     """
-    if libtop == None:
-        _error('No library loaded')
-        return
+
     nr = libtop.toppy.get_nr()
     return libtop.toppy.get_grid(nr)
+
+def get_model_field(fname):
+    n1, n2 = libtop.toppy.model_get_field_size(fname)
+    return libtop.toppy.model_get_field(fname, n1, n2)
 
