@@ -14,6 +14,7 @@ input shift_incr  0pf6.3
 input m_start I3
 input m_end   I3
 input m_incr  I3
+input filename A512
 #input nt_start I3
 #input nt_end   I3
 #input nt_incr  I3

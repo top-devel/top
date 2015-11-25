@@ -8,11 +8,9 @@ import top
 print('eq_poly_ester:')
 top.load('eq_poly_ester')
 top.read_dati('@datadir@/top/models/poly_ester/dati')
-model = top.get_from_dati('dirmodel')
-shift = float(top.get_from_dati('shift'))
+model = top.dati.dirmodel
+shift = top.dati.shift
 top.init_model(model)
-print('dirmodel: ' + model)
-print('shift: %e' % shift)
 top.run_arncheb(shift)
 
 vecps = top.get_vecps()
@@ -21,14 +19,11 @@ for v in valps:
     print("%e" % v)
 print('grid: ' + str(top.get_grid()))
 
-
 print('\neq_ESTER_all_lagrange:')
 top.load('eq_ESTER_all_lagrange')
 top.read_dati('@datadir@/top/models/ester/dati')
-model = top.get_from_dati('filename')
-shift = float(top.get_from_dati('shift'))
-print('filename: ' + model)
-print('shift: %e' % shift)
+model = top.dati.filename
+shift = top.dati.shift
 top.init_model(model)
 top.run_arncheb(shift)
 
@@ -36,4 +31,3 @@ vecps = top.get_vecps()
 valps = top.get_valps()
 for v in valps:
     print("%e" % v)
-
