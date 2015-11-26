@@ -1,0 +1,21 @@
+#!@PYTHON@
+
+if __name__ == '__main__':
+    import top
+    import subprocess as sp
+
+    tests = [
+            ('poly_ester',  'eq_poly_ester'),
+            ('ester',       'eq_ESTER_all_lagrange')]
+
+    for model, eq_file in tests:
+        sp.check_call(['@PYTHON@',
+            '@prefix@/bin/top-build',
+            '--model=%s' % model,
+            '@datadir@/top/models/%s/%s' % (model, eq_file)])
+
+        try:
+            top.load(eq_file)
+            print('Loading %s: [OK]' % eq_file)
+        except:
+            print('Loading %s: [Failed]' % eq_file)

@@ -5,7 +5,7 @@ import numpy as _np
 
 version = '@VERSION@'
 
-class abs_model:
+class _abs_model:
     def get_field(selft, fname):
         n1, n2 = libtop.modelpy.get_field_size(fname)
         return libtop.modelpy.get_field(fname, n1, n2)
@@ -130,7 +130,7 @@ def init_model(filename):
 
     libtop.toppy.py_init_model(filename)
     global model
-    model = abs_model()
+    model = _abs_model()
 
 def get_grid():
     """

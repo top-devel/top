@@ -46,4 +46,4 @@ EXTRA_DIST = models/ester/eq_ESTER_all_lagrange \
 			 top-script.in
 
 clean-local:
-	rm -rf $(BUILT_SOURCES)
+	rm -rf $(BUILT_SOURCES) models/ester/dati models/poly_ester/dati
