@@ -1,3 +1,6 @@
+AM_FFLAGS = -fPIC
+AM_FCFLAGS = -fPIC
+
 lib_LTLIBRARIES = liblegendre.la
 
 liblegendre_la_SOURCES = gauleg.f90 spherics.f90 fast_legendre.f90 \

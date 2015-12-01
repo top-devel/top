@@ -1,3 +1,7 @@
+#include "config.h"
+
+#ifdef USE_LIBESTER
+
 #include <ester.h>
 
 star2d s;
@@ -66,3 +70,4 @@ void get_zeta_(double *z) {
         z[i] = s.z(i);
     }
 }
+#endif

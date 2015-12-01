@@ -40,6 +40,20 @@ AM_PATH_PYTHON([2.7])
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
+AC_CHECK_LIB([ester], [ester_version],
+             [found_ester="yes"],
+             [found_ester="no"])
+
+AC_LANG_PUSH(C++)
+AS_IF([test "x$found_ester" == "xyes"],
+      [AC_CHECK_HEADER([ester.h],
+                       [LIBS="$LIBS -lester"
+                        AC_DEFINE([USE_LIBESTER], [1], [was libester detected])],
+                       [found_ester="no"])])
+AC_LANG_POP(C++)
+
+AM_CONDITIONAL([USE_ESTER_LIB], [test "x$found_ester" == "xyes"])
+
 AS_IF([test "x$enable_mpi" == "xyes"],
       [AC_SEARCH_LIBS([blacs_setup_], [blacs-openmpi], [],
                       [AC_ERROR(blacs library not found)],
@@ -113,9 +127,6 @@ AC_CONFIG_FILES([Makefile
                  utils/readeq-real-2D-multi-mpi
                  utils/readeq-cplx-2D-multi
                  src/Makefile])
-
-FCFLAGS+=" -fPIC"
-FFLAGS+=" -fPIC"
 
 AC_OUTPUT
 

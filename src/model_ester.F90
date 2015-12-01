@@ -1,3 +1,5 @@
+#include "config.h"
+
 module model
     use abstract_model_mod
     use mod_grid, only: ndomains, grd
@@ -61,6 +63,8 @@ contains
 
         integer :: i
 
+#ifdef USE_LIBESTER
+
         call cpp_read_ester_model(filename, nrm, nthm, ndom)
 
         ndom = ndom+1
@@ -95,6 +99,10 @@ contains
         enddo
 
         model_ptr => this
+#else
+        print*, "TOP was compiled without libester support..."
+        print*, "Cannot read Ester models"
+#endif
 
     end subroutine init_ester_model
     !------------------------------------------------------------------------

@@ -1,3 +1,5 @@
+AM_FFLAGS = -fPIC
+
 lib_LTLIBRARIES = libarnoldi.la
 
 libarnoldi_la_SOURCES  = zhessen.f zcheckset.f zvrand.f zdel.f \

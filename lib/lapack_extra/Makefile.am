@@ -1,3 +1,5 @@
+AM_FFLAGS = -fPIC
+
 lib_LTLIBRARIES = liblapack_extra.la
 
 liblapack_extra_la_SOURCES = dgetrv.f zgetrv.f

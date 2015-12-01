@@ -1,3 +1,6 @@
+AM_FFLAGS = -fPIC
+AM_FCFLAGS = -fPIC
+
 lib_LTLIBRARIES = libgetpar.la
 
 libgetpar_la_SOURCES = dfetch.f findstring.f getdouble.f getinteger.f \
