@@ -30,6 +30,7 @@ AS_IF([test "x$enable_mpi" == "xyes"],
       [AC_PROG_FC
        enable_mpi=no])
 
+AC_PROG_CXX
 AC_PROG_F77($FC)
 AC_PROG_LIBTOOL(disable-shared)
 AC_PATH_PROG(PERL, perl)

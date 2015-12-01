@@ -126,6 +126,7 @@ try:
         "matrices.o",
         "mod_blacs.o",
         "model.o",
+        "ester-interface.o",
         "-C",
         "@abs_top_builddir@/src",
         "model=" + args.model,
@@ -164,6 +165,7 @@ try:
         "@abs_top_builddir@/src/mod_blacs.o",
         "@abs_top_builddir@/src/abstract_model.o",
         "@abs_top_builddir@/src/model.o",
+        "@abs_top_builddir@/src/ester-interface.o",
         "@abs_top_srcdir@/src/python.F90",
         "@abs_top_builddir@/src/inputs.F90"],
         stderr=subprocess.STDOUT)
