@@ -223,43 +223,96 @@ contains
 
       use derivative
       implicit none
-      integer id,id2
+      integer id, id2
 
       ! clear derivation matrices
 #ifdef USE_MULTI
-      do id=1,ndomains
+      do id=1, ndomains
         call clear_derive(dmat(id))
       enddo
-      deallocate(dmat)
 #endif
+      if (allocated(dmat)) &
+          deallocate(dmat)
 
       ! clear domain matrices
-      do id=1,ndomains
-        deallocate(dm(id)%as,dm(id)%art,dm(id)%artt)
-        deallocate(dm(id)%asi,dm(id)%arti,dm(id)%artti)
-        deallocate(dm(id)%ivar,dm(id)%ieq)
-        deallocate(dm(id)%lvar,dm(id)%leq)
-        deallocate(dm(id)%var_der_max,dm(id)%var_der_min)
-        deallocate(dm(id)%bc_flag,dm(id)%vect_der)
-        deallocate(dm(id)%var_name,dm(id)%eq_name)
-        deallocate(dm(id)%var_keep,dm(id)%var_list)
+      do id=1, ndomains
+          if (allocated(dm(id)%as)) &
+              deallocate(dm(id)%as)
+          if (allocated(dm(id)%art)) &
+              deallocate(dm(id)%art)
+          if (allocated(dm(id)%artt)) &
+              deallocate(dm(id)%artt)
+
+          if (allocated(dm(id)%asi)) &
+              deallocate(dm(id)%asi)
+          if (allocated(dm(id)%arti)) &
+              deallocate(dm(id)%arti)
+          if (allocated(dm(id)%artti)) &
+              deallocate(dm(id)%artti)
+
+          if (allocated(dm(id)%ivar)) &
+              deallocate(dm(id)%ivar)
+          if (allocated(dm(id)%ieq)) &
+              deallocate(dm(id)%ieq)
+
+          if (allocated(dm(id)%lvar)) &
+              deallocate(dm(id)%lvar)
+          if (allocated(dm(id)%leq)) &
+              deallocate(dm(id)%leq)
+
+          if (allocated(dm(id)%var_der_max)) &
+              deallocate(dm(id)%var_der_max)
+          if (allocated(dm(id)%var_der_min)) &
+              deallocate(dm(id)%var_der_min)
+
+          if (allocated(dm(id)%bc_flag)) &
+              deallocate(dm(id)%bc_flag)
+          if (allocated(dm(id)%vect_der)) &
+              deallocate(dm(id)%vect_der)
+
+          if (allocated(dm(id)%var_name)) &
+              deallocate(dm(id)%var_name)
+          if (allocated(dm(id)%eq_name)) &
+              deallocate(dm(id)%eq_name)
+
+          if (allocated(dm(id)%var_keep)) &
+              deallocate(dm(id)%var_keep)
+          if (allocated(dm(id)%var_list)) &
+              deallocate(dm(id)%var_list)
+
       enddo
-#ifdef USE_MULTI
-      deallocate(dm)
-#endif
+
+      if (allocated(dm)) &
+          deallocate(dm)
 
       ! clear interdomain matrices
-      do id=1,ndomains
-        do id2=1,ndomains
-          deallocate(idm(id,id2)%atbc,idm(id,id2)%attbc)
-          deallocate(idm(id,id2)%atbci,idm(id,id2)%attbci)
-          deallocate(idm(id,id2)%v_bc_range,idm(id,id2)%h_bc_range)
-          deallocate(idm(id,id2)%inv_v_bc_range,idm(id,id2)%inv_h_bc_range)
-        enddo
+      do id=1, ndomains
+          do id2=1, ndomains
+              if (allocated(idm(id, id2)%atbc)) &
+                  deallocate(idm(id, id2)%atbc)
+              if (allocated(idm(id, id2)%attbc)) &
+                  deallocate(idm(id, id2)%attbc)
+
+              if (allocated(idm(id, id2)%atbci)) &
+                  deallocate(idm(id, id2)%atbci)
+              if (allocated(idm(id, id2)%attbci)) &
+                  deallocate(idm(id, id2)%attbci)
+
+              if (allocated(idm(id, id2)%v_bc_range)) &
+                  deallocate(idm(id, id2)%v_bc_range)
+              if (allocated(idm(id, id2)%h_bc_range)) &
+                  deallocate(idm(id, id2)%h_bc_range)
+
+              if (allocated(idm(id, id2)%inv_v_bc_range)) &
+                  deallocate(idm(id, id2)%inv_v_bc_range)
+              if (allocated(idm(id, id2)%inv_h_bc_range)) &
+                  deallocate(idm(id, id2)%inv_h_bc_range)
+
+          enddo
       enddo
-#ifdef USE_MULTI
-      deallocate(idm)
-#endif
+
+      if (allocated(idm)) &
+          deallocate(idm)
 
       end subroutine clear_all
 

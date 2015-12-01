@@ -134,22 +134,9 @@ sub writehead{
   print PUITS "      grd(1)%mattype = mattype\n";
   print PUITS "      nr => grd(1)%nr\n";
 
-  print PUITS "      ! if (allocated(dm(1)%as))           deallocate(dm(1)%as)\n";
-  print PUITS "      ! if (allocated(dm(1)%art))          deallocate(dm(1)%art)\n";
-  print PUITS "      ! if (allocated(dm(1)%artt))         deallocate(dm(1)%artt)\n";
-  print PUITS "      ! if (allocated(idm(1,1)%atbc))      deallocate(idm(1,1)%atbc)\n";
-  print PUITS "      ! if (allocated(idm(1,1)%attbc))     deallocate(idm(1,1)%attbc)\n";
-  print PUITS "      ! if (allocated(dm(1)%asi))          deallocate(dm(1)%asi)\n";
-  print PUITS "      ! if (allocated(dm(1)%arti))         deallocate(dm(1)%arti)\n";
-  print PUITS "      ! if (allocated(dm(1)%artti))        deallocate(dm(1)%artti)\n";
-  print PUITS "      ! if (allocated(idm(1,1)%atbci))     deallocate(idm(1,1)%atbci)\n";
-  print PUITS "      ! if (allocated(idm(1,1)%attbci))    deallocate(idm(1,1)%attbci)\n";
-  print PUITS "      ! if (allocated(dm(1)%var_name))     deallocate(dm(1)%var_name)\n";
-  print PUITS "      ! if (allocated(dm(1)%eq_name))      deallocate(dm(1)%eq_name)\n";
-  print PUITS "      ! if (allocated(dm(1)%lvar))         deallocate(dm(1)%lvar)\n";
-  print PUITS "      ! if (allocated(dm(1)%leq))          deallocate(dm(1)%leq)\n";
-  print PUITS "      ! if (allocated(dm(1)%var_keep))     deallocate(dm(1)%var_keep)\n";
-  print PUITS "      ! if (allocated(dm))                 deallocate(dm)\n\n";
+  print PUITS "      if (allocated(dm)) then\n";
+  print PUITS "          call clear_all()\n\n";
+  print PUITS "      endif\n\n";
   print PUITS "      allocate(dm(1))\n";
   print PUITS "      allocate(dmat(1))\n";
   print PUITS "      allocate(idm(1, 1))\n\n";
