@@ -12,24 +12,12 @@ AM_CXXFLAGS = -fPIC
 AM_LDFLAGS = -L@libdir@ \
 			 -Wl,-rpath -Wl,@libdir@
 
-# lib_LTLIBRARIES   = libtop.la
-# libtop_la_LIBADD  = -lgetpar -llegendre -larnoldi -lder -lfit \
-# 					-litemlist -llapack_extra
-# libtop_la_SOURCES = grid.F90 \
-# 					eigensolve.F90 \
-# 					python.F90 \
-# 					hpsort_index.F90 \
-# 					mod_blacs.F90 \
-# 					model.F90 \
-# 					inputs.F90 \
-# 					string.F90 \
-# 					matrices.F90
-
 noinst_bindir = @abs_builddir@/debug
 noinst_bin_PROGRAMS = top-debug
+
 top_debug_LDADD  = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
 				   -litemlist -llapack_extra
-top_debug_SOURCES = TOP.F90 ester-interface.cpp
+top_debug_SOURCES = TOP.F90 ester-interface.cpp hpsort_index.F90
 
 model.F90:
 	cp $(srcdir)/model_$(model).F90 model.F90
@@ -43,6 +31,7 @@ inputs.o:			mod_blacs.o grid.o string.o
 model.o:			inputs.o grid.o ester-interface.o
 grid.o:				string.o
 model.o:			abstract_model.o
+postproc.o:			eigensolve.o matrices.o grid.o hpsort_index.o
 
 clean-local:
 	rm -f *.mod *.lo *.o

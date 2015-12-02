@@ -48,7 +48,6 @@ args = parser.parse_args()
 eqfile = args.file
 if not os.path.isfile(eqfile):
     print("Error: file `" + eqfile + "' does not exists")
-    parser.print_help()
     sys.exit(1)
 
 # get abs path for equation file
@@ -127,6 +126,7 @@ try:
         "mod_blacs.o",
         "model.o",
         "ester-interface.o",
+        "postproc.o",
         "-C",
         "@abs_top_builddir@/src",
         "model=" + args.model,
@@ -166,6 +166,8 @@ try:
         "@abs_top_builddir@/src/abstract_model.o",
         "@abs_top_builddir@/src/model.o",
         "@abs_top_builddir@/src/ester-interface.o",
+        "@abs_top_builddir@/src/postproc.o",
+        "@abs_top_builddir@/src/hpsort_index.o",
         "@abs_top_srcdir@/src/python.F90",
         "@abs_top_builddir@/src/inputs.F90"],
         stderr=subprocess.STDOUT)

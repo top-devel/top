@@ -5,17 +5,28 @@ if __name__ == '__main__':
     import subprocess as sp
 
     tests = [
-            ('poly_ester',  'eq_poly_ester'),
-            ('ester',       'eq_ESTER_all_lagrange')]
+            ('poly_ester',  'eq_poly_ester',            'poly_ester'),
+            ('ester_old',   'eq_ESTER_all_lagrange',    'ester/d.dat')]
 
-    for model, eq_file in tests:
+    for model_name, eq_file, model_file in tests:
         sp.check_call(['@PYTHON@',
             '@prefix@/bin/top-build',
-            '--model=%s' % model,
-            '@datadir@/top/models/%s/%s' % (model, eq_file)])
+            '--model=%s' % model_name,
+            '@datadir@/top/models/%s/%s' % (model_name, eq_file)])
 
         try:
             top.load(eq_file)
             print('Loading %s: [OK]' % eq_file)
-        except:
-            print('Loading %s: [Failed]' % eq_file)
+            top.read_dati('@datadir@/top/models/%s/dati' % model_name)
+            print('Reading dati: [OK]')
+            model = '@datadir@/top/models/%s/' % model_file
+            top.init_model(model)
+            print('Init model: [OK]')
+            top.run_arncheb(top.dati.shift)
+            print('Run arncheb: [OK]')
+            top.write_output('/tmp/out-%s' % model_name)
+            print('Write out: [OK]')
+        except Exception as e:
+            print('Something went wrong with `%s\' test' % eq_file)
+            print('Error was:')
+            print(e)

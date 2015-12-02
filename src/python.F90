@@ -8,6 +8,7 @@ module toppy
     use matrices, only: a_dim, init_order, init_a, init_bc_flag
     use model, only: init_model
     use inputs, only: read_inputs
+    use postproc, only: write_output
 
     implicit none
 
@@ -127,6 +128,12 @@ contains
 
         call run_arncheb(shift)
     end subroutine py_run_arncheb
+
+    subroutine pywrite_output(dir)
+        character(len=*), intent(in) :: dir
+
+        call write_output(dir)
+    end subroutine pywrite_output
 
 end module toppy
 
