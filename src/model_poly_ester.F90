@@ -32,17 +32,115 @@ contains
               allocate(field(grd(1)%nr, lres))
               field = hh
               return
-          endif
-
-          if (fname == 'hht') then
+          elseif (fname == 'hht') then
               allocate(field(grd(1)%nr, lres))
               field = hht
               return
+          elseif (fname == 'hhz') then
+              allocate(field(grd(1)%nr, lres))
+              field = hhz
+              return
+          elseif (fname == 'hhzz') then
+              allocate(field(grd(1)%nr, lres))
+              field = hhzz
+              return
+          elseif (fname == 'hhzt') then
+              allocate(field(grd(1)%nr, lres))
+              field = hhzt
+              return
+          elseif (fname == 'lnhht') then
+              allocate(field(grd(1)%nr, lres))
+              field = lnhht
+              return
+          elseif (fname == 'lambda') then
+              allocate(field(1, 1))
+              field = lambda
+              return
+          elseif (fname == 'alpha') then
+              allocate(field(1, 1))
+              field = alpha
+              return
+          elseif (fname == 'aplat') then
+              allocate(field(1, 1))
+              field = aplat
+              return
+          elseif (fname == 'omega_K' .or. fname == 'omega_k') then
+              allocate(field(1, 1))
+              field = omega_K
+              return
+          elseif (fname == 'omga') then
+              allocate(field(1, 1))
+              field = omga
+              return
+          elseif (fname == 'r_t') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_t
+              return
+          elseif (fname == 'r_z') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_z
+              return
+          elseif (fname == 'r_map') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_map
+              return
+          elseif (fname == 're_t') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_t
+              return
+          elseif (fname == 're_z') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_z
+              return
+          elseif (fname == 're_map') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_map
+              return
+          elseif (fname == 'r_zz') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_zz
+              return
+          elseif (fname == 'r_zt') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_zt
+              return
+          elseif (fname == 'r_tt') then
+              allocate(field(grd(1)%nr, lres))
+              field = r_tt
+              return
+          elseif (fname == 're_zz') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_zz
+              return
+          elseif (fname == 're_zt') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_zt
+              return
+          elseif (fname == 're_tt') then
+              allocate(field(grd(1)%nr, lres))
+              field = re_tt
+              return
+          elseif (fname == 'zeta') then
+              allocate(field(grd(1)%nr, lres))
+              field = zeta
+              return
+          elseif (fname == 'cost') then
+              allocate(field(grd(1)%nr, lres))
+              field = cost
+              return
+          elseif (fname == 'sint') then
+              allocate(field(grd(1)%nr, lres))
+              field = sint
+              return
+          elseif (fname == 'cott') then
+              allocate(field(grd(1)%nr, lres))
+              field = cott
+              return
+          else
+              print*, 'Unknown field:', fname
+              allocate(field(1, 1))
+              field = 0.0
           endif
-
-          print*, 'Unknown field:', fname
-          allocate(field(1, 1))
-          field = 0.0
 
       end subroutine poly_ester_get_field
 !------------------------------------------------------------------------
