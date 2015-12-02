@@ -3,12 +3,12 @@
 module toppy
 
     use eigensolve, only: run_arncheb, vec, omega, nsol_out
-    use mod_grid, only: ndomains, grd
+    use mod_grid, only: ndomains, grd, nt
     use abstract_model_mod, only: abstract_model, model_ptr
     use matrices, only: a_dim, init_order, init_a, init_bc_flag
     use model, only: init_model
     use inputs, only: read_inputs
-    use postproc, only: write_output
+    use postproc, only: write_output, get_sol
 
     implicit none
 
@@ -134,6 +134,24 @@ contains
 
         call write_output(dir)
     end subroutine pywrite_output
+
+    subroutine get_solsize(idom, nr, nth)
+        integer, intent(in) :: idom
+        integer, intent(out) :: nr, nth
+
+        nr = grd(idom)%nr
+        nth = nt
+
+    end subroutine get_solsize
+
+    subroutine get_sol_real(idom, isol, var, valp, vecp, nr, nt)
+        integer, intent(in) :: idom, isol
+        integer, intent(in) :: nr, nt
+        character(len=*), intent(in) :: var
+        real(kind=8), intent(out) :: valp, vecp(nr, nt)
+
+        call get_sol(idom, isol, var, valp, vecp)
+    end subroutine get_sol_real
 
 end module toppy
 

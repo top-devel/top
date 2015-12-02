@@ -157,3 +157,8 @@ def write_output(directory):
     if not _os.access(directory, _os.F_OK):
         d = mkpath(directory)
     libtop.toppy.pywrite_output(directory)
+
+def get_sol(idom, isol, var):
+    nr, nt = libtop.toppy.get_solsize(idom)
+    valp, vecp = libtop.toppy.get_sol_real(idom, isol, var, nr, nt)
+    return valp, vecp
