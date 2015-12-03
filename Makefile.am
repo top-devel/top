@@ -13,10 +13,11 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/udirectory.F90 \
 			 src/python.F90 \
 			 src/grid.F90 \
+			 src/ester-interface.cpp \
+			 src/abstract_model.F90 \
+			 src/postproc.F90 \
 			 sourceme.in
 
-
-DISTCLEANFILES = src/Makefile
 
 docs:
 	$(MAKE) html latexpdf -C $(top_srcdir)/doc
@@ -35,3 +36,9 @@ activate-top.sh: sourceme.in Makefile
 	$(do_subst) < $< > $@
 
 CLEANFILES = $(noinst_SCRIPTS)
+
+clean-local:
+	$(MAKE) clean -C src
+
+distclean-local:
+	$(MAKE) distclean -C src

@@ -34,4 +34,4 @@ postproc.o:			eigensolve.o matrices.o grid.o hpsort_index.o
 
 clean-local:
 	rm -f *.mod *.lo *.o
-	rm -f inputs.F90 matrices.inc model.F90 mod_grid.F90
+	rm -f inputs.F90 matrices.inc model.F90
