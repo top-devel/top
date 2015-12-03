@@ -72,7 +72,13 @@ def run_arncheb(shift):
     libtop.toppy.py_run_arncheb(shift)
     return
 
-def _get_nsol():
+def get_nsol():
+    """
+    Return the number of solutions computed by Arnoldi-Chebyshev method
+
+    :rtype: int
+    :return: number of solutions
+    """
     return libtop.toppy.get_nsol_out()
 
 def _get_adim():
@@ -151,6 +157,8 @@ def get_model_field(fname):
 def write_output(directory):
     """
     Writes TOP's output to directory
+
+    :param str directory: directory where to save Arnoldi-Chebyshev method's output
     """
     if directory[-1] != '/':
         directory = '%s/' % directory
@@ -159,8 +167,17 @@ def write_output(directory):
     libtop.toppy.pywrite_output(directory)
 
 def get_sol(idom, isol, var):
+    """
+    Get a solution
+
+    :param int idom: domain of the solution
+    :param int isol: solution number
+    :param str var: name of the variable
+    :rtype: tuple
+    :return: eigenvalue and eigenvector of the isol'th solution in the idom'th domain of variable var
+    """
     nr, nt = libtop.toppy.get_solsize(idom)
-    valp, vecp = libtop.toppy.get_sol_real(idom, isol, var, nr, nt)
+    valp, vecp = libtop.toppy.get_sol_real(idom, isol+1, var, nr, nt)
     return valp, vecp
 
 def get_vars(idom):

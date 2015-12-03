@@ -13,7 +13,7 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/udirectory.F90 \
 			 src/python.F90 \
 			 src/grid.F90 \
-			 src/string.F90
+			 sourceme.in
 
 
 DISTCLEANFILES = src/Makefile
@@ -33,3 +33,5 @@ noinst_SCRIPTS = activate-top.sh
 
 activate-top.sh: sourceme.in Makefile
 	$(do_subst) < $< > $@
+
+CLEANFILES = $(noinst_SCRIPTS)

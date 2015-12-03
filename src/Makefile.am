@@ -27,9 +27,8 @@ eigensolve.o:		matrices.o mod_blacs.o grid.o
 matrices.o:			matrices.inc model.o grid.o
 inputs.o:			grid.o grid.o
 udirectory.o:		inputs.o model.o grid.o
-inputs.o:			mod_blacs.o grid.o string.o
+inputs.o:			mod_blacs.o grid.o
 model.o:			inputs.o grid.o ester-interface.o
-grid.o:				string.o
 model.o:			abstract_model.o
 postproc.o:			eigensolve.o matrices.o grid.o hpsort_index.o
 
