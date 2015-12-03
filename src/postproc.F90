@@ -100,12 +100,6 @@ contains
     !-----------------------------------------------------
     subroutine write_vecp(dir)
 
-        ! use inputs, only: write_inputs, write_stamp
-        ! use eigensolve
-        ! use mod_grid
-        ! use derivative
-        ! use matrices
-
         character(len=*), intent(in) :: dir
 
         integer isol, iisol, id, i, ii, j, var, vvar, der_id, lbder, ubder
@@ -241,7 +235,7 @@ contains
         deallocate(iu)
 
     end subroutine
-
+    !-----------------------------------------------------
     subroutine get_valp(i, val)
 
         integer, intent(in) :: i
@@ -250,7 +244,7 @@ contains
         call init_index()
         val = omega(Ndex(i))
     end subroutine
-
+    !-----------------------------------------------------
     subroutine get_valps(vals)
 
         double precision, intent(out) :: vals(nsol)
@@ -258,6 +252,5 @@ contains
         call init_index()
         vals = omega
     end subroutine
-
     !-----------------------------------------------------
 end module

@@ -5,7 +5,7 @@ module toppy
     use eigensolve, only: run_arncheb, vec, omega, nsol_out
     use mod_grid, only: ndomains, grd, nt
     use abstract_model_mod, only: abstract_model, model_ptr
-    use matrices, only: a_dim, init_order, init_a, init_bc_flag
+    use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
     use model, only: init_model
     use inputs, only: read_inputs
     use postproc, only: write_output, get_sol
@@ -152,6 +152,21 @@ contains
 
         call get_sol(idom, isol, var, valp, vecp)
     end subroutine get_sol_real
+
+    subroutine get_var_name(idom, ivar, var_name)
+        integer, intent(in) :: idom, ivar
+        character(len=64), intent(out) :: var_name
+
+        var_name = dm(idom)%var_name(ivar)
+
+    end subroutine get_var_name
+
+    subroutine get_nvars(idom, nvars)
+        integer, intent(in) :: idom
+        integer, intent(out) :: nvars
+
+        nvars = dm(idom)%nvar_keep
+    end subroutine get_nvars
 
 end module toppy
 

@@ -162,3 +162,11 @@ def get_sol(idom, isol, var):
     nr, nt = libtop.toppy.get_solsize(idom)
     valp, vecp = libtop.toppy.get_sol_real(idom, isol, var, nr, nt)
     return valp, vecp
+
+def get_vars(idom):
+    nvars = libtop.toppy.get_nvars(idom)
+    ret = []
+    for i in range(1, nvars+1):
+        v = libtop.toppy.get_var_name(idom, i)
+        ret.append(v.strip())
+    return ret
