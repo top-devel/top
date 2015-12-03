@@ -94,7 +94,7 @@ def get_valps():
     if libtop == None:
         _error('No library loaded')
         return
-    n = _get_nsol()
+    n = get_nsol()
     dtype = get_dtype()
     if dtype == 'real':
         valps = libtop.toppy.get_valps_real(n)
@@ -115,7 +115,7 @@ def get_vecps():
     :return: An array of eigenvector
     """
 
-    n = _get_nsol()
+    n = get_nsol()
     adim = _get_adim()
 
     dtype = get_dtype()
