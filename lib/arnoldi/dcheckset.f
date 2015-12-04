@@ -192,13 +192,13 @@ c
 c    Display parameters and options of the computation
 c
       write(stdout,*)'-----------------------------------------------'
-      write(7,*)'-----------------------------------------------'
+      ! write(7,*)'-----------------------------------------------'
       write(stdout,*)'Size of the eigenproblem: ',n
-      write(7,*)'Size of the eigenproblem: ',n
+      ! write(7,*)'Size of the eigenproblem: ',n
       write(stdout,*)'Size of the projection given to: ',iarn
-      write(7,*)'Size of the projection given to: ',iarn
+      ! write(7,*)'Size of the projection given to: ',iarn
       write(stdout,*)'Number of wanted eigenvalues: ',iparam(6)
-      write(7,*)'Number of wanted eigenvalues: ',iparam(6)
+      ! write(7,*)'Number of wanted eigenvalues: ',iparam(6)
       if (eig.eq.'LR') then
         string = 'Largest real part'
       elseif (eig.eq.'SR') then
@@ -210,42 +210,42 @@ c
       endif
       if (iparam(1).lt.4) then
       	write(stdout,*)'Type of resolution:  ',string
-      	write(7,*)'Type of resolution:  ',string
+      	! write(7,*)'Type of resolution:  ',string
       else
       	write(stdout,44)shift
-      	write(7,44)shift
+      	! write(7,44)shift
       endif
  44   format('Type of resolution: Around the shift',d12.3)
       if (nor.eq.'GI') then
 	write(stdout,*)'||A|| is equal to: ', normA
-	write(7,*)'||A|| is equal to: ', normA
+	! write(7,*)'||A|| is equal to: ', normA
       elseif (nor.eq.'PM') then
 	write(stdout,*)'||A|| estimated by n matrix-vector products'
-	write(7,*)'||A|| estimated by n matrix-vector products'
+	! write(7,*)'||A|| estimated by n matrix-vector products'
       elseif (nor.eq.'HH') then 
 	write(stdout,*)'||A|| estimated by Hager''s algorithm'
-	write(7,*)'||A|| estimated by Hager''s algorithm'
+	! write(7,*)'||A|| estimated by Hager''s algorithm'
       endif
       if (che.eq.'GI') then
 	write(stdout,*)'Deg. of Chebyshev poly. is equal to: ',deg
-	write(7,*)'Deg. of Chebyshev poly. is equal to: ',deg
+	! write(7,*)'Deg. of Chebyshev poly. is equal to: ',deg
       elseif (che.eq.'DY') then
 	write(stdout,*)'Deg. of Chebyshev poly. is dynamically set'
-	write(7,*)'Deg. of Chebyshev poly. is dynamically set'
+	! write(7,*)'Deg. of Chebyshev poly. is dynamically set'
       endif
       write(stdout,45)tol
-      write(7,45)tol
+      ! write(7,45)tol
  45   format('Tolerance is equal to:',d12.3)
       if (iparam(5).eq.1) then
 	write(stdout,*)'Starting vector is given'
-	write(7,*)'Starting vector is given'
+	! write(7,*)'Starting vector is given'
       elseif (iparam(5).eq.0) then
 	write(stdout,*)'Starting vector is set to a random one'
-	write(7,*)'Starting vector is set to a random one'
+	! write(7,*)'Starting vector is set to a random one'
       endif
       write(stdout,*)'Maximum number of iterations',iparam(10)
       write(stdout,*)'-----------------------------------------------'
-      write(7,*)'-----------------------------------------------'
+      ! write(7,*)'-----------------------------------------------'
       go to 200
 100   continue
 200   return

@@ -188,8 +188,8 @@ c  if 0 < flagcom <3 : Compute ||A||
 c
       	if (flagcom.eq.-1) then 
                 info = 0
-                open (7, file = 'result')
-                open (9, file = 'parameter')
+                ! open (7, file = 'result')
+                ! open (9, file = 'parameter')
 		call dcheckset(n, iarn, deg,
      &                    degmax, iparam, tol, normA, shift, u,
      &                    info, eig, nor, che, stdout)
@@ -210,9 +210,9 @@ c
 600     iter = iter+1
         if (iter.gt.iparam(10)) then
 		info=-17
-		goto 100 		
+		goto 100
         endif
-	if (iter.eq.1) write(9,27)normA
+	! if (iter.eq.1) write(9,27)normA
 27   	format('The estimated of ||A|| is equal to: ',d12.3,/)
         go to 700
       elseif (flagcom.ge.3.and.flagcom.le.7) then
@@ -300,12 +300,12 @@ c
 c
 c   Write eigenvalues and residuals in file result
 c
-        write(7,22)iter
+        ! write(7,22)iter
 22      format(' ',' Iteration No',i4,/)
-        write(7,23)(wr(j), wi(j), work(j), j = 1, iparam(6))
+        ! write(7,23)(wr(j), wi(j), work(j), j = 1, iparam(6))
 23      format(' ','    re(lambda) ',
      &     '         *       im(lambda)      *      res',/,(/3e24.16))
-        write(7,24)
+        ! write(7,24)
 24      format(' ',//)
 c
 c   Convergence is achieved, then Exit
@@ -370,12 +370,12 @@ c
 c
 c   Write parameters of Chebyshev acceleration in file parameter
 c
-        write(9,22)iter
-        if (ierrell.lt.0) then
-                write(9,*)'Restart with Arnoldi vectors'
-        else
-                write(9,25)d, c, ea1
-        endif
+        ! write(9,22)iter
+        ! if (ierrell.lt.0) then
+                ! write(9,*)'Restart with Arnoldi vectors'
+        ! else
+                ! write(9,25)d, c, ea1
+        ! endif
 25      format('Centre: ',d12.4,'  Focus distance: ',d12.4,
      &         ' ea1: ',d12.4)
 c
@@ -490,12 +490,12 @@ c
         flagcom = -1
         info = 0
 	write(stdout,*)'Normal exit'
-        if (iparam(8).ne.0) then 
-        	write(stdout,*)'The eigenvalues are in the file eigenval'
-        endif
-        write(stdout,*)'The computation parameters are in
-     &the file parameter'
-        write(stdout,*)'The computation history is in the file result'
+        ! if (iparam(8).ne.0) then 
+        ! 	write(stdout,*)'The eigenvalues are in the file eigenval'
+        ! endif
+        ! write(stdout,*)'The computation parameters are in
+        ! &the file parameter'
+        ! write(stdout,*)'The computation history is in the file result'
       endif
       close(7, status = 'keep')
       close(9, status = 'keep')

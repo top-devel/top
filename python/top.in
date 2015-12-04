@@ -2,7 +2,8 @@
 
 import os as _os
 import numpy as _np
-from distutils.dir_util import mkpath
+from distutils.dir_util import mkpath as _mkpath
+import matplotlib.pyplot as _plt
 
 version = '@VERSION@'
 
@@ -166,7 +167,7 @@ def write_output(directory):
     if directory[-1] != '/':
         directory = '%s/' % directory
     if not _os.access(directory, _os.F_OK):
-        d = mkpath(directory)
+        d = _mkpath(directory)
     libtop.toppy.pywrite_output(directory)
 
 def get_sol(idom, isol, var):
