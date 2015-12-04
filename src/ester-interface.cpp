@@ -17,7 +17,7 @@ int cpp_read_ester_model_(char *model, int *nr, int *nth, int *ndom) {
     return 0;
 }
 
-void cpy_mat(int id, double *farray, matrix& field) {
+void cpy_mat(int id, double *farray, const matrix& field) {
     int skip;
     int idom = id - 1;
 
@@ -34,8 +34,35 @@ void cpy_mat(int id, double *farray, matrix& field) {
 }
 
 extern "C"
+void get_rs_(int *id, double *Rs) {
+    for (int i=0; i<s.nth; i++) {
+        Rs[i] = s.r(-1, i);
+    }
+}
+
+extern "C"
+void get_rr_(int *id, double *rr) {
+    cpy_mat(*id, rr, s.r);
+}
+
+extern "C"
+void get_p_(int *id, double *p) {
+    cpy_mat(*id, p, s.p);
+}
+
+extern "C"
 void get_rho_(int *id, double *rho) {
     cpy_mat(*id, rho, s.rho);
+}
+
+extern "C"
+void get_g1_(int *id, double *G1) {
+    cpy_mat(*id, G1, s.eos.G1);
+}
+
+extern "C"
+void get_w_(int *id, double *w) {
+    cpy_mat(*id, w, s.w);
 }
 
 extern "C"
@@ -70,4 +97,54 @@ void get_zeta_(double *z) {
         z[i] = s.z(i);
     }
 }
+
+extern "C"
+void get_mass_(double *m) {
+    int i;
+
+    *m = s.M;
+}
+
+extern "C"
+void get_radius_(double *r) {
+    int i;
+
+    *r = s.R;
+}
+
+extern "C"
+void get_lum_(double *lum) {
+    int i;
+
+    *lum = s.luminosity();
+}
+
+extern "C"
+void get_omega_(double *omega) {
+    int i;
+
+    *omega = s.Omega;
+}
+
+extern "C"
+void get_x_(double *X) {
+    int i;
+
+    *X = s.X0;
+}
+
+extern "C"
+void get_z_(double *Z) {
+    int i;
+
+    *Z = s.Z0;
+}
+
+extern "C"
+void get_xc_(double *Xc) {
+    int i;
+
+    *Xc = s.Xc;
+}
+
 #endif

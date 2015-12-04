@@ -8,7 +8,8 @@ module toppy
     use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
     use model, only: init_model
     use inputs, only: read_inputs
-    use postproc, only: write_output, get_sol
+    use postproc, only: write_output, get_sol, get_lvar_size, get_lvar
+    use mod_legendre
 
     implicit none
 
@@ -76,6 +77,13 @@ contains
         do id=1, ndomains
             n_r = n_r + grd(id)%nr
         enddo
+
+    end subroutine
+
+    subroutine get_nth(n_th)
+        integer, intent(out) :: n_th
+
+        n_th = nt
 
     end subroutine
 
@@ -168,6 +176,28 @@ contains
         nvars = dm(idom)%nvar_keep
     end subroutine get_nvars
 
+    subroutine get_ndom(ndom)
+        integer, intent(out) :: ndom
+
+        ndom = ndomains
+    end subroutine get_ndom
+
+    subroutine pyget_lvar_size(idom, var, lsize)
+        integer, intent(in) :: idom
+        character(len=*), intent(in) :: var
+        integer, intent(out) :: lsize
+
+        call get_lvar_size(idom, var, lsize)
+    end subroutine pyget_lvar_size
+
+    subroutine pyget_lvar(idom, var, lm, l)
+        integer, intent(in) :: idom, lm
+        character(len=*), intent(in) :: var
+        integer, intent(out) :: l(lm)
+
+        call get_lvar(idom, var, l)
+    end subroutine pyget_lvar
+
 end module toppy
 
 module modelpy
@@ -202,4 +232,29 @@ contains
     end subroutine get_field
 
 end module modelpy
+
+
+module legpy
+    use fast_legendre
+    implicit none
+
+contains
+    subroutine eval(fs, nr, ns, nt, m, l, linc, f)
+
+        integer, intent(in) :: nr, ns, nt, l, linc, m
+        real(kind=8), intent(in) :: fs(:, :)
+        real(kind=8), intent(out) :: f(nr, nt)
+
+        ! local
+        double precision :: cth(nt), w(nt)
+
+        call gauleg(-1d0, 1d0, cth, w, nt)
+        f = 0.0
+        call eval_ylm(1d0, fs, f, cth, nr, ns, nt, l, linc, m)
+    end subroutine eval
+
+    ! subroutine grid_to_spec()
+    ! end subroutine grid_to_spec
+
+end module legpy
 

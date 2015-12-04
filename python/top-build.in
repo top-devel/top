@@ -37,7 +37,7 @@ parser.add_argument('file',
 
 parser.add_argument('--model',
         required=True,
-        help='input model (SCF, ester or poly)')
+        help='input model (ester or poly_ester, etc)')
 
 parser.add_argument('--debug', dest='debug', action='store_true',
         help='debug')
@@ -78,6 +78,10 @@ else:
 
 if args.mpi == "mpi":
     readeq += "-mpi"
+
+if not os.access('@abs_top_srcdir@/src/model_%s.F90' % args.model, os.F_OK):
+    print('Error: no model named `%s\'' % args.model)
+    sys.exit(1)
 
 # print("TOP flavor: " + readeq)
 if not os.path.isfile(readeq):

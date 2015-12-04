@@ -64,16 +64,7 @@ contains
         call init_index()
         isol = Ndex(nsol)
 
-        ivar = 0
-        do iv=1, dm(idom)%nvar_keep
-            if (trim(var) == trim(dm(idom)%var_name(iv))) then
-                ivar = iv
-            endif
-        enddo
-        if (ivar == 0) then
-            print*, "no variable named "//trim(var)
-            return
-        endif
+        ivar = get_ivar(idom, var)
 
         do j=1, nt
             do i=1, grd(idom)%nr
@@ -252,5 +243,48 @@ contains
         call init_index()
         vals = omega
     end subroutine
+    !-----------------------------------------------------
+    subroutine get_lvar_size(idom, var, lsize)
+        integer, intent(in) :: idom
+        character(len=*), intent(in) :: var
+        integer, intent(out) :: lsize
+
+        integer :: ivar
+
+        ivar = get_ivar(idom, var)
+        lsize = size(dm(idom)%lvar(:, ivar), 1)
+
+    end subroutine get_lvar_size
+    !-----------------------------------------------------
+    subroutine get_lvar(idom, var, lvar)
+        integer, intent(in) :: idom
+        character(len=*), intent(in) :: var
+        integer, intent(out) :: lvar(:)
+
+        integer :: ivar
+
+        ivar = get_ivar(idom, var)
+        lvar = dm(idom)%lvar(:, ivar)
+
+    end subroutine get_lvar
+    !-----------------------------------------------------
+    function get_ivar(idom, var)
+
+        integer, intent(in) :: idom
+        character(len=*), intent(in) :: var
+        integer :: get_ivar, iv
+
+        get_ivar = 0
+        do iv=1, dm(idom)%nvar_keep
+            if (trim(var) == trim(dm(idom)%var_name(iv))) then
+                get_ivar = iv
+                return
+            endif
+        enddo
+        if (get_ivar == 0) then
+            print"(A, I2)", "no variable named "//trim(var)//" in domain", idom
+            return
+        endif
+    end function get_ivar
     !-----------------------------------------------------
 end module

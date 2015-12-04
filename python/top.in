@@ -42,6 +42,9 @@ def load(name):
     global libtop
     libtop = importlib.import_module(name)
 
+    global leg
+    leg = libtop.legpy
+
 def get_lib_version():
     """
     Get loaded library TOP version
@@ -176,14 +179,36 @@ def get_sol(idom, isol, var):
     :rtype: tuple
     :return: eigenvalue and eigenvector of the isol'th solution in the idom'th domain of variable var
     """
-    nr, nt = libtop.toppy.get_solsize(idom)
-    valp, vecp = libtop.toppy.get_sol_real(idom, isol+1, var, nr, nt)
-    return valp, vecp
+    nr, nt = libtop.toppy.get_solsize(idom+1)
+    valp, vecp = libtop.toppy.get_sol_real(idom+1, isol+1, var, nr, nt)
+    l = libtop.toppy.pyget_lvar(idom+1, var, nt)
+    return valp, vecp, l
+
+def get_ndom():
+    return libtop.toppy.get_ndom()
+
+def get_full_sol(isol, var):
+    nr = libtop.toppy.get_nr()
+    nt = libtop.toppy.get_nth()
+    fvecp = _np.zeros(shape=(nr, nt))
+    skip = 0
+    for idom in range(0, get_ndom()): # for all domains but the last
+        nr, nt = libtop.toppy.get_solsize(idom+1)
+        valp, vecp, l = get_sol(idom, isol, var)
+        fvecp[skip:skip+nr, :] = vecp
+        skip = skip + nr
+    return valp, fvecp, l
 
 def get_vars(idom):
-    nvars = libtop.toppy.get_nvars(idom)
+    nvars = libtop.toppy.get_nvars(idom+1)
     ret = []
-    for i in range(1, nvars+1):
-        v = libtop.toppy.get_var_name(idom, i)
+    for i in range(0, nvars):
+        v = libtop.toppy.get_var_name(idom+1, i+1)
         ret.append(v.strip())
     return ret
+
+def eval(fs, nth, l, m):
+    nr, ns = fs.shape
+    f = _np.zeros(shape=(nr, nth))
+    f = leg.eval(fs, nr, ns, nth, m, l[0], 2)
+    return f
