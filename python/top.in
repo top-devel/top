@@ -186,21 +186,22 @@ def get_sol(idom, isol, var):
     return valp, vecp, l
 
 def get_ndom():
+    """
+    Returns the number of domains of the problem
+
+    :rtype: int
+    :return: number of domains
+    """
     return libtop.toppy.get_ndom()
 
-def get_full_sol(isol, var):
-    nr = libtop.toppy.get_nr()
-    nt = libtop.toppy.get_nth()
-    fvecp = _np.zeros(shape=(nr, nt))
-    skip = 0
-    for idom in range(0, get_ndom()): # for all domains but the last
-        nr, nt = libtop.toppy.get_solsize(idom+1)
-        valp, vecp, l = get_sol(idom, isol, var)
-        fvecp[skip:skip+nr, :] = vecp
-        skip = skip + nr
-    return valp, fvecp, l
-
 def get_vars(idom):
+    """
+    Returns the list of variables defined in a domain
+
+    :param int idom: domain
+    :rtype: [str]
+    :return: list of variables in the idom'th domain
+    """
     nvars = libtop.toppy.get_nvars(idom+1)
     ret = []
     for i in range(0, nvars):
@@ -208,8 +209,32 @@ def get_vars(idom):
         ret.append(v.strip())
     return ret
 
-def eval(fs, nth, l, m):
-    nr, ns = fs.shape
-    f = _np.zeros(shape=(nr, nth))
-    f = leg.eval(fs, nr, ns, nth, m, l[0], 2)
-    return f
+def plot(idom, isol, var, m=0, nth=180):
+    """
+    Plots isol'th solution of variable var in domain number idom
+
+    :param int idom: domain
+    :param int isol: solution to plot
+    :param str var: variable to plot
+    :param int nth: number of theta point for the projection to real space
+    """
+    theta = _np.linspace(_np.pi, 0, nth)
+    r = get_grid()
+    cost = _np.cos(theta)
+    sint = _np.sin(theta)
+
+    rs = 0
+    for ir in range(0, idom):
+        _, vec, _ = get_sol(idom, isol, var)
+        rs = rs + vec.shape[0]
+
+    val, vec, l = get_sol(idom, isol, var)
+    fg = leg.eval2d(vec, cost, l[0], 2, m)
+    r = r[rs:rs+vec.shape[0]]
+    x = _np.outer(r, sint)
+    y = _np.outer(r, cost)
+
+    _plt.pcolormesh(x, y, fg)
+    _plt.title(var)
+    _plt.colorbar()
+    _plt.show()
