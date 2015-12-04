@@ -23,5 +23,5 @@ iparity = 0
 m = 0
 shift = 18.484 # 18.48490552055010d0
 nsol = 4
-filename = @datadir@/top/models/ester/d.dat
+filename = @builddir@/d.dat
 rootdir = ./

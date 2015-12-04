@@ -7,7 +7,7 @@ orderFD = 2             # order of the method when using finite differences
 mattype = FULL          # BAND = banded structure for the matrix, FULL = full structure for the matrix
 nsol=10
 shift =  0.791171838986203E-01
-dirmodel = @datadir@/top/models/poly_ester/
+dirmodel = @builddir@/model/
 rootdir = ./
 m  = 0
 tagdir = test1

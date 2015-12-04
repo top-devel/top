@@ -1,0 +1,11 @@
+#!@PYTHON@
+
+import top
+
+if __name__ == '__main__':
+    top.load('eq_ESTER_old_all_lagrange')
+    top.read_dati('@builddir@/dati')
+    # top.init_model('@builddir@/star.h5')
+    top.init_model(top.dati.filename)
+    top.run_arncheb(top.dati.shift)
+    top.plot(1, 2, 'Phi2')

@@ -1,0 +1,10 @@
+#!@PYTHON@
+
+import top
+
+if __name__ == '__main__':
+    top.load('eq_poly_ester')
+    top.read_dati('@builddir@/dati')
+    top.init_model(top.dati.dirmodel)
+    top.run_arncheb(top.dati.shift)
+    top.plot(0, 5, 'B')
