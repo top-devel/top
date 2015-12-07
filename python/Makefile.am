@@ -14,7 +14,7 @@ EXTRA_DIST = top.in top-build.in top-test.in
 BUILT_SOURCES = top.py top-build top-test
 
 bin_SCRIPTS = top-build
-pkgpython_PYTHON = top.py
+pkgpython_PYTHON = __init__.py
 
 noinst_bin_SCRIPTS = top-test
 
@@ -26,7 +26,7 @@ top-test: top-test.in Makefile
 top-build: top-build.in Makefile
 	$(do_subst) < $< > $@
 
-top.py: top.in Makefile
+__init__.py: top.in Makefile
 	$(do_subst) < $< > $@
 
 CLEANFILES = $(BUILT_SOURCES)

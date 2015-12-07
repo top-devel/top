@@ -2,4 +2,4 @@
 
 export PATH="@bindir@:$PATH"
 export LD_LIBRARY_PATH="@libdir@:@libexecdir@:$LD_LIBRARY_PATH"
-export PYTHONPATH="@pythondir@/top:@pyexecdir@/top:$LD_LIBRARY_PATH"
+export PYTHONPATH="@pythondir@:@pyexecdir@/top:$LD_LIBRARY_PATH"

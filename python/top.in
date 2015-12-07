@@ -4,16 +4,113 @@ import os as _os
 import numpy as _np
 from distutils.dir_util import mkpath as _mkpath
 import matplotlib.pyplot as _plt
+import h5py
 
 version = '@VERSION@'
 
+def _error(msg):
+    raise Exception(msg)
+
 class _abs_model:
-    def get_field(selft, fname):
+    def get_field(self, fname):
         n1, n2 = libtop.modelpy.get_field_size(fname)
         return libtop.modelpy.get_field(fname, n1, n2)
 
-def _error(msg):
-    raise Exception(msg)
+class results:
+    def __init__(self, result_file = ''):
+        if result_file == '':
+            try:
+                self.from_top()
+            except Exception:
+                _error('you did not run `run_arncheb\' yet')
+        else:
+            self.from_file(result_file)
+
+    def from_file(self, h5result):
+        self.valps = []
+        self.vecps = []
+        self.l = []
+
+        f = h5py.File(h5result, 'r')
+        self.nsol = len(f['/'])
+        self.model = f.attrs['model']
+        self.shift = f.attrs['shift']
+        self.ndom = len(f['sol0'].keys())
+        self.vars = []
+
+        for isol in range(0, self.nsol):
+            self.valps.append([])
+            self.vecps.append([])
+            self.l.append([])
+            self.vars.append([])
+            for idom in range(0, self.ndom):
+                valps = {}
+                vecps = {}
+                ls = {}
+                grp = f['/sol%d/dom%d' % (isol, idom)]
+                for var in grp.keys():
+                    self.vars[idom].append(var)
+                    vgrp = f['/sol%d/dom%d/%s' % (isol, idom, var)]
+                    valps[var] = vgrp.attrs['valp']
+                    vecps[var] = vgrp[:, :]
+                    ls[var] = vgrp.attrs['l']
+
+                self.valps[-1].append(valps)
+                self.vecps[-1].append(vecps)
+                self.l[-1].append(ls)
+
+    def from_top(self):
+        self.nsol = get_nsol()
+        self.ndom = get_ndom()
+        self.valps = []
+        self.vecps = []
+        self.l = []
+        self.vars = []
+        self.shift = _actual_shift
+        self.model = _actual_model
+
+        for idom in range(0, self.ndom):
+            self.vars.append(get_vars(idom))
+
+        for isol in range(0, self.nsol):
+            self.valps.append([])
+            self.vecps.append([])
+            self.l.append([])
+            for idom in range(0, self.ndom):
+                valps = {}
+                vecps = {}
+                ls = {}
+                for var in self.vars[idom]:
+                    valp, vecp, l = get_sol(idom, isol, var)
+                    valps[var] = valp
+                    vecps[var] = vecp
+                    ls[var] = l
+                self.valps[-1].append(valps)
+                self.vecps[-1].append(vecps)
+                self.l[-1].append(ls)
+
+    def get_sol(self, idom, isol, var):
+        valp = self.valps[isol][idom][var]
+        vecp = self.vecps[isol][idom][var]
+        l = self.l[isol][idom][var]
+        return valp, vecp, l
+
+    def save(self, h5file):
+        f = h5py.File(h5file, 'w')
+        f.attrs['model'] = self.model
+        f.attrs['shift'] = self.shift
+        for isol in range(0, self.nsol):
+            sgrp = f.create_group('sol%d' % isol)
+            for idom in range(0, self.ndom):
+                dgrp = sgrp.create_group('dom%d' % idom)
+                for var in self.vars[idom]:
+                    valp, vecp, l = self.get_sol(idom, isol, var)
+                    dset = dgrp.create_dataset(var, data = vecp)
+                    dset.attrs['valp'] = valp
+                    dset.attrs['l'] = l
+        f.close()
+
+
 
 def get_compiled_files():
     """
@@ -72,6 +169,8 @@ def run_arncheb(shift):
     :param float shift: Initial shift
     """
 
+    global _actual_shift
+    _actual_shift = shift
     libtop.toppy.init_arncheb()
     libtop.toppy.py_run_arncheb(shift)
     return
@@ -139,6 +238,11 @@ def init_model(filename):
     :param str filename: Filename or directory to read in order to initialize the model
     """
 
+    global _actual_model
+    if type(filename) == str:
+        _actual_model = filename
+    else:
+        _actual_model = filename.tostring().strip()
     libtop.toppy.py_init_model(filename)
     global model
     model = _abs_model()
