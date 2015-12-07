@@ -7,4 +7,6 @@ if __name__ == '__main__':
     top.read_dati('@builddir@/dati')
     top.init_model(top.dati.dirmodel)
     top.run_arncheb(top.dati.shift)
-    top.plot(0, 5, 'B')
+
+    res = top.results()
+    res.plot(0, 5, 'B')

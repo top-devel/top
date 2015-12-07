@@ -1,12 +1,18 @@
 #!@PYTHON@
 
 import os as _os
+import sys as _sys
 import numpy as _np
-from distutils.dir_util import mkpath as _mkpath
+import h5py as _h5py
+import importlib as _importlib
 import matplotlib.pyplot as _plt
-import h5py
+from distutils.dir_util import mkpath as _mkpath
 
 version = '@VERSION@'
+
+_sys.path.append('@abs_top_builddir@/src/')
+import legpy as _legpy
+leg = _legpy.legpy
 
 def _error(msg):
     raise Exception(msg)
@@ -19,25 +25,25 @@ class _abs_model:
 class results:
     def __init__(self, result_file = ''):
         if result_file == '':
-            try:
-                self.from_top()
-            except Exception:
-                _error('you did not run `run_arncheb\' yet')
+            self.from_top()
         else:
             self.from_file(result_file)
 
     def from_file(self, h5result):
+
         self.valps = []
         self.vecps = []
         self.l = []
 
-        f = h5py.File(h5result, 'r')
+        f = _h5py.File(h5result, 'r')
         self.nsol = len(f['/'])
         self.model = f.attrs['model']
         self.shift = f.attrs['shift']
         self.ndom = len(f['sol0'].keys())
         self.vars = []
+        self.nr = []
 
+        grids = []
         for isol in range(0, self.nsol):
             self.valps.append([])
             self.vecps.append([])
@@ -47,9 +53,14 @@ class results:
                 valps = {}
                 vecps = {}
                 ls = {}
+                vars = []
                 grp = f['/sol%d/dom%d' % (isol, idom)]
+                if isol == 0:
+                    dom_grid = grp.attrs['grid']
+                    self.nr.append(len(dom_grid))
+                    grids.append(dom_grid)
                 for var in grp.keys():
-                    self.vars[idom].append(var)
+                    vars.append(var)
                     vgrp = f['/sol%d/dom%d/%s' % (isol, idom, var)]
                     valps[var] = vgrp.attrs['valp']
                     vecps[var] = vgrp[:, :]
@@ -58,6 +69,12 @@ class results:
                 self.valps[-1].append(valps)
                 self.vecps[-1].append(vecps)
                 self.l[-1].append(ls)
+                self.vars[-1].append(vars)
+
+        self.grid = _np.zeros(shape = sum(self.nr))
+        for idom in range(0, self.ndom):
+            skip = sum(self.nr[0:idom])
+            self.grid[skip:skip+self.nr[idom]] = _np.array(grids[idom])
 
     def from_top(self):
         self.nsol = get_nsol()
@@ -68,9 +85,12 @@ class results:
         self.vars = []
         self.shift = _actual_shift
         self.model = _actual_model
+        self.nr = []
+        self.grid = _get_grid()
 
         for idom in range(0, self.ndom):
-            self.vars.append(get_vars(idom))
+            self.vars.append(_get_vars(idom))
+            self.nr.append(libtop.toppy.get_dom_nr(idom+1))
 
         for isol in range(0, self.nsol):
             self.valps.append([])
@@ -95,14 +115,30 @@ class results:
         l = self.l[isol][idom][var]
         return valp, vecp, l
 
+    def get_grid(self, idom = -1):
+        if idom >= 0:
+            skip = 0
+            for i in range(0, idom):
+                nr = self.nr[i]
+                skip = skip + nr
+            nr = self.nr[idom]
+            return self.grid[skip:skip+nr]
+        else:
+            return self.grid
+
+
     def save(self, h5file):
-        f = h5py.File(h5file, 'w')
+        f = _h5py.File(h5file, 'w')
         f.attrs['model'] = self.model
         f.attrs['shift'] = self.shift
         for isol in range(0, self.nsol):
             sgrp = f.create_group('sol%d' % isol)
+            skip = 0
             for idom in range(0, self.ndom):
+                nr = self.nr[idom]
                 dgrp = sgrp.create_group('dom%d' % idom)
+                dgrp.attrs['grid'] = self.grid[skip:skip+nr]
+                skip = skip + nr
                 for var in self.vars[idom]:
                     valp, vecp, l = self.get_sol(idom, isol, var)
                     dset = dgrp.create_dataset(var, data = vecp)
@@ -110,7 +146,32 @@ class results:
                     dset.attrs['l'] = l
         f.close()
 
+    def plot(self, idom, isol, var, m=0, nth=180):
+        """
+        Plots isol'th solution of variable var in domain number idom
 
+        :param int idom: domain
+        :param int isol: solution to plot
+        :param str var: variable to plot
+        :param int nth: number of theta point for the projection to real space
+        """
+
+        theta = _np.linspace(_np.pi, 0, nth+1)
+        cost = _np.cos(theta)
+        sint = _np.sin(theta)
+
+        val, vec, l = self.get_sol(idom, isol, var)
+
+        fg = leg.eval2d(vec, cost, l[0], 2, m)
+
+        r = self.get_grid(idom)
+        x = _np.outer(r, sint)
+        y = _np.outer(r, cost)
+
+        _plt.pcolormesh(x, y, fg)
+        _plt.title(var)
+        # _plt.colorbar()
+        _plt.show()
 
 def get_compiled_files():
     """
@@ -133,15 +194,10 @@ def load(name):
 
     :param str name: Name of the compiled equation file
     """
-    import sys
-    import importlib
 
-    sys.path.append('@abs_top_builddir@/src/lib/')
+    _sys.path.append('@abs_top_builddir@/src/lib/')
     global libtop
-    libtop = importlib.import_module(name)
-
-    global leg
-    leg = libtop.legpy
+    libtop = _importlib.import_module(name)
 
 def get_lib_version():
     """
@@ -169,11 +225,13 @@ def run_arncheb(shift):
     :param float shift: Initial shift
     """
 
-    global _actual_shift
-    _actual_shift = shift
-    libtop.toppy.init_arncheb()
-    libtop.toppy.py_run_arncheb(shift)
-    return
+    try:
+        global _actual_shift
+        _actual_shift = shift
+        libtop.toppy.init_arncheb()
+        libtop.toppy.py_run_arncheb(shift)
+    except NameError:
+        _error("No library loaded")
 
 def get_nsol():
     """
@@ -182,7 +240,10 @@ def get_nsol():
     :rtype: int
     :return: number of solutions
     """
-    return libtop.toppy.get_nsol_out()
+    try:
+        return libtop.toppy.get_nsol_out()
+    except NameError:
+        _error("You did not run `run_arncheb\' yet")
 
 def _get_adim():
     return libtop.toppy.get_adim()
@@ -194,18 +255,18 @@ def get_valps():
     :rtype: numpy.ndarray
     :return: An array of eigenvalue
     """
-    if libtop == None:
-        _error('No library loaded')
-        return
-    n = get_nsol()
-    dtype = get_dtype()
-    if dtype == 'real':
-        valps = libtop.toppy.get_valps_real(n)
-    elif dtype == 'cplx':
-        valps = libtop.toppy.get_valps_cplx(n)
-    else:
-        _error('Unknown type `%s\'' % dtype)
-    return  valps
+    try:
+        n = get_nsol()
+        dtype = get_dtype()
+        if dtype == 'real':
+            valps = libtop.toppy.get_valps_real(n)
+        elif dtype == 'cplx':
+            valps = libtop.toppy.get_valps_cplx(n)
+        else:
+            _error('Unknown type `%s\'' % dtype)
+        return  valps
+    except NameError:
+        _error("You did not run `run_arncheb\' yet")
 
 def get_dtype():
     return libtop.toppy.dtype().strip()
@@ -217,18 +278,20 @@ def get_vecps():
     :rtype: numpy.ndarray
     :return: An array of eigenvector
     """
+    try:
+        n = get_nsol()
+        adim = _get_adim()
 
-    n = get_nsol()
-    adim = _get_adim()
-
-    dtype = get_dtype()
-    if dtype == 'real':
-        vecps = libtop.toppy.get_vecps_real(n, adim)
-    elif dtype == 'cplx':
-        vecps = libtop.toppy.get_vecps_cplx(n, adim)
-    else:
-        _error('Unknown type `%s\'' % dtype)
-    return vecps
+        dtype = get_dtype()
+        if dtype == 'real':
+            vecps = libtop.toppy.get_vecps_real(n, adim)
+        elif dtype == 'cplx':
+            vecps = libtop.toppy.get_vecps_cplx(n, adim)
+        else:
+            _error('Unknown type `%s\'' % dtype)
+        return vecps
+    except NameError:
+        _error("You did not run `run_arncheb\' yet")
 
 def init_model(filename):
     """
@@ -237,17 +300,19 @@ def init_model(filename):
 
     :param str filename: Filename or directory to read in order to initialize the model
     """
+    try:
+        global _actual_model
+        if type(filename) == str:
+            _actual_model = filename
+        else:
+            _actual_model = filename.tostring().strip()
+        libtop.toppy.py_init_model(filename)
+        global model
+        model = _abs_model()
+    except NameError:
+        _error("No library loaded")
 
-    global _actual_model
-    if type(filename) == str:
-        _actual_model = filename
-    else:
-        _actual_model = filename.tostring().strip()
-    libtop.toppy.py_init_model(filename)
-    global model
-    model = _abs_model()
-
-def get_grid():
+def _get_grid():
     """
     Return the grid
 
@@ -298,7 +363,7 @@ def get_ndom():
     """
     return libtop.toppy.get_ndom()
 
-def get_vars(idom):
+def _get_vars(idom):
     """
     Returns the list of variables defined in a domain
 
@@ -313,32 +378,3 @@ def get_vars(idom):
         ret.append(v.strip())
     return ret
 
-def plot(idom, isol, var, m=0, nth=180):
-    """
-    Plots isol'th solution of variable var in domain number idom
-
-    :param int idom: domain
-    :param int isol: solution to plot
-    :param str var: variable to plot
-    :param int nth: number of theta point for the projection to real space
-    """
-    theta = _np.linspace(_np.pi, 0, nth+1)
-    r = get_grid()
-    cost = _np.cos(theta)
-    sint = _np.sin(theta)
-
-    rs = 0
-    for idm in range(0, idom):
-        nr = libtop.toppy.get_dom_nr(idm+1)
-        rs = rs + nr
-
-    val, vec, l = get_sol(idom, isol, var)
-    fg = leg.eval2d(vec, cost, l[0], 2, m)
-    r = r[rs:rs+vec.shape[0]+1]
-    x = _np.outer(r, sint)
-    y = _np.outer(r, cost)
-
-    _plt.pcolormesh(x, y, fg)
-    _plt.title(var)
-    # _plt.colorbar()
-    _plt.show()

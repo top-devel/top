@@ -131,6 +131,7 @@ try:
         "model.o",
         "ester-interface.o",
         "postproc.o",
+        "legpy.so",
         "-C",
         "@abs_top_builddir@/src",
         "model=" + args.model,
