@@ -45,12 +45,12 @@ class results:
 
         grids = []
         for isol in range(0, self.nsol):
-            self.valps.append([])
             self.vecps.append([])
             self.l.append([])
-            self.vars.append([])
+            sgrp = f['/sol%d' % (isol)]
+            self.valps.append(sgrp.attrs['valp'])
             for idom in range(0, self.ndom):
-                valps = {}
+                valp = {}
                 vecps = {}
                 ls = {}
                 vars = []
@@ -62,14 +62,14 @@ class results:
                 for var in grp.keys():
                     vars.append(var)
                     vgrp = f['/sol%d/dom%d/%s' % (isol, idom, var)]
-                    valps[var] = vgrp.attrs['valp']
                     vecps[var] = vgrp[:, :]
                     ls[var] = vgrp.attrs['l']
 
-                self.valps[-1].append(valps)
                 self.vecps[-1].append(vecps)
                 self.l[-1].append(ls)
-                self.vars[-1].append(vars)
+                if isol == 0:
+                    self.vars.append([])
+                    self.vars[-1] = vars
 
         self.grid = _np.zeros(shape = sum(self.nr))
         for idom in range(0, self.ndom):
@@ -93,24 +93,22 @@ class results:
             self.nr.append(libtop.toppy.get_dom_nr(idom+1))
 
         for isol in range(0, self.nsol):
-            self.valps.append([])
+            self.valps.append(0.0)
             self.vecps.append([])
             self.l.append([])
             for idom in range(0, self.ndom):
-                valps = {}
                 vecps = {}
                 ls = {}
                 for var in self.vars[idom]:
-                    valp, vecp, l = get_sol(idom, isol, var)
-                    valps[var] = valp
+                    valp, vecp, l = _get_sol(idom, isol, var)
                     vecps[var] = vecp
                     ls[var] = l
-                self.valps[-1].append(valps)
                 self.vecps[-1].append(vecps)
                 self.l[-1].append(ls)
+            self.valps[isol] = valp
 
     def get_sol(self, idom, isol, var):
-        valp = self.valps[isol][idom][var]
+        valp = self.valps[isol]
         vecp = self.vecps[isol][idom][var]
         l = self.l[isol][idom][var]
         return valp, vecp, l
@@ -131,6 +129,7 @@ class results:
         f = _h5py.File(h5file, 'w')
         f.attrs['model'] = self.model
         f.attrs['shift'] = self.shift
+        valp = 0.0
         for isol in range(0, self.nsol):
             sgrp = f.create_group('sol%d' % isol)
             skip = 0
@@ -142,8 +141,8 @@ class results:
                 for var in self.vars[idom]:
                     valp, vecp, l = self.get_sol(idom, isol, var)
                     dset = dgrp.create_dataset(var, data = vecp)
-                    dset.attrs['valp'] = valp
                     dset.attrs['l'] = l
+            sgrp.attrs['valp'] = valp
         f.close()
 
     def plot(self, idom, isol, var, m=0, nth=180):
@@ -339,7 +338,7 @@ def write_output(directory):
         d = _mkpath(directory)
     libtop.toppy.pywrite_output(directory)
 
-def get_sol(idom, isol, var):
+def _get_sol(idom, isol, var):
     """
     Get a solution
 
