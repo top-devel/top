@@ -80,6 +80,14 @@ contains
 
     end subroutine
 
+    subroutine get_dom_nr(id, n_r)
+        integer, intent(in) :: id
+        integer, intent(out) :: n_r
+
+        n_r = n_r + grd(id)%nr
+
+    end subroutine
+
     subroutine get_nth(n_th)
         integer, intent(out) :: n_th
 

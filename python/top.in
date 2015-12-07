@@ -63,7 +63,7 @@ def read_dati(datifile):
         global dati
         dati = libtop.inputs
     else:
-        _error('%s: not such file' % dati)
+        _error('%s: not such file' % datifile)
 
 def run_arncheb(shift):
     """
@@ -218,23 +218,23 @@ def plot(idom, isol, var, m=0, nth=180):
     :param str var: variable to plot
     :param int nth: number of theta point for the projection to real space
     """
-    theta = _np.linspace(_np.pi, 0, nth)
+    theta = _np.linspace(_np.pi, 0, nth+1)
     r = get_grid()
     cost = _np.cos(theta)
     sint = _np.sin(theta)
 
     rs = 0
-    for ir in range(0, idom):
-        _, vec, _ = get_sol(idom, isol, var)
-        rs = rs + vec.shape[0]
+    for idm in range(0, idom):
+        nr = libtop.toppy.get_dom_nr(idm+1)
+        rs = rs + nr
 
     val, vec, l = get_sol(idom, isol, var)
     fg = leg.eval2d(vec, cost, l[0], 2, m)
-    r = r[rs:rs+vec.shape[0]]
+    r = r[rs:rs+vec.shape[0]+1]
     x = _np.outer(r, sint)
     y = _np.outer(r, cost)
 
     _plt.pcolormesh(x, y, fg)
     _plt.title(var)
-    _plt.colorbar()
+    # _plt.colorbar()
     _plt.show()
