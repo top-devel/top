@@ -70,7 +70,7 @@ find you libraries:
 
 * ``FC``: allows you to choose your Fortran compiler (e.g. ``FC=gfortran``)
 * ``LDFLAGS``: sets linker flags. This can be used to specify libraries search
-  directory (e.g. ``LDLFAGS=-L$HOME/local/lib``)
+  directory (e.g. ``LDFLAGS=-L$HOME/local/lib``)
 * ``LIBS``: what libraries should be linked with TOP. (e.g. ``LIBS=-ltatlas``)
 * ``CPPFLAGS``: preprocessor flags, this can be used to tell the compiler where
   to find header files (e.g. ``CPPFLAGS=-I$HOME/local/include``)

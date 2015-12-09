@@ -34,9 +34,9 @@ AC_PROG_CXX
 AC_PROG_F77($FC)
 AC_PROG_LIBTOOL(disable-shared)
 AC_PATH_PROG(PERL, perl)
-AC_PATH_PROG(F2PY, f2py)
 
 AM_PATH_PYTHON([2.7])
+AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py$PYTHON_VERSION, f2py)
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
@@ -145,5 +145,6 @@ FCFLAGS:        $FCFLAGS
 FFLAGS:         $FFLAGS
 LDLFAGS:        $LDFLAGS
 LIBS:           $LIBS
+F2PY:           $F2PY
 
 EOF

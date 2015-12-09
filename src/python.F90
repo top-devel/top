@@ -129,11 +129,9 @@ contains
 
         integer :: id, skip, npts
 
-        print*, "nr zeta: ", nr
         skip = 1
         do id=1, ndomains-1
             npts = grd(id)%nr
-            print"(A, I2, A, I2)", "dom:", id, " npts=", npts
             zeta(skip:skip+npts) = grd(id)%r
             skip = skip + npts
         enddo
