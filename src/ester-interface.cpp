@@ -73,18 +73,14 @@ void get_nex_(int *pts) {
 
 extern "C"
 void get_npts_(int *pts) {
-    int i;
-
-    for (i=0; i<s.ndomains; i++) {
+    for (int i=0; i<s.ndomains; i++) {
         pts[i] = s.map.gl.npts[i];
     }
 }
 
 extern "C"
 void get_theta_(double *th) {
-    int i;
-
-    for (i=0; i<s.nth; i++) {
+    for (int i=0; i<s.nth; i++) {
         th[i] = s.th(i);
     }
 }
@@ -100,51 +96,47 @@ void get_zeta_(double *z) {
 
 extern "C"
 void get_mass_(double *m) {
-    int i;
-
     *m = s.M;
 }
 
 extern "C"
 void get_radius_(double *r) {
-    int i;
-
     *r = s.R;
 }
 
 extern "C"
 void get_lum_(double *lum) {
-    int i;
-
     *lum = s.luminosity();
 }
 
 extern "C"
 void get_omega_(double *omega) {
-    int i;
-
     *omega = s.Omega;
 }
 
 extern "C"
 void get_x_(double *X) {
-    int i;
-
     *X = s.X0;
 }
 
 extern "C"
 void get_z_(double *Z) {
-    int i;
-
     *Z = s.Z0;
 }
 
 extern "C"
 void get_xc_(double *Xc) {
-    int i;
-
     *Xc = s.Xc;
+}
+
+extern "C"
+void cpp_get_grid_(double *grid, double *th) {
+    for(int j=0; j<s.nth; j++) {
+        th[j] = s.th(j);
+        for(int i=0; i<s.nr; i++) {
+            grid[i*s.nth + j] = s.r(i, j);
+        }
+    }
 }
 
 #endif

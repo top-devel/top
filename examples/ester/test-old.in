@@ -12,4 +12,4 @@ if __name__ == '__main__':
     # retrieve the results
     res = top.results()
     for idom in range(0, res.ndom-1):
-        top.plot(idom, 2, 'Phi%d' % (idom+1))
+        res.plot(idom, 2, 'Phi%d' % (idom+1))

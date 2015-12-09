@@ -48,6 +48,8 @@ module model
       contains
           procedure :: init => init_ester_model
           procedure :: get_field => ester_get_field
+        procedure :: get_grid => ester_get_grid
+        procedure :: get_grid_size => ester_get_grid_size
       end type model_ester
 
       integer, save :: nrm, nthm, ndom, nconv, npts_max
@@ -66,6 +68,42 @@ module model
       double precision, parameter :: G = 6.672d-8 !cm^3.g^-1.s^-2
 
 contains
+
+    subroutine ester_get_grid_size(this, n_r, n_t)
+
+        class(model_ester) :: this
+        integer, intent(out) :: n_r, n_t
+
+        integer :: id
+
+        n_r = 0
+        do id=1, ndomains-1
+            n_r = n_r + grd(id)%nr
+        enddo
+        n_t = lres
+
+    end subroutine ester_get_grid_size
+    !------------------------------------------------------------------------
+    subroutine ester_get_grid(this, r, th, nr, nt)
+
+        class(model_ester) :: this
+        real(kind=8), intent(out) :: r(nr, nt), th(nt)
+        integer, intent(in) :: nr, nt
+
+        integer :: id, skip, npts, it
+
+        th = acos(cth)
+        skip = 0
+        do id=1, ndomains-1
+            npts = grd(id)%nr
+            do it=1, lres
+                r(1+skip:npts+1, it) = s(id)%r_map(:, it) * grd(id)%r(:)
+            enddo
+            skip = skip + npts
+        enddo
+
+
+    end subroutine ester_get_grid
 
       subroutine ester_get_field(this, fname, field)
 

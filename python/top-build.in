@@ -107,7 +107,7 @@ if is_multi(eqfile):
 else:
     sys.stdout.write("mono)")
 
-sys.stdout.write(": ")
+sys.stdout.write("... ")
 sys.stdout.flush()
 
 try:

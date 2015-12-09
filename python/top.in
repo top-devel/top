@@ -36,14 +36,15 @@ class results:
         self.l = []
 
         f = _h5py.File(h5result, 'r')
-        self.nsol = len(f['/'])
+        self.nsol = len(f['/']) - 2 # minus r and theta fields
         self.model = f.attrs['model']
         self.shift = f.attrs['shift']
+        self.lres = f.attrs['lres']
         self.ndom = len(f['sol0'].keys())
         self.vars = []
         self.nr = []
 
-        grids = []
+        zeta = []
         for isol in range(0, self.nsol):
             self.vecps.append([])
             self.l.append([])
@@ -56,14 +57,14 @@ class results:
                 vars = []
                 grp = f['/sol%d/dom%d' % (isol, idom)]
                 if isol == 0:
-                    dom_grid = grp.attrs['grid']
+                    dom_grid = grp.attrs['zeta']
                     self.nr.append(len(dom_grid))
-                    grids.append(dom_grid)
+                    zeta.append(dom_grid)
                 for var in grp.keys():
                     vars.append(var)
-                    vgrp = f['/sol%d/dom%d/%s' % (isol, idom, var)]
-                    vecps[var] = vgrp[:, :]
-                    ls[var] = vgrp.attrs['l']
+                    vdset = f['/sol%d/dom%d/%s' % (isol, idom, var)]
+                    vecps[var] = vdset[:, :]
+                    ls[var] = vdset.attrs['l']
 
                 self.vecps[-1].append(vecps)
                 self.l[-1].append(ls)
@@ -71,10 +72,13 @@ class results:
                     self.vars.append([])
                     self.vars[-1] = vars
 
-        self.grid = _np.zeros(shape = sum(self.nr))
+        self.zeta = _np.zeros(shape = sum(self.nr))
         for idom in range(0, self.ndom):
             skip = sum(self.nr[0:idom])
-            self.grid[skip:skip+self.nr[idom]] = _np.array(grids[idom])
+            self.zeta[skip:skip+self.nr[idom]] = _np.array(zeta[idom])
+        self.r = f['/r'][:, :]
+        self.theta = f['/theta'][:]
+        f.close()
 
     def from_top(self):
         self.nsol = get_nsol()
@@ -86,7 +90,9 @@ class results:
         self.shift = _actual_shift
         self.model = _actual_model
         self.nr = []
-        self.grid = _get_grid()
+        self.r, self.theta = _get_grid()
+        self.zeta = _get_zeta()
+        self.lres = dati.lres
 
         for idom in range(0, self.ndom):
             self.vars.append(_get_vars(idom))
@@ -120,23 +126,25 @@ class results:
                 nr = self.nr[i]
                 skip = skip + nr
             nr = self.nr[idom]
-            return self.grid[skip:skip+nr]
+            return self.r[skip:skip+nr], self.theta
         else:
-            return self.grid
-
+            return self.r, self.theta
 
     def save(self, h5file):
         f = _h5py.File(h5file, 'w')
         f.attrs['model'] = self.model
         f.attrs['shift'] = self.shift
+        f.attrs['lres'] = self.lres
         valp = 0.0
+        f.create_dataset('r', data = self.r)
+        f.create_dataset('theta', data = self.theta)
         for isol in range(0, self.nsol):
             sgrp = f.create_group('sol%d' % isol)
             skip = 0
             for idom in range(0, self.ndom):
                 nr = self.nr[idom]
                 dgrp = sgrp.create_group('dom%d' % idom)
-                dgrp.attrs['grid'] = self.grid[skip:skip+nr]
+                dgrp.attrs['zeta'] = self.zeta[skip:skip+nr]
                 skip = skip + nr
                 for var in self.vars[idom]:
                     valp, vecp, l = self.get_sol(idom, isol, var)
@@ -155,17 +163,17 @@ class results:
         :param int nth: number of theta point for the projection to real space
         """
 
-        theta = _np.linspace(_np.pi, 0, nth+1)
+        val, vec, l = self.get_sol(idom, isol, var)
+
+        r, theta = self.get_grid(idom)
         cost = _np.cos(theta)
         sint = _np.sin(theta)
 
-        val, vec, l = self.get_sol(idom, isol, var)
-
+        # fg = vec
         fg = leg.eval2d(vec, cost, l[0], 2, m)
 
-        r = self.get_grid(idom)
-        x = _np.outer(r, sint)
-        y = _np.outer(r, cost)
+        x = r * sint
+        y = r * cost
 
         _plt.pcolormesh(x, y, fg)
         _plt.title(var)
@@ -319,8 +327,19 @@ def _get_grid():
     :return: The grid of the model
     """
 
-    nr = libtop.toppy.get_nr()
-    return libtop.toppy.get_grid(nr)
+    nr, nt = libtop.toppy.get_grid_size()
+    return libtop.toppy.get_grid(nr, nt)
+
+def _get_zeta():
+    """
+    Return the radial grid in zeta coordinate
+
+    :rtype: numpy.ndarray
+    :return: The grid of the model
+    """
+
+    nr, _ = libtop.toppy.get_grid_size()
+    return libtop.toppy.get_zeta(nr)
 
 def get_model_field(fname):
     n1, n2 = libtop.toppy.model_get_field_size(fname)
@@ -376,4 +395,3 @@ def _get_vars(idom):
         v = libtop.toppy.get_var_name(idom+1, i+1)
         ret.append(v.strip())
     return ret
-

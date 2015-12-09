@@ -7,9 +7,8 @@ module toppy
     use abstract_model_mod, only: abstract_model, model_ptr
     use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
     use model, only: init_model
-    use inputs, only: read_inputs
+    use inputs, only: read_inputs, lres
     use postproc, only: write_output, get_sol, get_lvar_size, get_lvar
-    use mod_legendre
 
     implicit none
 
@@ -74,9 +73,23 @@ contains
         integer :: id
 
         n_r = 0
-        do id=1, ndomains
+        do id=1, ndomains-1
             n_r = n_r + grd(id)%nr
         enddo
+
+    end subroutine
+
+    subroutine get_nt(n_t)
+        integer, intent(out) :: n_t
+
+        n_t = nt
+
+    end subroutine
+
+    subroutine get_lres(l_res)
+        integer, intent(out) :: l_res
+
+        l_res = lres
 
     end subroutine
 
@@ -95,16 +108,34 @@ contains
 
     end subroutine
 
-    subroutine get_grid(nr, grid)
+    subroutine get_grid_size(nr, nt)
+        integer, intent(out) :: nr, nt
+
+        call model_ptr%get_grid_size(nr, nt)
+
+    end subroutine
+
+    subroutine get_grid(grid, th, nr, nt)
+        integer, intent(in) :: nr, nt
+        real(kind=8), intent(out) :: grid(nr, nt), th(nt)
+
+        call model_ptr%get_grid(grid, th, nr, nt)
+
+    end subroutine
+
+    subroutine get_zeta(zeta, nr)
         integer, intent(in) :: nr
-        real(kind=8), intent(out) :: grid(nr)
+        real(kind=8), intent(out) :: zeta(nr)
 
-        integer :: ir, id
+        integer :: id, skip, npts
 
-        ir = 1
-        do id=1, ndomains
-            grid(ir:ir+grd(id)%nr-1) = grd(id)%r(:)
-            ir = ir + grd(id)%nr
+        print*, "nr zeta: ", nr
+        skip = 1
+        do id=1, ndomains-1
+            npts = grd(id)%nr
+            print"(A, I2, A, I2)", "dom:", id, " npts=", npts
+            zeta(skip:skip+npts) = grd(id)%r
+            skip = skip + npts
         enddo
 
     end subroutine

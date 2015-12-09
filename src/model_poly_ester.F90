@@ -17,11 +17,33 @@ module model
       contains
           procedure :: init => init_poly_ester_model
           procedure :: get_field => poly_ester_get_field
+          procedure :: get_grid => poly_ester_get_grid
+          procedure :: get_grid_size => poly_ester_get_grid_size
       end type model_poly_ester
 
 contains
 
 !------------------------------------------------------------------------
+      subroutine poly_ester_get_grid_size(this, n_r, n_t)
+
+          class(model_poly_ester) :: this
+          integer, intent(out) :: n_r, n_t
+
+          n_r = grd(1)%nr
+          n_t = lres
+
+      end subroutine poly_ester_get_grid_size
+
+      subroutine poly_ester_get_grid(this, r, th, nr, nt)
+
+          class(model_poly_ester) :: this
+          real(kind=8), intent(out) :: r(nr, nt), th(nt)
+          integer, intent(in) :: nr, nt
+
+          r = r_map
+          th = acos(cth)
+      end subroutine poly_ester_get_grid
+
       subroutine poly_ester_get_field(this, fname, field)
 
           class(model_poly_ester) :: this
@@ -358,12 +380,12 @@ contains
               if (lmod.ne.lmod_temp) &
                   stop "Error: lmod in domains_boundaries is not compatible"
               if (lmod.ge.lres) stop 'lmod.ge.lres: not implemented'
-              if (allocated(r_map)) deallocate ( r_map, r_t,          &
-                  r_z, re_map,         &
-                  re_t, re_z,          &
-                  r_zz, r_zt,          &
-                  r_tt, re_zz,         &
-                  re_zt, re_tt,        &
+              if (allocated(r_map)) deallocate ( r_map, r_t,    &
+                  r_z, re_map,                                  &
+                  re_t, re_z,                                   &
+                  r_zz, r_zt,                                   &
+                  r_tt, re_zz,                                  &
+                  re_zt, re_tt,                                 &
                   zeta, cth, sth, cost, sint, cott)
 
               allocate(r_spec(lres), rs(lres), rsp(lres))
@@ -379,8 +401,8 @@ contains
               allocate(sth(lres), w(lres), cost(grd(1)%nr, lres))
               allocate(sint(grd(1)%nr, lres), cott(grd(1)%nr, lres))
 
-              r_spec=0d0;rs=0d0;rsp=0d0;r_map=0d0;r_t=0d0;r_z=0d0;re_map=0d0;
-              re_t=0d0;re_z=0d0;zeta=0d0;a=0d0;ap=0d0;ae=0d0;aep=0d0;
+              r_spec=0d0; rs=0d0; rsp=0d0; r_map=0d0; r_t=0d0; r_z=0d0; re_map=0d0;
+              re_t=0d0; re_z=0d0; zeta=0d0; a=0d0; ap=0d0; ae=0d0; aep=0d0;
               read(3, *) (aux, i=1, lmod+1)
               read(3, *) r_spec(1:lmod+1)
               close(3)
@@ -389,9 +411,9 @@ contains
               call gauleg(-1d0, 1d0, cth, w, lres)
               sth = sqrt(1d0-cth**2)
               do i=1, grd(1)%nr
-              sint(i, :) = sth(:)
-              cost(i, :) = cth(:)
-              cott(i, :) = cth(:)/sth(:)
+                  sint(i, :) = sth(:)
+                  cost(i, :) = cth(:)
+                  cott(i, :) = cth(:)/sth(:)
               enddo
 
               call legendre(r_spec(1:lres), rs(1:lres), lres, 0, -1)
