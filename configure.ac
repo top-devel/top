@@ -39,6 +39,32 @@ AM_PATH_PYTHON([2.7])
 AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py$PYTHON_VERSION, f2py)
 
 # Checks for libraries.
+
+AC_LANG_PUSH(Fortran)
+AC_MSG_CHECKING([whether Fortran compiler supports procedure interface])
+AC_COMPILE_IFELSE(
+              [AC_LANG_PROGRAM([], [
+               type, abstract :: abstract_type
+               contains
+               procedure(foo_inter), deferred :: foo
+               end type abstract_type
+               abstract interface
+               subroutine foo_inter(this)
+                   import abstract_type
+                   class(abstract_type) :: this
+               end subroutine foo_inter
+               end interface
+               ])],
+              [inter=yes],
+              [inter=no])
+AC_MSG_RESULT($inter)
+AC_LANG_POP(Fortran)
+
+AS_IF([test "x$inter" == "xno"],
+      [AC_ERROR(Your Fortran compiler does not support procedure interface. Try using a newer one)])
+
+
+
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([ester], [ester_version],
              [found_ester="yes"],
