@@ -16,6 +16,7 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/ester-interface.cpp \
 			 src/abstract_model.F90 \
 			 src/postproc.F90 \
+			 src/legpy.F90 \
 			 sourceme.in
 
 
