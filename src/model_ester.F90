@@ -198,8 +198,8 @@ contains
         rota_avg = rotation*t_ref
 
 #else
-        print*, "TOP was compiled without libester support..."
-        print*, "Cannot read Ester models"
+        print"(A)", "TOP was compiled without libester support..."
+        print"(A)", "Cannot read Ester models"
 #endif
 
     end subroutine read_model

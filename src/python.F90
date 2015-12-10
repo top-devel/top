@@ -6,8 +6,7 @@ module toppy
     use mod_grid, only: ndomains, grd, nt
     use abstract_model_mod, only: abstract_model, model_ptr
     use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
-    use model, only: init_model
-    use inputs, only: read_inputs, lres
+    use inputs, only: read_inputs, lres, init_default
     use postproc, only: write_output, get_sol, get_lvar_size, get_lvar
 
     implicit none
@@ -144,12 +143,6 @@ contains
         v = VERSION
     end subroutine
 
-    subroutine py_init_model(modelfile)
-        character(len=*), intent(in) :: modelfile
-
-        call init_model(modelfile)
-    end subroutine
-
     subroutine read_dati(dati)
         character(len=*), intent(in) :: dati
 
@@ -235,10 +228,14 @@ contains
         call get_lvar(idom, var, l)
     end subroutine pyget_lvar
 
+    subroutine init_dati()
+        call init_default()
+    end subroutine init_dati
 end module toppy
 
 module modelpy
     use abstract_model_mod
+    use model, only: init_model
     implicit none
 
 contains
@@ -267,5 +264,11 @@ contains
         deallocate(tmp)
 
     end subroutine get_field
+
+    subroutine py_init_model(modelfile)
+        character(len=*), intent(in) :: modelfile
+
+        call init_model(modelfile)
+    end subroutine
 
 end module modelpy

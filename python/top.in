@@ -17,32 +17,54 @@ leg = _legpy.legpy
 def _error(msg):
     raise Exception(msg)
 
-class _abs_model:
-    def get_field(self, fname):
-        n1, n2 = libtop.modelpy.get_field_size(fname)
-        return libtop.modelpy.get_field(fname, n1, n2)
+class model:
+    filename = ''
+    libmodel = None
+    def __init__(self, libmodel, filename):
+        if type(filename) == str:
+            self.filename = filename
+        else:
+            self.filename = filename.tostring().strip()
+        self.libmodel = libmodel
+        self.libmodel.py_init_model(filename)
+
+    def __getitem__(self, name):
+        n1, n2 = self.libmodel.get_field_size(name)
+        return self.libmodel.get_field(name, n1, n2)
+
 
 class results:
+    valps = []
+    vecps = []
+    l = []
+    nsol = 0
+    modelfile = None
+    shift = 0
+    lres = 0
+    libname = None
+    dati = {}
+    ndom = 0
+    vars = []
+    nr = []
+    zeta = []
+    r = []
+    theta = []
+
     def __init__(self, result_file = ''):
-        if result_file == '':
-            self.from_top()
-        else:
+        if result_file != '':
             self.from_file(result_file)
 
     def from_file(self, h5result):
 
-        self.valps = []
-        self.vecps = []
-        self.l = []
-
         f = _h5py.File(h5result, 'r')
         self.nsol = len(f['/']) - 2 # minus r and theta fields
-        self.model = f.attrs['model']
+        self.modelfile = f.attrs['modelfile']
         self.shift = f.attrs['shift']
         self.lres = f.attrs['lres']
+        self.libname = f.attrs['eq']
+        for k, v in f.attrs.items():
+            self.dati[k] = v
         self.ndom = len(f['sol0'].keys())
-        self.vars = []
-        self.nr = []
 
         zeta = []
         for isol in range(0, self.nsol):
@@ -80,39 +102,6 @@ class results:
         self.theta = f['/theta'][:]
         f.close()
 
-    def from_top(self):
-        self.nsol = get_nsol()
-        self.ndom = get_ndom()
-        self.valps = []
-        self.vecps = []
-        self.l = []
-        self.vars = []
-        self.shift = _actual_shift
-        self.model = _actual_model
-        self.nr = []
-        self.r, self.theta = _get_grid()
-        self.zeta = _get_zeta()
-        self.lres = dati.lres
-
-        for idom in range(0, self.ndom):
-            self.vars.append(_get_vars(idom))
-            self.nr.append(libtop.toppy.get_dom_nr(idom+1))
-
-        for isol in range(0, self.nsol):
-            self.valps.append(0.0)
-            self.vecps.append([])
-            self.l.append([])
-            for idom in range(0, self.ndom):
-                vecps = {}
-                ls = {}
-                for var in self.vars[idom]:
-                    valp, vecp, l = _get_sol(idom, isol, var)
-                    vecps[var] = vecp
-                    ls[var] = l
-                self.vecps[-1].append(vecps)
-                self.l[-1].append(ls)
-            self.valps[isol] = valp
-
     def get_sol(self, idom, isol, var):
         valp = self.valps[isol]
         vecp = self.vecps[isol][idom][var]
@@ -132,9 +121,15 @@ class results:
 
     def save(self, h5file):
         f = _h5py.File(h5file, 'w')
-        f.attrs['model'] = self.model
+        f.attrs['modelfile'] = self.modelfile
         f.attrs['shift'] = self.shift
         f.attrs['lres'] = self.lres
+        f.attrs['eq'] = self.libname
+        for k, v in self.dati.items():
+            if v.dtype == _np.dtype('S1'):
+                f.attrs[k] = v.tostring().strip()
+            else:
+                f.attrs[k] = v
         valp = 0.0
         f.create_dataset('r', data = self.r)
         f.create_dataset('theta', data = self.theta)
@@ -153,16 +148,27 @@ class results:
             sgrp.attrs['valp'] = valp
         f.close()
 
-    def plot(self, idom, isol, var, m=0, nth=180):
+    def plot_val(self, mat):
+        r, theta = self.get_grid()
+        cost = _np.cos(theta)
+        sint = _np.sin(theta)
+
+        # fg = vec
+        x = r * sint
+        y = r * cost
+
+        _plt.pcolormesh(x, y, mat)
+        # _plt.colorbar()
+        _plt.show()
+
+    def plot(self, idom, isol, var, m=0):
         """
         Plots isol'th solution of variable var in domain number idom
 
         :param int idom: domain
         :param int isol: solution to plot
         :param str var: variable to plot
-        :param int nth: number of theta point for the projection to real space
         """
-
         val, vec, l = self.get_sol(idom, isol, var)
 
         r, theta = self.get_grid(idom)
@@ -180,6 +186,12 @@ class results:
         # _plt.colorbar()
         _plt.show()
 
+    def read_model(self):
+        p = load(self.libname)
+        p.dati.lres = self.lres
+        return p.init_model(self.modelfile)
+
+
 def get_compiled_files():
     """
     Get the list of compiled equation files (that can be loaded with
@@ -195,203 +207,108 @@ def get_compiled_files():
                 files.append(filename[0:-3])
     return files
 
-def load(name):
-    """
-    Load a compiled equation file
+class load:
+    lib = None
+    name = None
+    dati = None
+    modelfile = ''
+    libmodel = None
+    shift = 0
 
-    :param str name: Name of the compiled equation file
-    """
+    def __init__(self, name):
+        if not '@abs_top_builddir@/src/lib/' in _sys.path:
+            _sys.path.append('@abs_top_builddir@/src/lib/')
+        lib = _importlib.import_module(name)
+        self.lib = lib.toppy
+        self.libmodel = lib.modelpy
+        lib.toppy.init_dati()
+        self.name = name
+        self.dati = lib.inputs
 
-    _sys.path.append('@abs_top_builddir@/src/lib/')
-    global libtop
-    libtop = _importlib.import_module(name)
+    def get_version(self):
+        return self.lib.get_version().strip()
 
-def get_lib_version():
-    """
-    Get loaded library TOP version
-    """
-    return libtop.toppy.get_version().strip()
+    def read_dati(self, filename):
+        self.lib.read_dati(filename)
 
-def read_dati(datifile):
-    """
-    Read a 'dati' file and initialize internal variables with values defined in it
+    def init_model(self, filename):
+        self.modelfile = filename
+        self.model = model(self.libmodel, filename)
+        return self.model
 
-    :param str datifile: File to read
-    """
-    if _os.access(datifile, _os.F_OK):
-        libtop.toppy.read_dati(datifile)
-        global dati
-        dati = libtop.inputs
-    else:
-        _error('%s: not such file' % datifile)
-
-def run_arncheb(shift):
-    """
-    Run the Arnoldi-Chebyshev method
-
-    :param float shift: Initial shift
-    """
-
-    try:
-        global _actual_shift
-        _actual_shift = shift
-        libtop.toppy.init_arncheb()
-        libtop.toppy.py_run_arncheb(shift)
-    except NameError:
-        _error("No library loaded")
-
-def get_nsol():
-    """
-    Return the number of solutions computed by Arnoldi-Chebyshev method
-
-    :rtype: int
-    :return: number of solutions
-    """
-    try:
-        return libtop.toppy.get_nsol_out()
-    except NameError:
-        _error("You did not run `run_arncheb\' yet")
-
-def _get_adim():
-    return libtop.toppy.get_adim()
-
-def get_valps():
-    """
-    Retrieve eigenvalues computed by :py:func:`top.run_arncheb`
-
-    :rtype: numpy.ndarray
-    :return: An array of eigenvalue
-    """
-    try:
-        n = get_nsol()
-        dtype = get_dtype()
-        if dtype == 'real':
-            valps = libtop.toppy.get_valps_real(n)
-        elif dtype == 'cplx':
-            valps = libtop.toppy.get_valps_cplx(n)
+    def run_arncheb(self, shift):
+        if self.modelfile != '':
+            self.lib.init_arncheb()
+            self.shift = shift
+            self.lib.py_run_arncheb(shift)
+            return self.get_results()
         else:
-            _error('Unknown type `%s\'' % dtype)
-        return  valps
-    except NameError:
-        _error("You did not run `run_arncheb\' yet")
+            _error('model not initialized')
 
-def get_dtype():
-    return libtop.toppy.dtype().strip()
+    def get_grid(self):
+        nr, nt = self.lib.get_grid_size()
+        return self.lib.get_grid(nr, nt)
 
-def get_vecps():
-    """
-    Return the eigenvectors computed by :py:func:`top.run_arncheb`
+    def get_zeta(self):
+        nr, _ = self.lib.get_grid_size()
+        return self.lib.get_zeta(nr)
 
-    :rtype: numpy.ndarray
-    :return: An array of eigenvector
-    """
-    try:
-        n = get_nsol()
-        adim = _get_adim()
+    def get_sol(self, idom, isol, var):
+        nr, nt = self.lib.get_solsize(idom+1)
+        valp, vecp = self.lib.get_sol_real(idom+1, isol+1, var, nr, nt)
+        l = self.lib.pyget_lvar(idom+1, var, nt)
+        return valp, vecp, l
 
-        dtype = get_dtype()
-        if dtype == 'real':
-            vecps = libtop.toppy.get_vecps_real(n, adim)
-        elif dtype == 'cplx':
-            vecps = libtop.toppy.get_vecps_cplx(n, adim)
-        else:
-            _error('Unknown type `%s\'' % dtype)
-        return vecps
-    except NameError:
-        _error("You did not run `run_arncheb\' yet")
+    def get_vars(self, idom):
+        nvars = self.lib.get_nvars(idom+1)
+        ret = []
+        for i in range(0, nvars):
+            v = self.lib.get_var_name(idom+1, i+1)
+            ret.append(v.strip())
+        return ret
 
-def init_model(filename):
-    """
-    Initialize the model by calling the Fortran routine init_model of the model
-    compiled with the equation file currently loaded.
+    def get_results(self):
+        res = results()
+        res.nsol = self.lib.get_nsol_out()
+        res.ndom = self.lib.get_ndom()
+        res.valps = []
+        res.vecps = []
+        res.l = []
+        res.vars = []
+        res.shift = self.shift
+        res.modelfile = self.modelfile
+        res.nr = []
+        res.r, res.theta = self.get_grid()
+        res.zeta = self.get_zeta()
+        res.lres = self.dati.lres
+        res.libname = self.name
+        res.dati = {}
+        d = vars(self.dati).items()
+        for i in range(len(d)):
+            k, v = d[i]
+            if type(v) == _np.ndarray:
+                res.dati[k] = v
 
-    :param str filename: Filename or directory to read in order to initialize the model
-    """
-    try:
-        global _actual_model
-        if type(filename) == str:
-            _actual_model = filename
-        else:
-            _actual_model = filename.tostring().strip()
-        libtop.toppy.py_init_model(filename)
-        global model
-        model = _abs_model()
-    except NameError:
-        _error("No library loaded")
+        for idom in range(0, res.ndom):
+            res.vars.append(self.get_vars(idom))
+            res.nr.append(self.lib.get_dom_nr(idom+1))
 
-def _get_grid():
-    """
-    Return the grid
+        for isol in range(0, res.nsol):
+            res.valps.append(0.0)
+            res.vecps.append([])
+            res.l.append([])
+            for idom in range(0, res.ndom):
+                vecps = {}
+                ls = {}
+                for var in res.vars[idom]:
+                    valp, vecp, l = self.get_sol(idom, isol, var)
+                    vecps[var] = vecp
+                    ls[var] = l
+                res.vecps[-1].append(vecps)
+                res.l[-1].append(ls)
+            res.valps[isol] = valp
 
-    :rtype: numpy.ndarray
-    :return: The grid of the model
-    """
+        return res
 
-    nr, nt = libtop.toppy.get_grid_size()
-    return libtop.toppy.get_grid(nr, nt)
-
-def _get_zeta():
-    """
-    Return the radial grid in zeta coordinate
-
-    :rtype: numpy.ndarray
-    :return: The grid of the model
-    """
-
-    nr, _ = libtop.toppy.get_grid_size()
-    return libtop.toppy.get_zeta(nr)
-
-def get_model_field(fname):
-    n1, n2 = libtop.toppy.model_get_field_size(fname)
-    return libtop.toppy.model_get_field(fname, n1, n2)
-
-def write_output(directory):
-    """
-    Writes TOP's output to directory
-
-    :param str directory: directory where to save Arnoldi-Chebyshev method's output
-    """
-    if directory[-1] != '/':
-        directory = '%s/' % directory
-    if not _os.access(directory, _os.F_OK):
-        d = _mkpath(directory)
-    libtop.toppy.pywrite_output(directory)
-
-def _get_sol(idom, isol, var):
-    """
-    Get a solution
-
-    :param int idom: domain of the solution
-    :param int isol: solution number
-    :param str var: name of the variable
-    :rtype: tuple
-    :return: eigenvalue and eigenvector of the isol'th solution in the idom'th domain of variable var
-    """
-    nr, nt = libtop.toppy.get_solsize(idom+1)
-    valp, vecp = libtop.toppy.get_sol_real(idom+1, isol+1, var, nr, nt)
-    l = libtop.toppy.pyget_lvar(idom+1, var, nt)
-    return valp, vecp, l
-
-def get_ndom():
-    """
-    Returns the number of domains of the problem
-
-    :rtype: int
-    :return: number of domains
-    """
-    return libtop.toppy.get_ndom()
-
-def _get_vars(idom):
-    """
-    Returns the list of variables defined in a domain
-
-    :param int idom: domain
-    :rtype: [str]
-    :return: list of variables in the idom'th domain
-    """
-    nvars = libtop.toppy.get_nvars(idom+1)
-    ret = []
-    for i in range(0, nvars):
-        v = libtop.toppy.get_var_name(idom+1, i+1)
-        ret.append(v.strip())
-    return ret
+    def get_dtype(self):
+        return self.lib.dtype().strip()

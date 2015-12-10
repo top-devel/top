@@ -159,7 +159,7 @@ contains
               field = cott
               return
           else
-              print*, 'Unknown field:', fname
+              print"(A, A)", 'Unknown field:', fname
               allocate(field(1, 1))
               field = 0.0
           endif
@@ -172,10 +172,10 @@ contains
           character(len=*), intent(in) :: filename
 
           call read_model(filename)
-          call read_poly()
+          call read_poly(filename)
           call init_radial_grid()
           call write_grid()
-          call make_mapping(lres)
+          call make_mapping(filename, lres)
 
           model_ptr => this
 
@@ -240,12 +240,13 @@ contains
       end subroutine read_model
 
 !------------------------------------------------------------------------
-      subroutine read_poly()
+      subroutine read_poly(dirmodel)
 
           use mod_legendre
-          use inputs
+          ! use inputs
           implicit none
 
+          character(len=*), intent(in) :: dirmodel
           integer i, j, l, k, nr_temp, lmod_temp
           double precision, allocatable :: hh_spec(:, :), hhz_spec(:, :)
           double precision, allocatable :: hhzz_spec(:, :)
@@ -355,12 +356,13 @@ contains
           end subroutine
 
 !-----------------------------------------------------------------------
-          subroutine make_mapping(lres)
+          subroutine make_mapping(dirmodel, lres)
 
               use mod_legendre
-              use inputs, only: dirmodel, lmod
+              use inputs, only: lmod
 
               implicit none
+              character(len=*), intent(in) :: dirmodel
               integer, intent(in) :: lres
               integer i, lmod_temp, l
               double precision cnst, pi, xi, aux

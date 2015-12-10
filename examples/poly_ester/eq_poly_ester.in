@@ -8,7 +8,6 @@ input lres I4
 input lmod I3
 input lmax I3
 input iCor I1
-input dirmodel A512
 input dirmodroot A512
 input tagdir A512
 input serie A512
