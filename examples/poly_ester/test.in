@@ -1,12 +1,38 @@
 #!@PYTHON@
 
 import top
+import numpy as np
 
 if __name__ == '__main__':
-    top.load('eq_poly_ester')
-    top.read_dati('@builddir@/dati')
-    top.init_model('@builddir@/model/')
-    top.run_arncheb(top.dati.shift)
+    l = top.load('eq_poly_ester')
+    l.read_dati('@builddir@/dati')
+    l.init_model('@builddir@/model/')
+    res = l.run_arncheb(l.dati.shift)
 
-    res = top.results()
     res.plot(0, 5, 'B')
+
+    # save results for later use
+    res.save('/tmp/res.h5')
+
+    # read saved results
+    r = top.results('/tmp/res.h5')
+
+    # read the model to compute the results
+    m = r.read_model()
+
+    # get enthalpy from the model and plot it
+    h = m['hh']
+    r.plot_val(h)
+
+    # get a solution for Pi:
+    val, pi, l = r.get_sol(0, 5, 'Pi')
+
+    # get the grid of the model
+    radius, theta = r.get_grid()
+    cost = np.cos(theta)
+
+    # project the solution on the grid
+    pi = top.leg.eval2d(pi, cost, l[0], 2, r.dati['m'])
+
+    # and plot an expression of pi and h:
+    r.plot_val(pi*np.sqrt(h)**r.dati['pindex'])

@@ -3,13 +3,10 @@
 import top
 
 if __name__ == '__main__':
-    top.load('eq_ESTER_old_all_lagrange')
-    top.read_dati('@builddir@/dati')
-    # top.init_model('@builddir@/star.h5')
-    top.init_model(top.dati.filename)
-    top.run_arncheb(top.dati.shift)
+    l = top.load('eq_ESTER_old_all_lagrange')
+    l.read_dati('@builddir@/dati')
+    l.init_model('@builddir@/d.dat')
+    res = l.run_arncheb(l.dati.shift)
 
-    # retrieve the results
-    res = top.results()
     for idom in range(0, res.ndom-1):
         res.plot(idom, 2, 'Phi%d' % (idom+1))
