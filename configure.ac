@@ -36,7 +36,7 @@ AC_PROG_LIBTOOL(disable-shared)
 AC_PATH_PROG(PERL, perl)
 
 AM_PATH_PYTHON([2.7])
-AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py$PYTHON_VERSION, f2py)
+AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py)
 
 # Checks for libraries.
 
