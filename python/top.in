@@ -312,3 +312,9 @@ class load:
 
     def get_dtype(self):
         return self.lib.dtype().strip()
+
+    def write_output(self, dir):
+        if dir[-1] != '/':
+            dir = dir + '/'
+        _mkpath(dir)
+        self.lib.pywrite_output(dir)
