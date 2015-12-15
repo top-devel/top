@@ -320,10 +320,6 @@ contains
         implicit none
         integer id
 
-        do id=1, ndom
-            deallocate(grd(id)%r)
-        enddo
-
         do id=1, ndom-1
             deallocate(s(id)%p_raw)
             deallocate(s(id)%p_z_raw)
