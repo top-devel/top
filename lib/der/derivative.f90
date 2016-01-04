@@ -14,8 +14,8 @@
 
       type DERMAT
         integer :: der_max, der_min, der_id, ngrid
-        integer, pointer :: ubder(:), lbder(:)
-        double precision, pointer :: derive(:,:,:)
+        integer, allocatable :: ubder(:), lbder(:)
+        double precision, allocatable :: derive(:,:,:)
       end type DERMAT
 
 !------------------------------------------------------------------------------ 
@@ -94,9 +94,9 @@ contains
       implicit none
       type(DERMAT), intent(out)    :: dmat 
 
-      if (associated(dmat%derive)) deallocate(dmat%derive)
-      if (associated(dmat%ubder))  deallocate(dmat%ubder)
-      if (associated(dmat%lbder))  deallocate(dmat%lbder)
+      if (allocated(dmat%derive)) deallocate(dmat%derive)
+      if (allocated(dmat%ubder))  deallocate(dmat%ubder)
+      if (allocated(dmat%lbder))  deallocate(dmat%lbder)
 
       end subroutine clear_derive
 !------------------------------------------------------------------------------ 
