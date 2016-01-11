@@ -24,12 +24,12 @@ module model
         real(kind=c_double), pointer, dimension(:)   :: Rs
 
         ! raw variables (of dimension grd(id)%nr x nthm)
-        real(kind=c_double), pointer, dimension(:, :) ::   &
-            rr, p_raw, rho_raw, Gamma1_raw, Rota_raw,   &
+        real(kind=c_double), pointer, dimension(:, :) ::    &
+            rr, p_raw, rho_raw, Gamma1_raw, Rota_raw,       &
             p_z_raw, rho_z_raw, Rota_z_raw
 
         ! final variables (of dimension grd(id)%nr x lres)
-        real(kind=c_double), pointer, dimension(:, :) ::       &
+        real(kind=c_double), pointer, dimension(:, :) ::    &
             pm, rhom, Gamma1, pm_z, pm_t, rhom_z, rhom_t,   &
             c2, NNtoz, Rota, Rota_z, Rota_t, pm_zz,         &
             pm_zt, pm_tz, pm_tt, pm_ez, grd_pe_z,           &

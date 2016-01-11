@@ -4,7 +4,7 @@ module eigensolve
       use mod_grid
       use mod_blacs
       use matrices
-      use inputs, only: nsol
+      use inputs, only: nsol, lres
       use iso_c_binding
 
       type MULTI_MAT
