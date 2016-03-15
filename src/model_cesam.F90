@@ -3,7 +3,7 @@
 module model
     use abstract_model_mod
     use mod_grid
-    use inputs, only: lres, rota, mass, dertype, orderFD, gridfile
+    use inputs, only: lres, rota, mass, dertype, orderFD !, gridfile
 
     ! raw variables:
     double precision, allocatable, save :: var(:, :), glob(:)
@@ -195,31 +195,31 @@ contains
     !--------------------------------------------------------------------------
     ! This does a simple initialisation for the radial grid
     !--------------------------------------------------------------------------
-    subroutine init_radial_grid_file()
-
-        implicit none
-        integer i, j
-
-        open(unit=37, file=trim(gridfile), status="old")
-        grd(1)%nr = 0
-        do
-            read(37, *, end=10)
-            grd(1)%nr = grd(1)%nr + 1
-        enddo
-10      rewind(37)
-        print*, "New grid resolution:", grd(1)%nr
-        call init_radial_grid()
-        do i=1, grd(1)%nr
-            read(37, *) j, grd(1)%r(i)
-        enddo
-        close(37)
-
-        ! very important
-        do i=1, grd(1)%nr
-            grd(1)%r(i) = grd(1)%r(i)/grd(1)%r(grd(1)%nr)
-        enddo
-
-    end subroutine init_radial_grid_file
+!     subroutine init_radial_grid_file()
+! 
+!         implicit none
+!         integer i, j
+! 
+!         open(unit=37, file=trim(gridfile), status="old")
+!         grd(1)%nr = 0
+!         do
+!             read(37, *, end=10)
+!             grd(1)%nr = grd(1)%nr + 1
+!         enddo
+! 10      rewind(37)
+!         print*, "New grid resolution:", grd(1)%nr
+!         call init_radial_grid()
+!         do i=1, grd(1)%nr
+!             read(37, *) j, grd(1)%r(i)
+!         enddo
+!         close(37)
+! 
+!         ! very important
+!         do i=1, grd(1)%nr
+!             grd(1)%r(i) = grd(1)%r(i)/grd(1)%r(grd(1)%nr)
+!         enddo
+! 
+!     end subroutine init_radial_grid_file
 
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for g-modes:

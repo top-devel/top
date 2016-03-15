@@ -17,7 +17,17 @@ leg = _legpy.legpy
 def _error(msg):
     raise Exception(msg)
 
+
 class model:
+    """
+    This class storing a star model
+
+    access to fields of the model can be achieved with square bracket operator.
+    But you need to know the fields stored in your model.
+
+    :example:
+        m['w'] # access the field omega of the model `m`
+    """
     filename = ''
     libmodel = None
     def __init__(self, libmodel, filename):
@@ -34,6 +44,13 @@ class model:
 
 
 class results:
+    """
+    This class stores results of a previous computation
+
+    :param str result_file: (optional) file with previous results stored
+    :rtype: :py:class:`results` object
+    :return: results of a previous computation (if result_file is provided) an empty results object otherwise
+    """
     valps = []
     vecps = []
     l = []
@@ -52,9 +69,9 @@ class results:
 
     def __init__(self, result_file = ''):
         if result_file != '':
-            self.from_file(result_file)
+            self._from_file(result_file)
 
-    def from_file(self, h5result):
+    def _from_file(self, h5result):
 
         f = _h5py.File(h5result, 'r')
         self.nsol = len(f['/']) - 2 # minus r and theta fields
@@ -103,12 +120,27 @@ class results:
         f.close()
 
     def get_sol(self, idom, isol, var):
+        """
+        returns `isol` th solution in domain number `idom` for variable named
+        `var`
+
+        :rtype: tuple (eigenvalue, eigenvector, Legendre degree)
+        :return: eigenvalue, eigenvector of the solution. The solution is given in spectral space (Legendre), so the of the degrees of Legendre polynomial are also returned
+        :param int idom: domain index of the solution
+        :param int isol: solution number
+        :param str var: variable name
+        """
         valp = self.valps[isol]
         vecp = self.vecps[isol][idom][var]
         l = self.l[isol][idom][var]
         return valp, vecp, l
 
     def get_grid(self, idom = -1):
+        """
+        returns the grid used by the model (requires a call to init_model)
+
+        if `idom` is provided returns the grid only for this particular domain
+        """
         if idom >= 0:
             skip = 0
             for i in range(0, idom):
@@ -120,6 +152,9 @@ class results:
             return self.r, self.theta
 
     def save(self, h5file):
+        """
+        saves the results in HDF5 format in file named `h5file`
+        """
         f = _h5py.File(h5file, 'w')
         f.attrs['modelfile'] = self.modelfile
         f.attrs['shift'] = self.shift
@@ -149,6 +184,11 @@ class results:
         f.close()
 
     def plot_val(self, mat):
+        """
+        Plots the values stored in `mat`
+
+        :param matrix mat: function to be plotted
+        """
         r, theta = self.get_grid()
         cost = _np.cos(theta)
         sint = _np.sin(theta)
@@ -165,7 +205,7 @@ class results:
         """
         Plots isol'th solution of variable var in domain number idom
 
-        :param int idom: domain
+        :param int idom: domain number
         :param int isol: solution to plot
         :param str var: variable to plot
         """
@@ -187,6 +227,12 @@ class results:
         _plt.show()
 
     def read_model(self):
+        """
+        Reads the model that was used to perform the computation
+
+        :rtype: :py:class:`model` (see :ref:`model<model>`)
+        :return: the model used to perform computation
+        """
         p = load(self.libname)
         p.dati.lres = self.lres
         return p.init_model(self.modelfile)
@@ -208,6 +254,17 @@ def get_compiled_files():
     return files
 
 class load:
+    """
+    Main class for running TOP:
+
+    It is responsible for loading a previously compiled equation file,
+    initializing the model and running the Arnoldi-Chebyshev algorithm
+
+    :param str name: name of the equation filed to load
+
+    :example:
+        poly = load('eq_poly_ester')
+    """
     lib = None
     name = None
     dati = None
@@ -226,17 +283,41 @@ class load:
         self.dati = lib.inputs
 
     def get_version(self):
+        """
+        returns the version of TOP that compiled the currently loaded equation file
+        """
         return self.lib.get_version().strip()
 
     def read_dati(self, filename):
+        """
+        reads dati parameter file named `filename`
+
+        :param str filename: dati file to read
+        """
         self.lib.read_dati(filename)
 
     def init_model(self, filename):
+        """
+        initializes the star model with the file `filename`
+
+        :param str filename: file to read to initialize the star model
+        """
         self.modelfile = filename
         self.model = model(self.libmodel, filename)
         return self.model
 
     def run_arncheb(self, shift):
+        """
+        runs the Arnoldi-Chebyshev algorithm with a shift provided by the
+        `shift` argument.
+        Calls call to run_arncheb must be preceded by a call to `read_dati` to
+        initialize problem parameters and a call to `init_model` to initialize
+        the start model.
+
+        :param float shift: starts the Arnoldi-Chebyshev algorithm arnoud frequency given by shift
+        :rtype: results object
+        :return: the results of the Arnoldi-Chebyshev algorithm
+        """
         if self.modelfile != '':
             self.lib.init_arncheb()
             self.shift = shift
@@ -246,20 +327,49 @@ class load:
             _error('model not initialized')
 
     def get_grid(self):
+        """
+        returns the grid used by the model (requires a call to init_model)
+
+        :rtype: tuple (r, theta)
+        :return: the grid coordinates `r` and `theta`
+        """
         nr, nt = self.lib.get_grid_size()
         return self.lib.get_grid(nr, nt)
 
     def get_zeta(self):
+        """
+        returns the zeta radial coordinate
+
+        :rtype: tuple (r, theta)
+        :return: the grid coordinates `r` and `theta`
+        """
         nr, _ = self.lib.get_grid_size()
         return self.lib.get_zeta(nr)
 
     def get_sol(self, idom, isol, var):
+        """
+        returns `isol` th solution in domain number `idom` for variable named
+        `var`
+
+        :rtype: tuple (eigenvalue, eigenvector, Legendre degree)
+        :return: eigenvalue, eigenvector of the solution. The solution is given in spectral space (Legendre), so the of the degrees of Legendre polynomial are also returned
+        :param int idom: domain index of the solution
+        :param int isol: solution number
+        :param str var: variable name
+        """
         nr, nt = self.lib.get_solsize(idom+1)
         valp, vecp = self.lib.get_sol_real(idom+1, isol+1, var, nr, nt)
         l = self.lib.pyget_lvar(idom+1, var, nt)
         return valp, vecp, l
 
     def get_vars(self, idom):
+        """
+        returns a list of variables in domain `idom`
+
+        :rtype: [str]
+        :return: list of variables in domain number idom
+        :param int idom: domain index
+        """
         nvars = self.lib.get_nvars(idom+1)
         ret = []
         for i in range(0, nvars):
@@ -268,6 +378,13 @@ class load:
         return ret
 
     def get_results(self):
+        """
+        returns an `result` object containing the results of a call to
+        run_arncheb
+
+        :rtype: results object
+        :return: results of the previous call to run_arncheb
+        """
         res = results()
         res.nsol = self.lib.get_nsol_out()
         res.ndom = self.lib.get_ndom()
@@ -314,6 +431,10 @@ class load:
         return self.lib.dtype().strip()
 
     def write_output(self, dir):
+        """
+        write the results computed by run_arncheb to location `dir`, this for
+        retro compatibility purpose
+        """
         if dir[-1] != '/':
             dir = dir + '/'
         _mkpath(dir)

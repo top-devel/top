@@ -31,23 +31,43 @@ module:
 
 .. code-block:: python
 
-   import top                      # imports the top module 
-   import matplotlib.pyplot as plt # import matplotlib for plots
+   import top                       # imports the top module 
+   import numpy as np               # imports numpy
 
-   top.load('eq_poly_ester')       # loads your compiled equation file
-   top.read_dati('dati')           # reads the parameter file `dati`
-   model = top.dati.dirmodel       # dirmodel has to be an input in eq_file
-   shift = top.dati.shift
+   p = top.load('eq_poly_ester')    # loads your compiled equation file
+   p.read_dati('dati')              # reads the parameter file `dati`
 
-   top.init_model(model)           # initializes the model stored in the directory
-   top.run_arncheb(shift)          # runs Arnoldi-Chebyshev method
+   model = 'model/'                 # path to the model
+   shift = p.dati.shift
 
-   # get the solutions in the first domain:
-   for sol in range(0, top.get_nsol()): # for all solutions
-       for var in top.get_vars(1):      # for each variable (in the fist domain)
-           # get the solution number sol for variable named var in the first domain
-           valp, vecp = top.get_sol(1, sol, var)
-           plt.plot(vecp)
-           plt.title(var)
-           plt.show()
-           print('Variable: %s, valp: %e' % (var, valp))
+   m = p.init_model(model)          # initializes the model stored in the directory
+   r = p.run_arncheb(shift)         # runs Arnoldi-Chebyshev method
+
+   # get the solutions
+   for i in range(0, r.nsol):       # for all solutions
+       for var in p.get_vars(0):    # for each variable (in the fist domain)
+           # plot the solution
+           r.plot(0, i, v)          # quick plot of the solution
+
+           # plot an expression of the solution:
+
+           # get the solution
+           val, vec, l = r.get_sol(0, i, v)
+
+           # get the grid
+           radius, theta = r.get_grid()
+           cost = np.cos(theta)
+
+           # get a field from the model
+           h = m['hh']
+
+           # project the solution onto the grid
+           gv = top.leg.eval2d(vec, cost, l[0], 2, r.dati['m'])
+
+           # actually plot the expression
+           r.plot_val(gv*np.sqrt(h)**r.dati['pindex'])
+
+
+
+For a detailed description of all functionalities available through the python
+module, see :ref:`python API<api>`.

@@ -10,7 +10,6 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/hpsort_index.F90 \
 			 src/matrices.F90 \
 			 src/eigensolve.F90 \
-			 src/udirectory.F90 \
 			 src/python.F90 \
 			 src/grid.F90 \
 			 src/ester-interface.cpp \

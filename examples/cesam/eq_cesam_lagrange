@@ -9,7 +9,6 @@ input age  1pe8.2
 input rota 1pe8.2 
 # input modelfile a64
 # input prtrbfile a64
-input gridfile a64
 
 eqlist  eqRho eqEr eqEt eqP eqPhi eqPhie eqEp
 varlist Rho Er Et P Phi Phie Ep

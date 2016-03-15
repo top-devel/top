@@ -2,6 +2,25 @@
 Install
 #######
 
+Quick Install Guide
+===================
+
+Top uses the standard autotools install procedure, you should be able to install
+it using:
+
+.. code-block:: shell
+
+    ./configure
+    make
+    make install
+
+You can get more details and options reading the following sections:
+:ref:`getting the code<download>`, :ref:`configure<configure>`,
+:ref:`compile and install<build>`,
+
+
+.. _download:
+
 Getting the code
 ================
 
@@ -57,9 +76,12 @@ Configure
 **Prerequisites:**
 
 The configure script allows you to configure the build environment of TOP.
-The only prerequisite to install TOP is to have a BLAS and a LAPACK library
-installed.
-The program ``f2py``, usually shipped with ``numpy``, is also required.
+In order to intall TOP, you will need:
+
+* a Fortran compiler supporting procedure interface (``gfortran (>=4.9)``)
+* a recent version of Python (``python (>=2.7)``)
+* the program ``f2py``, usually shipped with ``numpy``
+* the following python modules: ``numpy`` and ``h5py``
 
 Configure will try to detect the libraries installed in your system, if it fails
 to find both a BLAS and a LAPACK library it will return an error.
@@ -74,6 +96,7 @@ find you libraries:
 * ``LIBS``: what libraries should be linked with TOP. (e.g. ``LIBS=-ltatlas``)
 * ``CPPFLAGS``: preprocessor flags, this can be used to tell the compiler where
   to find header files (e.g. ``CPPFLAGS=-I$HOME/local/include``)
+* ``PYTHON``: the python interpreter to use (e.g. ``PYTHON=python3``)
 * ``--prefix=``: this option allows you to set TOP's install directory (by
   default the prefix is set to ``$HOME/local``)
 
@@ -87,6 +110,8 @@ command line:
 .. code-block:: shell
 
    ./configure FC=ifort LDFLAGS=-L$HOME/local/lib LIBS=-ltatlas
+
+.. _build:
 
 Compile & Install
 =================
@@ -111,5 +136,5 @@ As few examples are also availiable in ``$prefix/share/top/models``
 
 Check you Install
 =================
-Seed :ref:`usage<usage>`.
+See :ref:`usage<usage>`.
 
