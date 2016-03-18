@@ -12,6 +12,7 @@ TOP's documentation
 
    install
    usage
+   model
    equation
    api
    examples
