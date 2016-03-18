@@ -10,7 +10,7 @@ defined in the model.
 Polytropic Model
 ================
 
-**name**: `poly_ester`
+**Name:** ``poly_ester``
 
 Fields:
  * ``hh``
@@ -44,7 +44,7 @@ Fields:
 ESTER Model
 ===========
 
-**name**: `ester`
+**Name**: ``ester``
 
 Fields:
  * ``zeta``
@@ -53,7 +53,27 @@ Fields:
 CESAM Model
 ===========
 
-**name**: `cesam`
+**Name**: ``cesam``
 
 Fields:
  * ``rho``
+ * ``rho``
+ * ``rhom``
+ * ``rhom_z``
+ * ``rhom_t``
+ * ``pm``
+ * ``pm_t``
+ * ``pm_z``
+ * ``Gamma1``
+ * ``aux``
+ * ``NNt``
+ * ``pe``
+ * ``pe_z``
+ * ``pe_t``
+ * ``c2``
+ * ``ws1``
+ * ``ws2``
+ * ``NNr``
+ * ``p_aux``
+ * ``p1D_bis``
+ * ``NN2D``

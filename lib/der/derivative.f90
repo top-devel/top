@@ -573,6 +573,7 @@ contains
       dmat%ngrid   = ngrid
 
       allocate(dmat%lbder(der_min:der_max),dmat%ubder(der_min:der_max))
+
       dmat%ubder(-1) = 0
       dmat%lbder(-1) = 0
       dmat%ubder(0) = order

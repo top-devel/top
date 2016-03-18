@@ -95,7 +95,7 @@ contains
     subroutine read_model(modelfile)
 
         implicit none
-        integer i, j, nbelem 
+        integer i, j, nbelem
         character(len=*), intent(in) :: modelfile
 
         double precision, allocatable :: aux(:), logg(:), Teff(:)
@@ -108,33 +108,37 @@ contains
         ! Lecture du fichier CESAM:
         open(unit=37, form='formatted', status='old', file=trim(modelfile))
 
-        ! Lecture des lignes sans interets 
-
-        read(37, *) 
+        ! Skip 5 lines
+        read(37, *)
+        read(37, *)
+        read(37, *)
+        read(37, *)
+        read(37, *)
 
         !141    format(i5, 6i10) nrmod
-140     format(7i10)
+140     format(4i10)
 143     format(1p5d19.12)
 
         !read(37, 141)
-        !read(37, 140)  !  
-        read(37, '(i5)') nrmod
-        write(*, '("nrmod=", i5)') nrmod 
-        ivar=16
+        read(37, 140) nrmod, iconst, ivar, nbelem
+        ! read(37, '(i10)') nrmod
+
+        write(*, '("nrmod, iconst, ivar, nbelem = ", 4i5)') &
+            nrmod, iconst, ivar, nbelem
+
+        ivar = ivar + nbelem
 
         allocate(var(ivar, nrmod))
 
-        !read(37, 143) (glob(i), i=1, iconst)
+        allocate(glob(iconst))
+        read(37, 143) (glob(i), i=1, iconst)
         ! Beware: CESAM models go in reverse order
 
 
         do j=1, nrmod
-
-        !read(37, 143) (var(i, j), i=1, ivar)
-
-        read(37, *) (var(i, j), i=1, ivar)  
-
-        enddo    
+            read(37, 143) (var(i, j), i=1, ivar)
+            ! read(37, *) (var(i, j), i=1, ivar)
+        enddo
 
         close(37)
 
@@ -155,7 +159,7 @@ contains
         if (allocated(r_model)) deallocate(r_model)
         allocate(r_model(nrmod))
         do j=1, nrmod
-        r_model(j) = var(2, j)/radius
+            r_model(j) = var(2, j)/radius
         enddo
 
         ! calculate some 1D fields:
@@ -167,14 +171,13 @@ contains
         allocate(Gamma1_1D(nrmod), rho1D(nrmod), p1D(nrmod), mass1D(nrmod))
 
         do i=1, nrmod
-        rho1D(i)     = var(4, i)/rho_ref
-        p1D(i)       = var(5, i)/p_ref
-        Gamma1_1D(i) = var(7, i)/(1-var(8, i)*var(10, i))   !!!!!!!!!!!!!!!!!!!!!!!!
-        mass1D(i)    = var(3, i)/var(3, nrmod)
+            rho1D(i)     = var(4, i)/rho_ref
+            p1D(i)       = var(5, i)/p_ref
+            Gamma1_1D(i) = var(7, i)/(1-var(8, i)*var(10, i))   !!!!!!!!!!
+            mass1D(i)    = var(3, i)/var(3, nrmod)
         enddo
 
-
-    end subroutine
+    end subroutine read_model
 
     !--------------------------------------------------------------------------
     ! This does a simple initialisation for the radial grid
@@ -196,10 +199,10 @@ contains
     ! This does a simple initialisation for the radial grid
     !--------------------------------------------------------------------------
 !     subroutine init_radial_grid_file()
-! 
+!
 !         implicit none
 !         integer i, j
-! 
+!
 !         open(unit=37, file=trim(gridfile), status="old")
 !         grd(1)%nr = 0
 !         do
@@ -213,12 +216,12 @@ contains
 !             read(37, *) j, grd(1)%r(i)
 !         enddo
 !         close(37)
-! 
+!
 !         ! very important
 !         do i=1, grd(1)%nr
 !             grd(1)%r(i) = grd(1)%r(i)/grd(1)%r(grd(1)%nr)
 !         enddo
-! 
+!
 !     end subroutine init_radial_grid_file
 
     !--------------------------------------------------------------------------
@@ -229,7 +232,7 @@ contains
 
         implicit none
         double precision, allocatable ::  PP(:), CC1(:), CC3(:), V_son(:)
-        double precision :: P_total, P_target, mu, C1, C2, C3, C0 
+        double precision :: P_total, P_target, mu, C1, C2, C3, C0
         integer i, j
 
         allocate(NN(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
@@ -270,7 +273,7 @@ contains
         PP(1) = 0d0
         do i= 2, nrmod
         !PP(i) = PP(i-1) + (r_model(i)-r_model(i-1))*sqrt(C2)*(NN(i)+NN(i-1))/2d0
-        ! PP(i) = PP(i-1) +sqrt(1d-1*((r_model(i)-r_model(i-1))*(NN(i)+NN(i-1))/2d0)**2+1d0*((r_model(i)-r_model(i-1)))**2+(1d-4*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(r_model(i)-r_model(i-1)))/var(4, i))**2)+(r_model(i)-r_model(i-1))*2.5d-2*(G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))))  ! Base + Constant + Pression    
+        ! PP(i) = PP(i-1) +sqrt(1d-1*((r_model(i)-r_model(i-1))*(NN(i)+NN(i-1))/2d0)**2+1d0*((r_model(i)-r_model(i-1)))**2+(1d-4*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(r_model(i)-r_model(i-1)))/var(4, i))**2)+(r_model(i)-r_model(i-1))*2.5d-2*(G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))))  ! Base + Constant + Pression
 
         !PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))*sqrt(C0)  ! terme constant
         !PP(i)=PP(i-1)+sqrt(C3)*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(var(1, i)-var(1, i-1)))/var(4, i))**2           ! Terme de variation de pression.
@@ -306,9 +309,9 @@ contains
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         open(unit=3, file="info_diagram", status="unknown")
-        do i=1, nrmod      
+        do i=1, nrmod
             V_son(i)=Gamma1_1D(i)*p1D(i)/rho1D(i)
-            write(3, *) r_model(i) , NN(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2)) 
+            write(3, *) r_model(i) , NN(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2))
         enddo
         close(3)
 
@@ -317,7 +320,7 @@ contains
 
         deallocate(PP)
 
-        print*, NN(1)
+        ! print*, NN(1)
     end subroutine init_radial_grid_g_modes
 
     !--------------------------------------------------------------------------
@@ -335,8 +338,8 @@ contains
         ! find sound velocity
         c_max = 0d0
         do i = 1, nrmod
-        c_aux(i) = sqrt(Gamma1_1D(i)* p1D(i)/rho1D(i))
-        if (c_aux(i).gt.c_max) c_max = c_aux(i)
+            c_aux(i) = sqrt(Gamma1_1D(i)* p1D(i)/rho1D(i))
+            if (c_aux(i).gt.c_max) c_max = c_aux(i)
         enddo
 
         ! approximate time travel integral (from center), with
@@ -415,8 +418,6 @@ contains
         if (allocated(uhx)) deallocate(uhx)
         allocate(uhx(nrmod), aux(nrmod))
         call init_derive(dm, r_model, nrmod, 1, -1, 2, 'IFD ')
-
-
 
         ! Find auxiliary function:
         do i=2, nrmod
@@ -535,7 +536,7 @@ contains
             r_t(grd(1)%nr, lres), r_zz(grd(1)%nr, lres),    &
             r_zt(grd(1)%nr, lres), r_tt(grd(1)%nr, lres),   &
             re_map(grd(1)%nr, lres), re_z(grd(1)%nr, lres), &
-            re_t(grd(1)%nr, lres), re_zz(grd(1)%nr, lres),  & 
+            re_t(grd(1)%nr, lres), re_zz(grd(1)%nr, lres),  &
             re_zt(grd(1)%nr, lres), re_tt(grd(1)%nr, lres), &
             cth(lres), sth(lres), w(lres), &
             cost(grd(1)%nr, lres), sint(grd(1)%nr, lres),  &
@@ -676,12 +677,12 @@ contains
         if (allocated(NNt))     deallocate(NNt)
         if (allocated(NNr))     deallocate(NNr)
 
-        allocate(rhom(grd(1)%nr, lres), rhom_z(grd(1)%nr, lres), &
-            rhom_t(grd(1)%nr, lres), &
-            pm(grd(1)%nr, lres), pm_z(grd(1)%nr, lres), pm_t(grd(1)%nr, lres),       &
-            Gamma1(grd(1)%nr, lres), aux(grd(1)%nr, lres), NNt(grd(1)%nr, lres),     &
-            pe(grd(1)%nr, lres), pe_z(grd(1)%nr, lres), pe_t(grd(1)%nr, lres),       &
-            c2(grd(1)%nr, lres), ws1(nrmod), ws2(grd(1)%nr), NNr(grd(1)%nr, lres),    &
+        allocate(rhom(grd(1)%nr, lres), rhom_z(grd(1)%nr, lres),                    &
+            rhom_t(grd(1)%nr, lres),                                                &
+            pm(grd(1)%nr, lres), pm_z(grd(1)%nr, lres), pm_t(grd(1)%nr, lres),      &
+            Gamma1(grd(1)%nr, lres), aux(grd(1)%nr, lres), NNt(grd(1)%nr, lres),    &
+            pe(grd(1)%nr, lres), pe_z(grd(1)%nr, lres), pe_t(grd(1)%nr, lres),      &
+            c2(grd(1)%nr, lres), ws1(nrmod), ws2(grd(1)%nr), NNr(grd(1)%nr, lres),  &
             p_aux(nrmod), p1D_bis(nrmod), NN2D(grd(1)%nr, lres))
 
         ! The spherically averaged pressure is modifed as follows:
@@ -700,7 +701,7 @@ contains
         c2 = Gamma1*pm/rhom
         call map2D_der_bis(pe1D, pe, pe_t, pe_z, aux)
 
-        ws1 = var(15, :) 
+        ws1 = var(15, :)
         call interpolate(r_aux(1:nrmod, 1)**2, ws1, nrmod, r_map(1:grd(1)%nr, 1)**2, ws2, grd(1)%nr)
         do i=2, grd(1)%nr
         do j=1, lres
@@ -899,7 +900,7 @@ contains
         pe1D(1) = 0d0
         do i=2, nrmod
         pe1D(i) = (ff(i)-ff(1))/r_model(i)
-        enddo 
+        enddo
 
         do i=1, nrmod
         f(i) = -4d0*pi*r_model(i)*rho1D(i)
@@ -1134,12 +1135,12 @@ contains
 
     end subroutine
 
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     ! This subroutine calculates the anti-derivative of a function f defined on an
     ! arbitrary strictly monotonic grid.  It does this by integrating Lagrange
     ! interpolation polynomials calculated over a sliding window which spans
     ! [i-wnd, i+wnd+1].
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     ! description of variables:
     !
     ! grid(1:ngrid) = grid on which the function is defined
@@ -1147,7 +1148,7 @@ contains
     ! ff(1:ngrid)   = output anti-derivative
     ! ngrid         = number of grid points
     ! wnd           = positive integer which gives half the size of the window.
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     subroutine antiderivative_down(grid, f, ff, ngrid, wnd)
 
         implicit none
@@ -1227,12 +1228,12 @@ contains
 
     end subroutine antiderivative_down
 
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     ! This subroutine calculates the anti-derivative of a function f defined on an
     ! arbitrary strictly monotonic grid.  It does this by integrating Lagrange
     ! interpolation polynomials calculated over a sliding window which spans
     ! [i-wnd, i+wnd+1].
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     ! description of variables:
     !
     ! grid(1:ngrid) = grid on which the function is defined
@@ -1240,7 +1241,7 @@ contains
     ! ff(1:ngrid)   = output anti-derivative
     ! ngrid         = number of grid points
     ! wnd           = positive integer which gives half the size of the window.
-    !------------------------------------------------------------------------------ 
+    !------------------------------------------------------------------------------
     subroutine antiderivative_up(grid, f, ff, ngrid, wnd)
 
         implicit none
@@ -1335,111 +1336,111 @@ contains
         grd(1)%nr = nr_out
         allocate(aux(nr_in, lres), aux1D(nr_in))
 
-        aux = rhom   
+        aux = rhom
         deallocate(rhom   )
         allocate(rhom   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, rhom   , nr_out)
-        aux = rhom_z 
+        aux = rhom_z
         deallocate(rhom_z )
         allocate(rhom_z (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, rhom_z , nr_out)
-        aux = rhom_t 
+        aux = rhom_t
         deallocate(rhom_t )
         allocate(rhom_t (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, rhom_t , nr_out)
-        aux = pm     
+        aux = pm
         deallocate(pm     )
         allocate(pm     (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, pm     , nr_out)
-        aux = pm_z   
+        aux = pm_z
         deallocate(pm_z   )
         allocate(pm_z   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, pm_z   , nr_out)
-        aux = pm_t   
+        aux = pm_t
         deallocate(pm_t   )
         allocate(pm_t   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, pm_t   , nr_out)
-        aux = c2     
+        aux = c2
         deallocate(c2     )
         allocate(c2     (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, c2     , nr_out)
-        aux = Gamma1     
+        aux = Gamma1
         deallocate(Gamma1     )
         allocate(Gamma1     (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, Gamma1     , nr_out)
-        aux = NNt    
+        aux = NNt
         deallocate(NNt    )
         allocate(NNt    (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, NNt    , nr_out)
-        aux = r_map  
+        aux = r_map
         deallocate(r_map  )
         allocate(r_map  (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_map  , nr_out)
-        aux = r_z    
+        aux = r_z
         deallocate(r_z    )
         allocate(r_z    (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_z    , nr_out)
-        aux = r_t    
+        aux = r_t
         deallocate(r_t    )
         allocate(r_t    (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_t    , nr_out)
-        aux = r_zz   
+        aux = r_zz
         deallocate(r_zz   )
         allocate(r_zz   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_zz   , nr_out)
-        aux = r_zt   
+        aux = r_zt
         deallocate(r_zt   )
         allocate(r_zt   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_zt   , nr_out)
-        aux = r_tt   
+        aux = r_tt
         deallocate(r_tt   )
         allocate(r_tt   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, r_tt   , nr_out)
-        aux = re_map 
+        aux = re_map
         deallocate(re_map )
         allocate(re_map (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_map , nr_out)
-        aux = re_z   
+        aux = re_z
         deallocate(re_z   )
         allocate(re_z   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_z   , nr_out)
-        aux = re_t   
+        aux = re_t
         deallocate(re_t   )
         allocate(re_t   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_t   , nr_out)
-        aux = re_zz  
+        aux = re_zz
         deallocate(re_zz  )
         allocate(re_zz  (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_zz  , nr_out)
-        aux = re_zt  
+        aux = re_zt
         deallocate(re_zt  )
         allocate(re_zt  (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_zt  , nr_out)
-        aux = re_tt  
+        aux = re_tt
         deallocate(re_tt  )
         allocate(re_tt  (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, re_tt  , nr_out)
-        aux = zeta   
+        aux = zeta
         deallocate(zeta   )
         allocate(zeta   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, zeta   , nr_out)
-        aux = cost   
+        aux = cost
         deallocate(cost   )
         allocate(cost   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, cost   , nr_out)
-        aux = sint   
+        aux = sint
         deallocate(sint   )
         allocate(sint   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, sint   , nr_out)
-        aux = cott   
+        aux = cott
         deallocate(cott   )
         allocate(cott   (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, cott   , nr_out)
-        aux = roz    
+        aux = roz
         deallocate(roz    )
         allocate(roz    (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, roz    , nr_out)
-        aux = rrt    
+        aux = rrt
         deallocate(rrt    )
         allocate(rrt    (nr_out, lres))
         call reduce_2Darray(aux, nr_in, lres, rrt    , nr_out)
@@ -1451,19 +1452,19 @@ contains
         deallocate(grd(1)%r)
         call init_radial_grid()
         call reduce_1Darray(aux1D, nr_in, grd(1)%r, nr_out)
-        aux1D = rho1D  
+        aux1D = rho1D
         deallocate(rho1D  )
         allocate(rho1D  (nr_out))
         call reduce_1Darray(aux1D, nr_in, rho1D  , nr_out)
-        aux1D = p1D    
+        aux1D = p1D
         deallocate(p1D    )
         allocate(p1D    (nr_out))
         call reduce_1Darray(aux1D, nr_in, p1D    , nr_out)
-        aux1D = Gamma1_1D  
+        aux1D = Gamma1_1D
         deallocate(Gamma1_1D  )
         allocate(Gamma1_1D  (nr_out))
         call reduce_1Darray(aux1D, nr_in, Gamma1_1D  , nr_out)
-        aux1D = uhx    
+        aux1D = uhx
         deallocate(uhx    )
         allocate(uhx    (nr_out))
         call reduce_1Darray(aux1D, nr_in, uhx    , nr_out)
@@ -1628,14 +1629,69 @@ contains
         if (fname == 'rho') then
             allocate(field(grd(1)%nr, lres))
             field(:, :) = rhom
-        ! elseif (fname == 'theta') then
-        !     allocate(field(1, nthm))
-        !     field(1, :) = theta
+        elseif (fname == 'rhom') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = rhom
+        elseif (fname == 'rhom_z') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = rhom_z
+        elseif (fname == 'rhom_t') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = rhom_t
+        elseif (fname == 'pm') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pm
+        elseif (fname == 'pm_t') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pm_t
+        elseif (fname == 'pm_z') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pm_z
+        elseif (fname == 'Gamma1') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = Gamma1
+        elseif (fname == 'aux') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = aux
+        elseif (fname == 'NNt') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = NNt
+        elseif (fname == 'pe') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pe
+        elseif (fname == 'pe_z') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pe_z
+        elseif (fname == 'pe_t') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = pe_t
+        elseif (fname == 'c2') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = c2
+        elseif (fname == 'ws1') then
+            allocate(field(1, grd(1)%nr))
+            field(1, :) = ws1
+        elseif (fname == 'ws2') then
+            allocate(field(1, nrmod))
+            field(1, :) = ws2
+        elseif (fname == 'NNr') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = NNr
+        elseif (fname == 'p_aux') then
+            allocate(field(1, nrmod))
+            field(:, :) = p_aux
+        elseif (fname == 'p1D_bis') then
+            allocate(field(1, nrmod))
+            field(:, :) = p1D_bis
+        elseif (fname == 'NN2D') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = NN2D
         else
             print*, 'Unknown field:', fname
             allocate(field(1, 1))
             field = 0.0
         endif
+        !     p_aux(nrmod), p1D_bis(nrmod), NN2D(grd(1)%nr, lres))
 
     end subroutine cesam_get_field
     !------------------------------------------------------------------------
