@@ -250,6 +250,8 @@ contains
 #endif
           endif
           enddo
+#else
+          if (grd(1)%mattype.eq.'BAND') call init_ku_kl()
 #endif
 
           ! downward sweep method:

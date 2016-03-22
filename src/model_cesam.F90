@@ -3,7 +3,7 @@
 module model
     use abstract_model_mod
     use mod_grid
-    use inputs, only: lres, rota, mass, dertype, orderFD !, gridfile
+    use inputs, only: lres, rota, mass, dertype, orderFD, pert_model
 
     ! raw variables:
     double precision, allocatable, save :: var(:, :), glob(:)
@@ -53,6 +53,8 @@ module model
         procedure :: get_grid_size => cesam_get_grid_size
     end type cesam_model
 
+    double precision :: rota_pert
+
 contains
     !--------------------------------------------------------------------------
     ! This subroutine calls all of the necessary subroutines to initialise
@@ -75,18 +77,25 @@ contains
         character(len=*), intent(in) :: filename
 
         call read_model(filename)
-        !call init_radial_grid_file()
+        ! call init_radial_grid_file()
         call init_radial_grid_g_modes()
-        call find_pert()
-        !call no_pert() ! spherical case: but watch out because Rota is != 0
+        if (pert_model == 1) then
+            rota_pert = rota
+            call find_pert()
+        else
+            rota_pert = 0.d0
+            call no_pert() ! spherical case: but watch out because Rota is != 0
+        endif
         call make_mapping()
-        !call find_pe1D() ! integrate Poisson's equation
+        ! call find_pe1D() ! integrate Poisson's equation
         call find_pe1D_alt() ! integrate gravity
         call init_fields()
         call init_grd_pe()
-        !call write_radial_grid() ! this stops the program
-        !call write_amdl()        ! this stops the program
-        !call write_fields()      ! this stops the program
+        ! call write_radial_grid() ! this stops the program
+        ! call write_amdl()        ! this stops the program
+        ! call write_fields()      ! this stops the program
+
+        model_ptr => this
 
     end subroutine
     !--------------------------------------------------------------------------
@@ -131,22 +140,20 @@ contains
         allocate(var(ivar, nrmod))
 
         allocate(glob(iconst))
+
         read(37, 143) (glob(i), i=1, iconst)
         ! Beware: CESAM models go in reverse order
-
-
         do j=1, nrmod
-            read(37, 143) (var(i, j), i=1, ivar)
+            read(37, 143) (var(i, nrmod - j + 1), i=1, ivar)
             ! read(37, *) (var(i, j), i=1, ivar)
         enddo
-
         close(37)
 
         ! setting some global variables:
-        mass    = var(3, nrmod) ! in g
-        radius  = var(2, nrmod) ! in cm
-        !age     = abs(glob(11)) ! in some unknown unit
-        !age = glob(13) ! in Myr
+        mass    = exp(var(2, nrmod)) ! in g
+        radius  = var(1, nrmod) ! in cm
+        ! age     = abs(glob(11)) ! in some unknown unit
+        ! age     = glob(13) ! in Myr
         p_ref   = G * mass**2 / radius**4
         rho_ref = mass / radius**3
         phi_ref = G * mass / radius
@@ -159,7 +166,7 @@ contains
         if (allocated(r_model)) deallocate(r_model)
         allocate(r_model(nrmod))
         do j=1, nrmod
-            r_model(j) = var(2, j)/radius
+            r_model(j) = var(1, j)/radius
         enddo
 
         ! calculate some 1D fields:
@@ -171,10 +178,10 @@ contains
         allocate(Gamma1_1D(nrmod), rho1D(nrmod), p1D(nrmod), mass1D(nrmod))
 
         do i=1, nrmod
-            rho1D(i)     = var(4, i)/rho_ref
-            p1D(i)       = var(5, i)/p_ref
-            Gamma1_1D(i) = var(7, i)/(1-var(8, i)*var(10, i))   !!!!!!!!!!
-            mass1D(i)    = var(3, i)/var(3, nrmod)
+            rho1D(i)     = var(5, i)/rho_ref
+            p1D(i)       = var(4, i)/p_ref
+            Gamma1_1D(i) = var(10, i) ! /(1-var(8, i)*var(10, i))   !!!!!!!!!!
+            mass1D(i)    = exp(var(2, i))/exp(var(2, nrmod))
         enddo
 
     end subroutine read_model
@@ -235,35 +242,35 @@ contains
         double precision :: P_total, P_target, mu, C1, C2, C3, C0
         integer i, j
 
+        if (allocated(NN))      deallocate(NN)
+
         allocate(NN(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
 
-
-        C0=1d0
-        C1=2.5d-2
-        C2=1d-1
-        C3=1d-4
-
-
-
+        ! C0 = 1d0
+        ! C1 = 2.5d-2
+        ! C2 = 1d-1
+        ! C3 = 1d-4
+        C0 = 1d0
+        C1 = 10d0 ! 2.5d-2
+        C2 = 1d-2
+        C3 = 1.5d-2
 
         ! find scaled Brunt-Vaisala frequency: N/r
         do i = 2, nrmod
 
+            !NN(i) = sqrt(max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2))
+            !NN(i) = max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2)
 
+            NN(i)= mass1D(i) / r_model(i)**5 * abs(var(15, i))
+            ! NN(i)= mass1D(i)**2 / r_model(i)**6*rho1D(i)/p1D(i)*var(8, i) / var(7, i) * &
+            !     (var(10, i)-var(9, i)+var(12, i))
 
-
-        !NN(i) = sqrt(max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2))
-        !NN(i) = max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2)
-
-        NN(i)=(mass1D(i)**2/r_model(i)**6*rho1D(i)/p1D(i)*var(8, i)/var(7, i)*(var(10, i)-var(9, i)+var(12, i)))
-
-
-        !NN(i) = sqrt(abs(var(15, i)*exp(var(2, i))/r_model(i)**5))
-        CC1(i)=rho1D(i)/Gamma1_1D(i)/p1D(i) ! Corresp au terme en C1
-        CC3(i)=(mass1D(i)*rho1D(i)/(r_model(i)**2*p1D(i)))**2
-
+            !NN(i) = sqrt(abs(var(15, i)*exp(var(2, i))/r_model(i)**5))
+            CC1(i) = rho1D(i)/Gamma1_1D(i)/p1D(i) ! Corresp au terme en C1
+            CC3(i) = (mass1D(i)*rho1D(i)/(r_model(i)**2*p1D(i)))**2
 
         enddo
+
         NN(1)=0d0
         CC1(1)=rho1D(1)/Gamma1_1D(1)/p1D(1)
         CC3(1)=0d0
@@ -272,15 +279,23 @@ contains
         ! possible saturation near surface.
         PP(1) = 0d0
         do i= 2, nrmod
-        !PP(i) = PP(i-1) + (r_model(i)-r_model(i-1))*sqrt(C2)*(NN(i)+NN(i-1))/2d0
-        ! PP(i) = PP(i-1) +sqrt(1d-1*((r_model(i)-r_model(i-1))*(NN(i)+NN(i-1))/2d0)**2+1d0*((r_model(i)-r_model(i-1)))**2+(1d-4*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(r_model(i)-r_model(i-1)))/var(4, i))**2)+(r_model(i)-r_model(i-1))*2.5d-2*(G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))))  ! Base + Constant + Pression
+            !PP(i) = PP(i-1) + (r_model(i)-r_model(i-1))*sqrt(C2)*(NN(i)+NN(i-1))/2d0
+            ! PP(i) = PP(i-1) +sqrt(1d-1*((r_model(i)-r_model(i-1))*(NN(i)+NN(i-1))/2d0)**2+1d0*((r_model(i)-r_model(i-1)))**2+(1d-4*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(r_model(i)-r_model(i-1)))/var(4, i))**2)+(r_model(i)-r_model(i-1))*2.5d-2*(G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))))  ! Base + Constant + Pression
 
-        !PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))*sqrt(C0)  ! terme constant
-        !PP(i)=PP(i-1)+sqrt(C3)*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(var(1, i)-var(1, i-1)))/var(4, i))**2           ! Terme de variation de pression.
-        !PP(i)=pp(i-1)+sqrt(C1)*G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))
-        PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))* &
-            sqrt(C2*((NN(i)+NN(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
-            C3*((CC3(i)+CC3(i-1))/2d0)+C0)! 09/03
+            !PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))*sqrt(C0)  ! terme constant
+            !PP(i)=PP(i-1)+sqrt(C3)*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(var(1, i)-var(1, i-1)))/var(4, i))**2           ! Terme de variation de pression.
+            !PP(i)=pp(i-1)+sqrt(C1)*G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))
+            ! print*, "r_model: ", r_model(i)
+            ! print*, "NN: ", NN(i)
+            ! print*, "NN -1: ", NN(i-1)
+            ! print*, "CC1: ", CC1(i)
+            ! print*, "CC1 -1: ", CC1(i-1)
+            ! print*, "CC3: ", CC3(i)
+            ! print*, "CC3 -1: ", CC3(i-1)
+            PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))* &
+                sqrt(C2*((NN(i)+NN(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
+                C3*((CC3(i)+CC3(i-1))/2d0)+C0) ! 09/03
+            ! print*, "PP: ", PP(i)
         enddo
 
         ! find total travel time from center to surface
@@ -291,34 +306,38 @@ contains
         grd(1)%r(1) = 0d0
         grd(1)%r(grd(1)%nr) = r_model(nrmod)
 
-
-
         j = 1
         do i=2, grd(1)%nr-1
             P_target = P_total*dble(i-1)/dble(grd(1)%nr-1)
             do while (PP(j).lt.P_target)
-            j = j + 1
-        enddo
-        mu   = (PP(j)-P_target)/(PP(j)-PP(j-1))
-        grd(1)%r(i) = r_model(j-1)*mu + r_model(j)*(1d0-mu)
+                j = j + 1
+            enddo
+
+            mu   = (PP(j)-P_target)/(PP(j)-PP(j-1))
+
+            grd(1)%r(i) = r_model(j-1)*mu + r_model(j)*(1d0-mu)
         enddo
 
         do i=1, grd(1)%nr
-        grd(1)%r(i) = grd(1)%r(i)/r_model(nrmod)
+            grd(1)%r(i) = grd(1)%r(i)/r_model(nrmod)
         enddo
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        open(unit=3, file="info_diagram", status="unknown")
+        ! open(unit=3, file="info_diagram", status="unknown")
         do i=1, nrmod
             V_son(i)=Gamma1_1D(i)*p1D(i)/rho1D(i)
-            write(3, *) r_model(i) , NN(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2))
+            ! write(3, *) r_model(i) , NN(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2))
         enddo
-        close(3)
+
+        ! close(3)
 
         !  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
         deallocate(PP)
+        deallocate(CC1)
+        deallocate(CC3)
+        deallocate(V_son)
 
         ! print*, NN(1)
     end subroutine init_radial_grid_g_modes
@@ -359,8 +378,10 @@ contains
 
         ! define new grid
         call init_radial_grid()
+
         grd(1)%r(1) = 0d0
         grd(1)%r(grd(1)%nr) = r_model(nrmod)
+
         j = 1
         do i=2, grd(1)%nr-1
             T_target = T_total*dble(i-1)/dble(grd(1)%nr-1)
@@ -458,7 +479,7 @@ contains
             stop
         endif
         do i=1, nrmod
-            uhx(i) = v(2*i)*r_model(i)*Rota**2
+            uhx(i) = v(2*i)*r_model(i)*rota_pert**2
         enddo
 
         call clear_derive(dm)
@@ -543,6 +564,7 @@ contains
             cott(grd(1)%nr, lres), zeta(grd(1)%nr, lres),  &
             r_aux(nrmod, lres),             &
             roz(grd(1)%nr, lres), rrt(grd(1)%nr, lres))
+
         rs = 0d0; rsp = 0d0; rss = 0d0;
         r_map = 0d0; r_z = 0d0; r_t = 0d0;
         r_zz = 0d0; r_zt = 0d0; r_tt = 0d0;
@@ -559,14 +581,12 @@ contains
 
         call gauleg(-1d0, 1d0, cth, w, lres)
         sth = sqrt(1-cth**2)
+
         do i=1, grd(1)%nr
-        sint(i, :) = sth(:)
-        cost(i, :) = cth(:)
-        cott(i, :) = cth(:)/sth(:)
+            sint(i, :) = sth(:)
+            cost(i, :) = cth(:)
+            cott(i, :) = cth(:)/sth(:)
         enddo
-
-
-
 
         do j=1, lres
             rs(j)   = r_model(nrmod) - (1.5d0*cth(j)**2-0.5d0)*uhx(nrmod)
@@ -580,33 +600,33 @@ contains
         !K=(r_model(nrmod) - uhx(nrmod))/(r_model(nrmod) + 0.5D0*uhx(nrmod))
         epsilon = 1d0-K
 
-        open(unit=999, file="infos", status="unknown")
-        write(999, *) K
-        write(999, *) epsilon
-        write(999, *) Rota
-        write(999, *) r_model(nrmod)*sqrt(lambda), -sqrt(lambda/5D0)*uhx(nrmod)
-        do j=1, lres
-        write(999, *) cth(j), rs(j)
-        enddo
-        close(999)
+        ! open(unit=999, file="infos", status="unknown")
+        ! write(999, *) K
+        ! write(999, *) epsilon
+        ! write(999, *) Rota
+        ! write(999, *) r_model(nrmod)*sqrt(lambda), -sqrt(lambda/5D0)*uhx(nrmod)
+        ! do j=1, lres
+        ! write(999, *) cth(j), rs(j)
+        ! enddo
+        ! close(999)
 
-        open(unit=999, file="grid", status="unknown")
-        write(999, *) grd(1)%nr
-        write(999, *) grd(1)%r(:)
-        close(999)
+        ! open(unit=999, file="grid", status="unknown")
+        ! write(999, *) grd(1)%nr
+        ! write(999, *) grd(1)%r(:)
+        ! close(999)
 
 
 
         ! Find the inner domain:
         do i=1, grd(1)%nr
-        do j=1, lres
-        r_map(i, j) = K*grd(1)%r(i) + 0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*(rs(j)-K)
-        r_z  (i, j) = K    + 0.5d0*(15d0*grd(1)%r(i)**2-15d0*grd(1)%r(i)**4)*(rs(j)-K)
-        r_zz (i, j) =        0.5d0*(30d0*grd(1)%r(i)   -60d0*grd(1)%r(i)**3)*(rs(j)-K)
-        r_t  (i, j) =        0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*rsp(j)
-        r_zt (i, j) =        0.5d0*(15d0*grd(1)%r(i)**2-15d0*grd(1)%r(i)**4)*rsp(j)
-        r_tt (i, j) =        0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*rss(j)
-        enddo
+            do j=1, lres
+                r_map(i, j) = K*grd(1)%r(i) + 0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*(rs(j)-K)
+                r_z  (i, j) = K + 0.5d0*(15d0*grd(1)%r(i)**2-15d0*grd(1)%r(i)**4)*(rs(j)-K)
+                r_zz (i, j) = 0.5d0*(30d0*grd(1)%r(i)   -60d0*grd(1)%r(i)**3)*(rs(j)-K)
+                r_t  (i, j) = 0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*rsp(j)
+                r_zt (i, j) = 0.5d0*(15d0*grd(1)%r(i)**2-15d0*grd(1)%r(i)**4)*rsp(j)
+                r_tt (i, j) = 0.5d0*(5d0*grd(1)%r(i)**3-3d0*grd(1)%r(i)**5)*rss(j)
+            enddo
         enddo
 
         ! Find the outer domain (we fold this domain onto the inner domain):
@@ -614,36 +634,37 @@ contains
         ! re_z and re_zt.
 
         do i=1, grd(1)%nr
-        xi = 2d0-grd(1)%r(i)
-        do j=1, lres
-        re_map(i, j) = 2d0*epsilon + K*xi + (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*(rs(j)-1d0-epsilon)
-        re_z(i, j)   =             - K    - (6d0*xi**2-18d0*xi+12d0)*(rs(j)-1d0-epsilon)
-        re_zz(i, j)  =                      (12d0*xi-18d0)*(rs(j)-1d0-epsilon)
-        re_t(i, j)   =                      (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*rsp(j)
-        re_zt(i, j)  =                    - (6d0*xi**2-18d0*xi+12d0)*rsp(j)
-        re_tt(i, j)  =                      (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*rss(j)
-        enddo
+            xi = 2d0-grd(1)%r(i)
+            do j=1, lres
+                re_map(i, j) = 2d0*epsilon + K*xi + (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*(rs(j)-1d0-epsilon)
+                re_z(i, j)   = - K    - (6d0*xi**2-18d0*xi+12d0)*(rs(j)-1d0-epsilon)
+                re_zz(i, j)  = (12d0*xi-18d0)*(rs(j)-1d0-epsilon)
+                re_t(i, j)   = (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*rsp(j)
+                re_zt(i, j)  = - (6d0*xi**2-18d0*xi+12d0)*rsp(j)
+                re_tt(i, j)  = (2d0*xi**3-9d0*xi**2+12d0*xi-4d0)*rss(j)
+            enddo
         enddo
 
         do i=2, nrmod-1
-        do j=1, lres
-        r_aux(i, j) = r_model(i) - (1.5d0*cth(j)**2-0.5d0)*uhx(i)
+            do j=1, lres
+                r_aux(i, j) = r_model(i) - (1.5d0*cth(j)**2-0.5d0)*uhx(i)
+            enddo
         enddo
-        enddo
+
         do j=1, lres
-        r_aux(1, j)     = r_map(1, j)
-        r_aux(nrmod, j) = r_map(grd(1)%nr, j)
+            r_aux(1, j)     = r_map(1, j)
+            r_aux(nrmod, j) = r_map(grd(1)%nr, j)
         enddo
 
         ! Supplementary geometric terms, which require special attention
         ! in the center:
         do j=1, lres
-        do i=2, grd(1)%nr
-        rrt(i, j) = r_t(i, j)/r_map(i, j)
-        roz(i, j) = r_map(i, j)/zeta(i, j)
-        enddo
-        rrt(1, j) = r_zt(1, j)/r_z(1, j)
-        roz(1, j) = r_z(1, j)
+            do i=2, grd(1)%nr
+                rrt(i, j) = r_t(i, j)/r_map(i, j)
+                roz(i, j) = r_map(i, j)/zeta(i, j)
+            enddo
+            rrt(1, j) = r_zt(1, j)/r_z(1, j)
+            roz(1, j) = r_z(1, j)
         enddo
 
 
@@ -676,6 +697,7 @@ contains
         if (allocated(c2))      deallocate(c2)
         if (allocated(NNt))     deallocate(NNt)
         if (allocated(NNr))     deallocate(NNr)
+        if (allocated(NN2D))    deallocate(NN2D)
 
         allocate(rhom(grd(1)%nr, lres), rhom_z(grd(1)%nr, lres),                    &
             rhom_t(grd(1)%nr, lres),                                                &
@@ -687,13 +709,17 @@ contains
 
         ! The spherically averaged pressure is modifed as follows:
         do i=1, nrmod
-        p_aux(i) = 2d0*r_model(i)*rho1D(i)/3d0
+            p_aux(i) = 2d0*r_model(i)*rho1D(i)/3d0
         enddo
+
         call antiderivative_down(r_model, p_aux, p1D_bis, nrmod, 1)
+
         do i=1, nrmod
-        p1D_bis(i) = Rota**2*(p1D_bis(i)-p1D_bis(nrmod))+p1D(i)
+            p1D_bis(i) = rota_pert**2*(p1D_bis(i)-p1D_bis(nrmod))+p1D(i)
         enddo
-        print*, NN(1)
+
+        ! print*, NN(1)
+
         call map2D_der_p_bis(rho1D, rhom, rhom_t, rhom_z, aux)
         call map2D_der_p_bis(p1D_bis, pm, pm_t, pm_z, aux)
         call map2D(Gamma1_1D, Gamma1)
@@ -702,26 +728,28 @@ contains
         call map2D_der_bis(pe1D, pe, pe_t, pe_z, aux)
 
         ws1 = var(15, :)
-        call interpolate(r_aux(1:nrmod, 1)**2, ws1, nrmod, r_map(1:grd(1)%nr, 1)**2, ws2, grd(1)%nr)
+        call interpolate(r_aux(1:nrmod, 1)**2, ws1, nrmod, &
+            r_map(1:grd(1)%nr, 1)**2, ws2, grd(1)%nr)
+
         do i=2, grd(1)%nr
-        do j=1, lres
-        NNr(i, j) = Gamma1(i, j)*pm(i, j)*ws2(i)/r_map(i, j)
+            do j=1, lres
+                NNr(i, j) = Gamma1(i, j)*pm(i, j)*ws2(i)/r_map(i, j)
+            enddo
         enddo
-        enddo
+
         NNr(1, :) = 0d0
 
         do j=1, lres
-        do i=2, grd(1)%nr
-        NNt(i, j) = zeta(i, j)*(pm_t(i, j)-Gamma1(i, j)*rhom_t(i, j))/(r_map(i, j)**2*r_z(i, j))
+            do i=2, grd(1)%nr
+                NNt(i, j) = zeta(i, j) * &
+                    (pm_t(i, j) - Gamma1(i, j)*rhom_t(i, j)) / (r_map(i, j)**2*r_z(i, j))
+            enddo
+            NNt(1, j) = 0d0
         enddo
-        NNt(1, j) = 0d0
-        enddo
-
-
 
         deallocate(aux, ws1, ws2, p_aux, p1D_bis)
 
-    end subroutine
+    end subroutine init_fields
 
     !--------------------------------------------------------------------------
     ! This subroutine initialises all of the grd_pe arrays in such a way
@@ -910,7 +938,7 @@ contains
 
         do i=1, nrmod
         pe1D(i) = pe1D(i) + (ff(nrmod) - ff(i)) &
-            - (Rota*r_model(i))**2/3d0
+            - (rota_pert*r_model(i))**2/3d0
         enddo
 
         deallocate(f, ff)
@@ -938,7 +966,7 @@ contains
         call antiderivative_up(r_model, aux, pe1D, nrmod, 1)
         do i=1, nrmod
         pe1D(i) = pe1D(i) - pe1D(nrmod) - mass1D(nrmod)/r_model(nrmod) &
-            - (Rota*r_model(i))**2/3d0
+            - (rota_pert*r_model(i))**2/3d0
         enddo
 
         deallocate(aux)
@@ -1102,8 +1130,8 @@ contains
         use derivative
 
         implicit none
-        double precision f1D(nrmod)
-        double precision, dimension(grd(1)%nr, lres) :: f2D, f2D_t, f2D_z, aux
+        double precision, intent(in) :: f1D(nrmod)
+        double precision, intent(out), dimension(grd(1)%nr, lres) :: f2D, f2D_t, f2D_z, aux
         integer i, ii, j, order
         type(DERMAT) :: dm
 
@@ -1114,21 +1142,25 @@ contains
 
         ! make use of equatorial symmetry
         do j=1, (lres+1)/2
-        call interpolate(r_aux(1:nrmod, j)**2, ws1, nrmod, r_map(1:grd(1)%nr, j)**2, ws2, grd(1)%nr)
-        f2D(1:grd(1)%nr, j) = exp(ws2)
-        f2D(1:grd(1)%nr, lres+1-j)   = f2D(1:grd(1)%nr, j)
-        do i=1, grd(1)%nr
-        f2D_z(i, j) = 0d0
-        do ii=max(1, i-dm%lbder(1)), min(grd(1)%nr, i+dm%ubder(1))
-        f2D_z(i, j) = f2D_z(i, j) + dm%derive(i, ii, 1)*f2D(ii, j)
-        enddo
-        enddo
-        f2D_z(1:grd(1)%nr, lres+1-j) = f2D_z(1:grd(1)%nr, j)
+            call interpolate(r_aux(1:nrmod, j)**2, ws1, nrmod, &
+                r_map(1:grd(1)%nr, j)**2, ws2, grd(1)%nr)
+            f2D(1:grd(1)%nr, j) = exp(ws2)
+            f2D(1:grd(1)%nr, lres+1-j)   = f2D(1:grd(1)%nr, j)
+
+            do i=1, grd(1)%nr
+                f2D_z(i, j) = 0d0
+                do ii=max(1, i-dm%lbder(1)), min(grd(1)%nr, i+dm%ubder(1))
+                    f2D_z(i, j) = f2D_z(i, j) + dm%derive(i, ii, 1)*f2D(ii, j)
+                enddo
+            enddo
+            f2D_z(1:grd(1)%nr, lres+1-j) = f2D_z(1:grd(1)%nr, j)
         enddo
 
         aux = 0d0
-        call legendre(f2D(1:grd(1)%nr, 1:lres), aux(1:grd(1)%nr, 1:lres), lres, grd(1)%nr, 0, 1)
-        call legendrep(aux(1:grd(1)%nr, 1:lres), f2D_t(1:grd(1)%nr, 1:lres), lres, grd(1)%nr, 0)
+        call legendre(f2D(1:grd(1)%nr, 1:lres), aux(1:grd(1)%nr, 1:lres),       &
+            lres, grd(1)%nr, 0, 1)
+        call legendrep(aux(1:grd(1)%nr, 1:lres), f2D_t(1:grd(1)%nr, 1:lres),    &
+            lres, grd(1)%nr, 0)
 
         !f2D_z = 2d0*f2D_z*r_z*r_map
         call clear_derive(dm)
@@ -1273,7 +1305,7 @@ contains
         if ((i+finish).gt.ngrid) finish = ngrid - i
 
         do j=start, finish
-        mu(j) = grid(j+i) - grid(i)
+            mu(j) = grid(j+i) - grid(i)
         enddo
 
         do j=start, finish
@@ -1629,6 +1661,9 @@ contains
         if (fname == 'rho') then
             allocate(field(grd(1)%nr, lres))
             field(:, :) = rhom
+        elseif (fname == 'r_map') then
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = r_map
         elseif (fname == 'rhom') then
             allocate(field(grd(1)%nr, lres))
             field(:, :) = rhom

@@ -7,8 +7,7 @@ input iparity I1
 input mass 0pf5.2
 input age  1pe8.2
 input rota 1pe8.2 
-# input modelfile a64
-# input prtrbfile a64
+input pert_model I1
 
 eqlist  eqRho eqEr eqEt eqP eqPhi eqPhie eqEp
 varlist Rho Er Et P Phi Phie Ep
