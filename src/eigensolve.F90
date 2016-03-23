@@ -311,9 +311,21 @@ contains
 #else
               call make_asigma_band(sigma,asigma(id)%mat)
 #endif
+#ifdef USE_COMPLEX
+              ! call ZGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
+              print*, "Sorry, complexe valued band matrix are not yet implemented in TOP"
+              stop "not yet implemented"
+#else
+              call DGBTRF(d_dim,d_dim,kl,ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
+#endif
           else
               print*, "mattype:", grd(id)%mattype
               stop 'faulty matrix type'
+              if (info_lapack.ne.0) then
+                  print*, info_lapack,' info'
+                  print*, 'Factorisation (1) problem in domain ', id
+                  stop
+              endif
 
 #if USE_MPI
 #ifdef USE_COMPLEX
@@ -650,9 +662,9 @@ contains
 #ifdef USE_MPI
               endif
               do i=2,power_max-1
-              temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
-                  vect(1+i*a_dim:(i+1)*a_dim)
-              temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
+                  temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
+                      vect(1+i*a_dim:(i+1)*a_dim)
+                  temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
               enddo
               call DGEBS2D(ictxt1D,"A",topo,a_dim,power_max,temp2,a_dim)
           else
@@ -660,15 +672,15 @@ contains
           endif
 #endif
           do i=2,power_max-1
-          temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
-              vect(1+i*a_dim:(i+1)*a_dim)
-          temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
+              temp2(1:a_dim,i) = temp2(1:a_dim,i-1)+&
+                  vect(1+i*a_dim:(i+1)*a_dim)
+              temp2(1:a_dim,i) = temp2(1:a_dim,i)*sigma
           enddo
           do i=1,power_max-1
 #ifdef USE_MULTI
-          call a_product_total(temp2(1:a_dim,i),temp(1:a_dim), i+1)
+              call a_product_total(temp2(1:a_dim,i),temp(1:a_dim), i+1)
 #else
-          call a_product(temp2(1:a_dim,i),temp(1:a_dim), i+1)
+              call a_product(temp2(1:a_dim,i),temp(1:a_dim), i+1)
 #endif
 #ifdef USE_MPI
           if (iproc.eq.0) then
@@ -693,16 +705,16 @@ contains
           if (info_lapack.ne.0) &
               stop 'Problem solving linear system, in arncheb'
           do i=1,power_max-1
-          vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
-              sigma*vect(1+(i-1)*a_dim:i*a_dim)
+              vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
+                  sigma*vect(1+(i-1)*a_dim:i*a_dim)
           enddo
 #endif
 #ifdef USE_MPI
           if (iproc.eq.0) then
 #endif
               do i=1,power_max-1
-              vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
-                  sigma*vect(1+(i-1)*a_dim:i*a_dim)
+                  vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
+                      sigma*vect(1+(i-1)*a_dim:i*a_dim)
               enddo
 #ifdef USE_MPI
           endif

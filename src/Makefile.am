@@ -24,6 +24,8 @@ legpy.so: Makefile legpy.F90 ../lib/legendre/liblegendre.la
 		-I@abs_top_builddir@/lib/getpar \
 		-I@abs_top_builddir@/lib/itemlist \
 		-I@abs_top_builddir@/lib/legendre \
+		--f77flags="@FFLAGS@" \
+		--f90flags="@FCFLAGS@" \
 		$(srcdir)/legpy.F90
 
 TOP_LDADD  = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
