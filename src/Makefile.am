@@ -19,7 +19,7 @@ noinst_bin_SCRIPTS = legpy.so
 legpy.so: Makefile legpy.F90 ../lib/legendre/liblegendre.la
 	$(F2PY) -c -m legpy						\
 		--f90exec=$(FC)						\
-		--f70exec=$(F77)					\
+		--f77exec=$(F77)					\
 		-llegendre 							\
 		-L@libdir@ 							\
 		-I@abs_top_builddir@/lib/der		\
