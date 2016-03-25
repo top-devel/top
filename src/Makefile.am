@@ -17,15 +17,17 @@ noinst_bin_PROGRAMS = TOP
 noinst_bin_SCRIPTS = legpy.so
 
 legpy.so: Makefile legpy.F90 ../lib/legendre/liblegendre.la
-	$(F2PY) -c -m legpy \
-		-llegendre \
-		-L@libdir@ \
-		-I@abs_top_builddir@/lib/der \
-		-I@abs_top_builddir@/lib/getpar \
-		-I@abs_top_builddir@/lib/itemlist \
-		-I@abs_top_builddir@/lib/legendre \
-		--f77flags="@FFLAGS@" \
-		--f90flags="@FCFLAGS@" \
+	$(F2PY) -c -m legpy						\
+		--f90exec=$(FC)						\
+		--f70exec=$(F77)					\
+		-llegendre 							\
+		-L@libdir@ 							\
+		-I@abs_top_builddir@/lib/der		\
+		-I@abs_top_builddir@/lib/getpar		\
+		-I@abs_top_builddir@/lib/itemlist 	\
+		-I@abs_top_builddir@/lib/legendre 	\
+		--f77flags="@FFLAGS@"  				\
+		--f90flags="@FCFLAGS@" 				\
 		$(srcdir)/legpy.F90
 
 TOP_LDADD  = -ltop -lgetpar -llegendre -larnoldi -lder -lfit \
