@@ -1,0 +1,9 @@
+orderFD = 2     # order of the method when using finite differences
+dertype = IFD   # FD = finite differences, CHEB = Chebyshev spectral method
+mattype = BAND  # BAND = banded structure for the matrix
+nsol    = 4
+lres    = 150
+nr      = 594
+nt      = 2
+modelfile   = @builddir@/0000-m18a05-ad.osc
+rota    = 0

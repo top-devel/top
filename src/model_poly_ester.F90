@@ -1,6 +1,6 @@
 module model
       use mod_grid
-      use abstract_model_mod
+      use abstract_model_mod, only: model_ptr, abstract_model
       use inputs
 
       implicit none

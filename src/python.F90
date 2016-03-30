@@ -110,7 +110,13 @@ contains
     subroutine get_grid_size(nr, nt)
         integer, intent(out) :: nr, nt
 
-        call model_ptr%get_grid_size(nr, nt)
+        if (associated(model_ptr)) then
+            call model_ptr%get_grid_size(nr, nt)
+        else
+            print*, "warning undefined model"
+            nr = 1
+            nt = 1
+        endif
 
     end subroutine
 
@@ -118,7 +124,13 @@ contains
         integer, intent(in) :: nr, nt
         real(kind=8), intent(out) :: grid(nr, nt), th(nt)
 
-        call model_ptr%get_grid(grid, th, nr, nt)
+        if (associated(model_ptr)) then
+            call model_ptr%get_grid(grid, th, nr, nt)
+        else
+            print*, "warning undefined model"
+            grid = 0
+            th = 0
+        endif
 
     end subroutine
 

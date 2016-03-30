@@ -1,0 +1,206 @@
+stamp eq_cesam_all_lagrange_avg
+
+input m I3
+input lres I4
+input lmax I3
+input iparity I1
+input mass 0pf5.2
+input Rota 1pe22.15
+input age  1pe9.2
+input modelfile a256
+input gridfile  a256
+input inputlist a256
+input pert_model I1
+
+eqlist  eqdP_P eqEr eqEt eqPhi eqPhiP eqEp eqPhie eqPhieP
+varlist dP_P Er Et Phi PhiP Ep Phie PhieP
+
+suppress PhiP PhieP
+
+lvar Er    abs(m)+iparity
+lvar Et    abs(m)+iparity
+lvar dP_P  abs(m)+iparity
+lvar Phi   abs(m)+iparity
+lvar PhiP  abs(m)+iparity
+lvar Phie  abs(m)+iparity
+lvar PhieP abs(m)+iparity
+lvar Ep    abs(m)+1-iparity
+
+leq eqEr    abs(m)+iparity
+leq eqEt    abs(m)+iparity
+leq eqdP_P  abs(m)+iparity
+leq eqPhi   abs(m)+iparity
+leq eqPhiP  abs(m)+iparity
+leq eqPhie  abs(m)+iparity
+leq eqPhieP abs(m)+iparity
+leq eqEp    abs(m)+1-iparity
+
+#-------------------------------------------------------------------------------------
+#instruction lmax = maxval(lvar)
+instruction call initialisation(nt,nr,m,lres,llmax) # this initialises the integrales module
+instruction call init_avg(dmat(1)%derive(:,:,0),dmat(1)%lbder(0),dmat(1)%ubder(0))
+#-------------------------------------------------------------------------------------
+equation eqdP_P
+
+sub rtt w0 Illm_a(r_map*roz*r_z/Gamma1,$a,$leq,$lvar) dP_P
+sub rtt w0 Illm_a(zeta,$a,$leq,$lvar)                 Er'
+term s w0 2d0                                         Er
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))           Et
+
+termbc t nr w0 1d0                                    Er^-1(1)
+termbc t nr w0 -dble($lvar($j1))                      Et^-1(1)
+#-------------------------------------------------------------------------------------
+equation eqEr
+
+sub rtt w2 Illm_a(r_z/roz**2,$a,$leq,$lvar)                        Er
+sub rtt w1 Illm_a(2d0*m*Rota*r_z/roz**2,$a,$leq,$lvar)             Er
+sub rtt w0 Illm_a(m**2*Rota**2*r_z/roz**2,$a,$leq,$lvar)           Er
+sub rtt w2 Jllm_a(rrt/roz,$a,$leq,$lvar)                           Et
+sub rtt w1 Jllm_a(2d0*m*Rota*rrt/roz,$a,$leq,$lvar)                Et
+sub rtt w0 Jllm_a(m**2*Rota**2*rrt/roz,$a,$leq,$lvar)              Et
+sub rtt w2 Kllm_a(rrt/roz,$a,$leq,$lvar)                           Ep
+sub rtt w1 Kllm_a(2d0*m*Rota*rrt/roz,$a,$leq,$lvar)                Ep
+sub rtt w0 Kllm_a(m**2*Rota**2*rrt/roz,$a,$leq,$lvar)              Ep
+sub rtt w1 Kllm_a(-2d0*Rota*sint/roz,$a,$leq,$lvar)                Et
+sub rtt w0 Kllm_a(-2d0*m*Rota**2*sint/roz,$a,$leq,$lvar)           Et
+sub rtt w1 Jllm_a(-2d0*Rota*sint/roz,$a,$leq,$lvar)                Ep
+sub rtt w0 Jllm_a(-2d0*m*Rota**2*sint/roz,$a,$leq,$lvar)           Ep
+sub rtt w0 Illm_a(-pm/rhom,$a,$leq,$lvar)                          dP_P'
+sub rtt w0 Illm_a(pe_z*(1d0-1d0/Gamma1),$a,$leq,$lvar)             dP_P
+term s w0 -1d0                                                     PhiP
+sub rtt w0 Illm_a(-grd_pe_z,$a,$leq,$lvar)                         Er'
+sub rtt w0 Illm(-grd_pe_zz,$a,$leq,$lvar)                          Er  # this is NOT a mistake
+sub rtt w0 Jllm_a(-grd_pe_t,$a,$leq,$lvar)                         Et'
+sub rtt w0 Jllm(-grd_pe_zt,$a,$leq,$lvar)                          Et  # this is NOT a mistake
+sub rtt w0 Kllm_a(-grd_pe_t,$a,$leq,$lvar)                         Ep'
+sub rtt w0 Kllm(-grd_pe_zt,$a,$leq,$lvar)                          Ep  # this is NOT a mistake
+
+# This corresponds to delta p/P_0 = 0 on stellar surface:
+termbc t nr w0  1d0                                                     dP_P^-1(nr)
+#-------------------------------------------------------------------------------------
+equation eqEt
+
+sub rtt w2 Jllmc(r_t/roz**2,$a,$leq,$lvar)                                Er^-1
+sub rtt w1 Jllmc(2d0*m*Rota*r_t/roz**2,$a,$leq,$lvar)                     Er^-1
+sub rtt w0 Jllmc(m**2*Rota**2*r_t/roz**2,$a,$leq,$lvar)                   Er^-1
+sub rtt w2 Lllm((r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)                  Et^-1
+instruction call modify_l0($prev,abs(m)+iparity) 
+sub rtt w1 Lllm(2d0*m*Rota*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)       Et^-1
+sub rtt w0 Lllm(m**2*Rota**2*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)     Et^-1
+sub rtt w2 Nllm(zeta/r_z,$a,$leq,$lvar)                                   Et^-1
+sub rtt w1 Nllm(2d0*m*Rota*zeta/r_z,$a,$leq,$lvar)                        Et^-1
+sub rtt w0 Nllm(m**2*Rota**2*zeta/r_z,$a,$leq,$lvar)                      Et^-1
+sub rtt w2 Mllm((r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)                  Ep^-1
+sub rtt w1 Mllm(2d0*m*Rota*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)       Ep^-1
+sub rtt w0 Mllm(m**2*Rota**2*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)     Ep^-1
+sub rtt w2 Mllmc(-zeta/r_z,$a,$leq,$lvar)                                 Ep^-1
+sub rtt w1 Mllmc(-2d0*m*Rota*zeta/r_z,$a,$leq,$lvar)                      Ep^-1
+sub rtt w0 Mllmc(-m**2*Rota**2*zeta/r_z,$a,$leq,$lvar)                    Ep^-1
+sub rtt w1 Kllmc(2d0*Rota*zeta*sint/roz,$a,$leq,$lvar)                    Er^-1
+sub rtt w0 Kllmc(2d0*m*Rota**2*zeta*sint/roz,$a,$leq,$lvar)               Er^-1
+sub rtt w1 Mllm(-2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)       Et^-1
+sub rtt w1 Mllmc(2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)       Et^-1
+sub rtt w0 Mllm(-2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)  Et^-1
+sub rtt w0 Mllmc(2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)  Et^-1
+sub rtt w1 Lllm(-2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)       Ep^-1
+sub rtt w1 Nllm(-2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)       Ep^-1
+sub rtt w0 Lllm(-2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)  Ep^-1
+sub rtt w0 Nllm(-2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)  Ep^-1
+sub rtt w0 Lllm(-pm/rhom,$a,$leq,$lvar)                                        dP_P^-1
+sub rtt w0 Nllm(-pm/rhom,$a,$leq,$lvar)                                        dP_P^-1
+sub rtt w0 Jllmc(pe_t*(1d0-1d0/Gamma1),$a,$leq,$lvar)                          dP_P^-1
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                    Phi^-1
+sub rtt w0 Jllmc(-grd_pe_tz,$a,$leq,$lvar)                                     Er^-1
+sub rtt w0 Lllm(-grd_pe_tt,$a,$leq,$lvar)                                      Et^-1
+sub rtt w0 Mllm(-grd_pe_tt,$a,$leq,$lvar)                                      Ep^-1
+sub rtt w0 Lllm(-grd_pe_z,$a,$leq,$lvar)                                       Er^-1
+sub rtt w0 Nllm(-grd_pe_z,$a,$leq,$lvar)                                       Er^-1
+sub rtt w0 Tllm(-grd_pe_t,$a,$leq,$lvar)                                       Et^-1
+sub rtt w0 Mllmc(dble(m)*grd_pe_t/sint,$a,$leq,$lvar)                          Et^-1
+sub rtt w0 Ullm(-grd_pe_t,$a,$leq,$lvar)                                       Ep^-1
+sub rtt w0 Nllm(-dble(m)*grd_pe_t/sint,$a,$leq,$lvar)                          Ep^-1
+#-------------------------------------------------------------------------------------
+equation eqEp
+
+sub rtt w2 Kllmc(r_t/roz**2,$a,$leq,$lvar)                                  Er^-1
+sub rtt w1 Kllmc(2d0*m*Rota*r_t/roz**2,$a,$leq,$lvar)                       Er^-1
+sub rtt w0 Kllmc(m**2*Rota**2*r_t/roz**2,$a,$leq,$lvar)                     Er^-1
+sub rtt w2 Mllmc((r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)                   Et^-1
+sub rtt w1 Mllmc(2d0*m*Rota*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)        Et^-1
+sub rtt w0 Mllmc(m**2*Rota**2*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)      Et^-1
+sub rtt w2 Mllm(-zeta/r_z,$a,$leq,$lvar)                                    Et^-1
+sub rtt w1 Mllm(-2d0*m*Rota*zeta/r_z,$a,$leq,$lvar)                         Et^-1
+sub rtt w0 Mllm(-m**2*Rota**2*zeta/r_z,$a,$leq,$lvar)                       Et^-1
+sub rtt w2 Nllm(-(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)                   Ep^-1
+sub rtt w1 Nllm(-2d0*m*Rota*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)        Ep^-1
+sub rtt w0 Nllm(-m**2*Rota**2*(r_map+rrt*r_t)/(roz*r_z),$a,$leq,$lvar)      Ep^-1
+sub rtt w2 Lllm(-zeta/r_z,$a,$leq,$lvar)                                    Ep^-1
+instruction call modify_l0($prev,abs(m)+modulo(1+iparity,2)) 
+sub rtt w1 Lllm(-2d0*m*Rota*zeta/r_z,$a,$leq,$lvar)                         Ep^-1
+sub rtt w0 Lllm(-m**2*Rota**2*zeta/r_z,$a,$leq,$lvar)                       Ep^-1
+sub rtt w1 Jllmc(2d0*Rota*zeta*sint/roz,$a,$leq,$lvar)                      Er^-1
+sub rtt w0 Jllmc(2d0*m*Rota**2*zeta*sint/roz,$a,$leq,$lvar)                 Er^-1
+sub rtt w1 Lllm(2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)          Et^-1
+sub rtt w0 Lllm(2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)     Et^-1
+sub rtt w1 Nllm(2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)          Et^-1
+sub rtt w0 Nllm(2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)     Et^-1
+sub rtt w1 Mllm(2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)          Ep^-1
+sub rtt w0 Mllm(2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)     Ep^-1
+sub rtt w1 Mllmc(-2d0*Rota*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)        Ep^-1
+sub rtt w0 Mllmc(-2d0*m*Rota**2*(r_t*sint+r_map*cost)/(roz*r_z),$a,$leq,$lvar)   Ep^-1
+sub rtt w0 Mllm(pm/rhom,$a,$leq,$lvar)                                           dP_P^-1
+sub rtt w0 Mllmc(-pm/rhom,$a,$leq,$lvar)                                         dP_P^-1
+sub rtt w0 Kllmc(pe_t*(1d0-1d0/Gamma1),$a,$leq,$lvar)                            dP_P^-1
+sub rtt w0 Kllmc(-grd_pe_tz,$a,$leq,$lvar)                                       Er^-1
+sub rtt w0 Mllmc(-grd_pe_tt,$a,$leq,$lvar)                                       Et^-1
+sub rtt w0 Nllm(grd_pe_tt,$a,$leq,$lvar)                                         Ep^-1
+sub rtt w0 Mllm(grd_pe_z,$a,$leq,$lvar)                                          Er^-1
+sub rtt w0 Mllmc(-grd_pe_z,$a,$leq,$lvar)                                        Er^-1
+sub rtt w0 Xllm(-grd_pe_t,$a,$leq,$lvar)                                         Et^-1
+sub rtt w0 Lllm(dble(m)*grd_pe_t/sint,$a,$leq,$lvar)                             Et^-1
+sub rtt w0 Yllm(grd_pe_t,$a,$leq,$lvar)                                          Ep^-1
+sub rtt w0 Mllm(dble(m)*grd_pe_t/sint,$a,$leq,$lvar)                             Ep^-1
+
+termbc t 1 w0 1d0                                                                Ep^-1(1)
+#-------------------------------------------------------------------------------------
+equation eqPhi
+
+term s w0 1d0                                                                    Phi'
+term s w0 -1d0                                                                   PhiP
+
+termbc t nr w0 dble($lvar($j1))                                                  Phi^-1(1)
+termbc t nr w0 dble(max(0,1-$lvar($j1)))                                         PhiP^-1(1)
+#-------------------------------------------------------------------------------------
+equation eqPhiP
+
+sub rtt w0 Illm_a((r_map**2+r_t**2)/r_z**2,$a,$leq,$lvar)                                                                         PhiP'
+sub rtt w0 Illm_a((2d0*r_z*r_t*r_zt-r_map**2*r_zz-r_z**2*r_tt+2d0*r_map*r_z**2-r_t**2*r_zz-r_z**2*r_t*cott)/r_z**3,$a,$leq,$lvar) PhiP
+sub rtt w0 Jllm_a(-2d0*r_t/r_z,$a,$leq,$lvar)                                                                                     PhiP
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                                                                       Phi
+sub rtt w0 Illm_a(-Lambda*(r_map**2*rhom)/Gamma1,$a,$leq,$lvar)                                                                   dP_P
+sub rtt w0 Illm(Lambda*(zeta**2*rhom_z/r_z),$a,$leq,$lvar)                                                                        Er
+sub rtt w0 Jllm(Lambda*(zeta*rhom_t/r_z),$a,$leq,$lvar)                                                                           Et
+sub rtt w0 Kllm(Lambda*(zeta*rhom_t/r_z),$a,$leq,$lvar)                                                                           Ep
+
+termbc t nr w0 1d0           Phi^-1(nr)
+termbc t nr w0 -1d0          Phie^-1(nr)
+#-------------------------------------------------------------------------------------
+equation eqPhie
+
+term s w0 1d0  Phie'
+term s w0 -1d0 PhieP
+
+termbc t nr w0 1d0                     PhiP^-1(nr)
+termbc t nr w0 1d0                     PhieP^-1(nr)
+subbc tt nr w0 Illmbc(Lambda*rhom(nr,1:lres)*zeta(nr,1:lres)**2*r_z(nr,1:lres)/(r_map(nr,1:lres)**2+r_t(nr,1:lres)**2),$a,$leq,$lvar) Er^-1(nr)
+#-------------------------------------------------------------------------------------
+equation eqPhieP
+
+sub rtt w0 Illm_a((re_map**2+re_t**2)/re_z**2,$a,$leq,$lvar)                                                                                    PhieP'
+sub rtt w0 Illm_a((2d0*re_z*re_t*re_zt-re_map**2*re_zz-re_z**2*re_tt+2d0*re_map*re_z**2-re_t**2*re_zz-re_z**2*re_t*cott)/re_z**3,$a,$leq,$lvar) PhieP
+sub rtt w0 Jllm_a(-2d0*re_t/re_z,$a,$leq,$lvar)                                                                                                 PhieP
+term rt w0 -dble($lvar($j1)*($lvar($j1)+1))                                                                                                     Phie
+
+termbc t nr w0 -1d0/K                   PhieP^-1(1)
+termbc t nr w0 dble($lvar($j1)+1)/2d0   Phie^-1(1)
+#-------------------------------------------------------------------------------------

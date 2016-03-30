@@ -1,7 +1,7 @@
 #include "config.h"
 
 module model
-    use abstract_model_mod
+    use abstract_model_mod, only: model_ptr, abstract_model
     use mod_grid, only: ndomains, grd, nt
     use inputs, only: lres, mass, rota_avg
     use iso_c_binding

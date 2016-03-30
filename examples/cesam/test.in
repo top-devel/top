@@ -1,0 +1,11 @@
+#!@PYTHON@
+
+import top
+import matplotlib.pyplot as plt
+
+if __name__ == '__main__':
+    cesam = top.load('eq_cesam_all_lagrange_avg')
+    cesam.read_dati('@builddir@/dati')
+    m = cesam.init_model('@builddir@/0000-m18a05-ad.osc')
+
+    r = cesam.run_arncheb(12)
