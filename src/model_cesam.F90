@@ -24,6 +24,7 @@ module model
 
     ! workspace:
     double precision, allocatable, save :: ws1(:), ws2(:)
+    double precision :: rota_pert
 
     ! variables needed for pulsation calculations
     double precision, allocatable, dimension(:,:), save :: rhom,NNt,&
@@ -63,8 +64,15 @@ contains
         call read_model(filename)
         ! call init_radial_grid_file()
         call init_radial_grid_g_modes()
-        ! call find_pert()
-        call no_pert() ! spherical case: but watch out because Rota is != 0
+        if (pert_model == 1) then
+            rota_pert = rota
+            print*, "Pert model: rota=", rota_pert
+            call find_pert()
+        else
+            rota_pert = 0.d0
+            print*, "No model pert"
+            call no_pert() ! spherical case: but watch out because Rota is != 0
+        endif
         call make_mapping()
         !call find_pe1D() ! integrate Poisson's equation
         call find_pe1D_alt() ! integrate gravity
@@ -462,7 +470,7 @@ contains
 
         open(unit=3,file="delme_grid",status="unknown")
         do i=1,grd(1)%nr
-        write(3,*) i, grd(1)%r(i)
+            write(3,*) i, grd(1)%r(i)
         enddo
         close(3)
         stop
@@ -524,7 +532,7 @@ contains
             stop
         endif
         do i=1,nrmod
-        uhx(i) = v(2*i)*r_model(i)*Rota**2
+            uhx(i) = v(2*i)*r_model(i)*rota_pert**2
         enddo
 
         call clear_derive(dm)
@@ -555,15 +563,15 @@ contains
         ! this does a basic check on uhx to see if it
         ! will produce a singular mapping:
         do i=2,nrmod
-        uprime = (uhx(i)-uhx(i-1))/(r_model(i)-r_model(i-1))
-        if (uprime.ge.1) then
-            print*,i
-            stop "d(uhx)/dx >= 1"
-        endif
-        if (uprime.le.-2) then
-            print*,i
-            stop "d(uhx)/dx <= -2"
-        endif
+            uprime = (uhx(i)-uhx(i-1))/(r_model(i)-r_model(i-1))
+            if (uprime.ge.1) then
+                print*,i
+                stop "d(uhx)/dx >= 1"
+            endif
+            if (uprime.le.-2) then
+                print*,i
+                stop "d(uhx)/dx <= -2"
+            endif
         enddo
 
         if (allocated(r_map))  deallocate(r_map)
@@ -617,9 +625,9 @@ contains
         call gauleg(-1d0,1d0,cth,w,lres)
         sth = sqrt(1-cth**2)
         do i=1,grd(1)%nr
-        sint(i,:) = sth(:)
-        cost(i,:) = cth(:)
-        cott(i,:) = cth(:)/sth(:)
+            sint(i,:) = sth(:)
+            cost(i,:) = cth(:)
+            cott(i,:) = cth(:)/sth(:)
         enddo
 
         do j=1,lres
@@ -720,7 +728,7 @@ contains
         enddo
         call antiderivative_down(r_model,p_aux,p1D_bis,nrmod,1)
         do i=1,nrmod
-        p1D_bis(i) = Rota**2*(p1D_bis(i)-p1D_bis(nrmod))+p1D(i)
+        p1D_bis(i) = rota_pert**2*(p1D_bis(i)-p1D_bis(nrmod))+p1D(i)
         enddo
 
         call map2D_der_p_bis(rho1D, rhom, rhom_t, rhom_z, aux)
@@ -925,7 +933,7 @@ contains
 
         do i=1,nrmod
         pe1D(i) = pe1D(i) + (ff(nrmod) - ff(i)) &
-            - (Rota*r_model(i))**2/3d0
+            - (rota_pert*r_model(i))**2/3d0
         enddo
 
         deallocate(f,ff)
@@ -950,7 +958,7 @@ contains
         call antiderivative_up(r_model,aux,pe1D,nrmod,1)
         do i=1,nrmod
         pe1D(i) = pe1D(i) - pe1D(nrmod) - mass1D(nrmod)/r_model(nrmod) &
-            - (Rota*r_model(i))**2/3d0
+            - (rota_pert*r_model(i))**2/3d0
         enddo
 
         deallocate(aux)
@@ -1608,7 +1616,7 @@ contains
         write(999,'(a)') "# Lambda"
         write(999,'(1pe22.15)') Lambda
         write(999,'(a)') "# Rota"
-        write(999,'(1pe22.15)') Rota
+        write(999,'(1pe22.15)') rota_pert
         close(999)
 
         101    format(3(1pe22.15,2X))

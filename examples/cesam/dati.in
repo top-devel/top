@@ -6,4 +6,5 @@ lres    = 150
 nr      = 594
 nt      = 2
 modelfile   = @builddir@/0000-m18a05-ad.osc
-rota    = 0
+Rota    = 0.2
+pert_model = 1
