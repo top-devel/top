@@ -11,6 +11,11 @@ input modelfile a256
 input gridfile  a256
 input inputlist a256
 input pert_model I1
+input grid_type a256
+input C0 1pe22.15
+input C1 1pe22.15
+input C2 1pe22.15
+input C3 1pe22.15
 
 eqlist  eqdP_P eqEr eqEt eqPhi eqPhiP eqEp eqPhie eqPhieP
 varlist dP_P Er Et Phi PhiP Ep Phie PhieP

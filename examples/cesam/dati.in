@@ -3,8 +3,13 @@ dertype = IFD   # FD = finite differences, CHEB = Chebyshev spectral method
 mattype = BAND  # BAND = banded structure for the matrix
 nsol    = 4
 lres    = 150
-nr      = 594
+nr      = 600
 nt      = 2
-modelfile   = @builddir@/0000-m18a05-ad.osc
+modelfile   = @builddir@/sismique_ultime_2099couches_tronc.osc
 Rota    = 0.2
 pert_model = 1
+grid_type = grid_p
+C0  = 1d0
+C1  = 2.5d-2
+C2  = 1d-1
+C3  = 1d-4

@@ -1,6 +1,6 @@
 module model
     use mod_grid
-    use inputs, only: lres, rota, mass, dertype, orderFD, pert_model, gridfile
+    use inputs, only: lres, rota, mass, dertype, orderFD, pert_model, grid_type
     use abstract_model_mod, only: model_ptr, abstract_model
 
     implicit none
@@ -269,6 +269,7 @@ contains
     !--------------------------------------------------------------------------
     ! This does a simple initialisation for the radial grid
     !--------------------------------------------------------------------------
+#if 0
     subroutine init_radial_grid_file()
 
         integer i, j
@@ -294,12 +295,14 @@ contains
         enddo
 
     end subroutine init_radial_grid_file
+#endif
 
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for g-modes:
     !--------------------------------------------------------------------------
     subroutine init_radial_grid_g_modes()
 
+        use inputs, C0_dati => C0, C1_dati => C1, C2_dati => C2, C3_dati => C3
 
         double precision, allocatable ::  PP(:), CC1(:), CC3(:), V_son(:)
         double precision :: P_total, P_target, mu, C1, C2, C3, C0
@@ -309,14 +312,26 @@ contains
 
         allocate(NN(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
 
-        ! C0 = 1d0
-        ! C1 = 2.5d-2
-        ! C2 = 1d-1
-        ! C3 = 1d-4
-        C0 = 1d0
-        C1 = 10d0 ! 2.5d-2
-        C2 = 1d-2
-        C3 = 1.5d-2
+        print*, "Grid type: ", trim(grid_type)
+        if (trim(grid_type) == 'grid_g') then
+            C0 = 1d0
+            C1 = 2.5d-2
+            C2 = 1d-1
+            C3 = 1d-4
+        else if (trim(grid_type) == 'grid_p') then
+            C0 = 1d0
+            C1 = 10d0
+            C2 = 1d-2
+            C3 = 1.5d-2
+        else if (trim(grid_type) == 'grid_coef') then
+            C0 = C0_dati
+            C1 = C1_dati
+            C2 = C2_dati
+            C3 = C3_dati
+            print*, "C0, C1, C2, C3 = ", C0, C1, C2, C3
+        else
+            stop "Unsupported grid in dati"
+        end if
 
         ! find scaled Brunt-Vaisala frequency: N/r
         do i = 2, nrmod
@@ -342,19 +357,6 @@ contains
         ! possible saturation near surface.
         PP(1) = 0d0
         do i= 2, nrmod
-            !PP(i) = PP(i-1) + (r_model(i)-r_model(i-1))*sqrt(C2)*(NN(i)+NN(i-1))/2d0
-            ! PP(i) = PP(i-1) +sqrt(1d-1*((r_model(i)-r_model(i-1))*(NN(i)+NN(i-1))/2d0)**2+1d0*((r_model(i)-r_model(i-1)))**2+(1d-4*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(r_model(i)-r_model(i-1)))/var(4, i))**2)+(r_model(i)-r_model(i-1))*2.5d-2*(G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))))  ! Base + Constant + Pression
-
-            !PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))*sqrt(C0)  ! terme constant
-            !PP(i)=PP(i-1)+sqrt(C3)*(r_model(i)-r_model(i-1))*(((var(4, i)-var(4, i-1))/(var(1, i)-var(1, i-1)))/var(4, i))**2           ! Terme de variation de pression.
-            !PP(i)=pp(i-1)+sqrt(C1)*G*solar_mass*var(5, i)/(solar_radius*var(10, i)*var(4, i))
-            ! print*, "r_model: ", r_model(i)
-            ! print*, "NN: ", NN(i)
-            ! print*, "NN -1: ", NN(i-1)
-            ! print*, "CC1: ", CC1(i)
-            ! print*, "CC1 -1: ", CC1(i-1)
-            ! print*, "CC3: ", CC3(i)
-            ! print*, "CC3 -1: ", CC3(i-1)
             PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))* &
                 sqrt(C2*((NN(i)+NN(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
                 C3*((CC3(i)+CC3(i-1))/2d0)+C0) ! 09/03
@@ -408,6 +410,7 @@ contains
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for p-modes:
     !--------------------------------------------------------------------------
+#if 0
     subroutine init_radial_grid_p_modes()
 
         double precision, allocatable :: c_aux(:), TT(:)
@@ -459,6 +462,7 @@ contains
         deallocate(c_aux, TT)
 
     end subroutine init_radial_grid_p_modes
+#endif
 
     !--------------------------------------------------------------------------
     ! This writes the radial grid as a function of index and stops the
