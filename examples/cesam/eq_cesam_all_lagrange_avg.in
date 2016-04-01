@@ -9,7 +9,6 @@ input Rota 1pe22.15
 input age  1pe9.2
 input modelfile a256
 input gridfile  a256
-input inputlist a256
 input pert_model I1
 input grid_type a256
 input C0 1pe22.15

@@ -35,6 +35,10 @@ parser.add_argument('mpi',
 parser.add_argument('file',
         help='equation file')
 
+parser.add_argument('--order',
+        nargs=1,
+        help='use an alternative `order.inc\' file')
+
 parser.add_argument('--model',
         required=True,
         help='input model (ester or poly_ester, etc)')
@@ -78,6 +82,17 @@ else:
 
 if args.mpi == "mpi":
     readeq += "-mpi"
+
+if args.order:
+    order = args.order[0]
+    if not os.access('%s' % order, os.F_OK):
+        print('Error: no such file `%s\'' % order)
+        sys.exit(1)
+else:
+    order = '@abs_top_srcdir@/src/order-default.inc'
+
+shutil.copy(order,
+        '@abs_top_builddir@/src/order.inc')
 
 if not os.access('@abs_top_srcdir@/src/model_%s.F90' % args.model, os.F_OK):
     print('Error: no model named `%s\'' % args.model)
