@@ -6,6 +6,7 @@ lres    = 150
 nr      = 600
 nt      = 2
 modelfile   = @builddir@/sismique_ultime_2099couches_tronc.osc
+gridfile   = @builddir@/grid600g_tronc.num
 Rota    = 0.0
 pert_model = 0
 m       = 0

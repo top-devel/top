@@ -41,7 +41,7 @@ legpy.o:			grid.o
 
 TOP.o:				eigensolve.o mod_blacs.o grid.o
 eigensolve.o:		matrices.o mod_blacs.o grid.o
-matrices.o:			matrices.inc model.o grid.o
+matrices.o:			matrices.inc model.o grid.o config.o
 inputs.o:			grid.o
 udirectory.o:		inputs.o model.o grid.o
 inputs.o:			mod_blacs.o grid.o

@@ -62,8 +62,8 @@ contains
         character(len=*), intent(in) :: filename
 
         call read_model(filename)
-        ! call init_radial_grid_file()
-        call init_radial_grid_g_modes()
+        call init_radial_grid_file()
+        ! call init_radial_grid_g_modes()
         if (pert_model == 1) then
             rota_pert = rota
             print*, "Pert model: rota=", rota_pert
@@ -78,9 +78,9 @@ contains
         call find_pe1D_alt() ! integrate gravity
         call init_fields()
         call init_grd_pe()
-        !call write_radial_grid() ! this stops the program
-        !call write_amdl()        ! this stops the program
-        !call write_fields()      ! this stops the program
+        ! call write_radial_grid() ! this stops the program
+        ! call write_amdl()        ! this stops the program
+        ! call write_fields()      ! this stops the program
 
         model_ptr => this
 
@@ -290,9 +290,10 @@ contains
     !--------------------------------------------------------------------------
     ! This does a simple initialisation for the radial grid
     !--------------------------------------------------------------------------
-#if 0
+#if 1
     subroutine init_radial_grid_file()
 
+        use inputs, only: gridfile
         integer i, j
 
         open(unit=37,file=trim(gridfile),status="old")

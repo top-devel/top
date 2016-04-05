@@ -189,6 +189,7 @@ try:
         "@abs_top_builddir@/src/postproc.o",
         "@abs_top_builddir@/src/hpsort_index.o",
         "@abs_top_srcdir@/src/python.F90",
+        "@abs_top_srcdir@/src/config.F90",
         "@abs_top_builddir@/src/inputs.F90"],
         stderr=subprocess.STDOUT)
 

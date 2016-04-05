@@ -282,6 +282,8 @@ class load:
         lib.toppy.init_dati()
         self.name = name
         self.dati = lib.inputs
+        self.cfg = lib.cfg
+        self.cfg.dump_asigma = False
 
     def get_version(self):
         """

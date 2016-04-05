@@ -9,6 +9,8 @@
       use mod_grid
       use derivative
 
+      use cfg
+
       type DOMAIN
         ! these quantities are the same for all processes (for the
         ! moment)
@@ -3428,6 +3430,16 @@ contains
       asigma = 0d0
       pos = dm(1)%kl + dm(1)%ku + 1
 
+      if (dump_asigma) then
+          open(unit=42, file="asigma-0.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
+
       ! The equations:
       do n=1,dm(1)%nas
         power = dm(1)%asi(1,n)
@@ -3449,6 +3461,16 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) then
+          open(unit=42, file="asigma-1.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
+
       do n=1,dm(1)%nart
         power = dm(1)%arti(1,n)
         der = dm(1)%arti(2,n)
@@ -3468,6 +3490,16 @@ contains
           enddo
         enddo
       enddo
+
+      if (dump_asigma) then
+          open(unit=42, file="asigma-2.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
 
       do n=1,dm(1)%nartt
         power = dm(1)%artti(1,n)
@@ -3491,6 +3523,16 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) then
+          open(unit=42, file="asigma-3.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
+
       ! Boundary conditions:
       do n=1,idm(1, 1)%natbc
         power = idm(1, 1)%atbci(1,n)
@@ -3509,6 +3551,16 @@ contains
           enddo
         enddo
       enddo
+
+      if (dump_asigma) then
+          open(unit=42, file="asigma-4.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
 
       do n=1,idm(1, 1)%nattbc
         power = idm(1, 1)%attbci(1,n)
@@ -3529,6 +3581,16 @@ contains
           enddo
         enddo
       enddo
+
+      if (dump_asigma) then
+          open(unit=42, file="asigma-5.txt")
+          do i=1, 2*dm(1)%kl+dm(1)%ku+1
+            do j=1, a_dim
+                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+            enddo
+          enddo
+          close(42)
+      endif
 
       end subroutine
 !------------------------------------------------------------------------------
