@@ -115,7 +115,7 @@ contains
             field = Gamma1
         elseif (fname == 'NN') then
             allocate(field(grd(1)%nr, 1))
-            field = NN
+            field(:, 1) = NN
         elseif (fname == 'NNr') then
             allocate(field(grd(1)%nr, lres))
             field = NNr
@@ -131,6 +131,24 @@ contains
         elseif (fname == 'pe_t') then
             allocate(field(grd(1)%nr, lres))
             field = pe_t
+        elseif (fname == 'grd_pe_z') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_z
+        elseif (fname == 'grd_pe_t') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_t
+        elseif (fname == 'grd_pe_zz') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_zz
+        elseif (fname == 'grd_pe_zt') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_zt
+        elseif (fname == 'grd_pe_tz') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_tz
+        elseif (fname == 'grd_pe_tt') then
+            allocate(field(grd(1)%nr, lres))
+            field = grd_pe_tt
         else
             allocate(field(1, 1))
             field = 0.d0
