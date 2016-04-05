@@ -56,24 +56,16 @@ CESAM Model
 **Name**: ``cesam``
 
 Fields:
- * ``rho``
- * ``rho``
- * ``rhom``
- * ``rhom_z``
- * ``rhom_t``
- * ``pm``
- * ``pm_t``
- * ``pm_z``
- * ``Gamma1``
- * ``aux``
- * ``NNt``
- * ``pe``
- * ``pe_z``
- * ``pe_t``
- * ``c2``
- * ``ws1``
- * ``ws2``
- * ``NNr``
- * ``p_aux``
- * ``p1D_bis``
- * ``NN2D``
+ * ``rhom``: density :math:`\rho`
+ * ``rhom_z``: :math:`\frac{\partial{\rho}}{\partial{\zeta}}`
+ * ``rhom_t``: :math:`\frac{\partial{\rho}}{\partial{\theta}}`
+ * ``pm``: pressure :math:`p`
+ * ``pm_z``: :math:`\frac{\partial{p}}{\partial{\zeta}}`
+ * ``pm_t``: :math:`\frac{\partial{p}}{\partial{\theta}}`
+ * ``Gamma1``: first adiabatic exponent
+ * ``NN``: Brunt-Vaisala frequency
+ * ``NNr``: :math:`\frac{\partial{NN}}{\partial{\zeta}}`
+ * ``NNt``: :math:`\frac{\partial{NN}}{\partial{\theta}}`
+ * ``pe``: pressure potential
+ * ``pe_z``: :math:`\frac{\partial{pe}}{\partial{\zeta}}`
+ * ``pe_t``: :math:`\frac{\partial{pe}}{\partial{\theta}}`

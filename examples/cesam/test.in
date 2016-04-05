@@ -6,6 +6,6 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     cesam = top.load('eq_cesam_all_lagrange_avg')
     cesam.read_dati('@builddir@/dati')
-    m = cesam.init_model('@builddir@/0000-m18a05-ad.osc')
+    m = cesam.init_model('@builddir@/sismique_ultime_2099couches_tronc.osc')
 
     r = cesam.run_arncheb(12)

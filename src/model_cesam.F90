@@ -113,6 +113,9 @@ contains
         elseif (fname == 'Gamma1') then
             allocate(field(grd(1)%nr, lres))
             field = Gamma1
+        elseif (fname == 'NN') then
+            allocate(field(grd(1)%nr, 1))
+            field = NN
         elseif (fname == 'NNr') then
             allocate(field(grd(1)%nr, lres))
             field = NNr
