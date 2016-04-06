@@ -51,23 +51,23 @@ class results:
     :rtype: :py:class:`results` object
     :return: results of a previous computation (if result_file is provided) an empty results object otherwise
     """
-    valps = []
-    vecps = []
-    l = []
-    nsol = 0
-    modelfile = None
-    shift = 0
-    lres = 0
-    libname = None
-    dati = {}
-    ndom = 0
-    vars = []
-    nr = []
-    zeta = []
-    r = []
-    theta = []
 
     def __init__(self, result_file = ''):
+        self.valps = []
+        self.vecps = []
+        self.l = []
+        self.nsol = 0
+        self.modelfile = None
+        self.shift = 0
+        self.lres = 0
+        self.libname = None
+        self.dati = {}
+        self.ndom = 0
+        self.vars = []
+        self.nr = []
+        self.zeta = []
+        self.r = []
+        self.theta = []
         if result_file != '':
             self._from_file(result_file)
 
@@ -118,6 +118,16 @@ class results:
         self.r = f['/r'][:, :]
         self.theta = f['/theta'][:]
         f.close()
+
+    def append(self, res):
+        """
+        appends results stored in res
+        """
+        self.nsol = self.nsol + res.nsol
+        for isol in range(0, res.nsol):
+            self.valps.append(res.valps[isol])
+            self.vecps.append(res.vecps[isol])
+            self.l.append(res.l[isol])
 
     def get_sol(self, idom, isol, var):
         """
