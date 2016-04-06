@@ -6,6 +6,7 @@ module eigensolve
       use matrices
       use inputs, only: nsol, lres
       use iso_c_binding
+      use cfg
 
       type MULTI_MAT
 
@@ -35,7 +36,6 @@ module eigensolve
 #endif
 
       type(MULTI_MAT), save, allocatable :: asigma(:)
-      integer ku, kl
 
 contains
 
@@ -301,9 +301,7 @@ contains
                   stop
               endif
           elseif (grd(id)%mattype.eq.'BAND') then
-              ku = dm(id)%ku
-              kl = dm(id)%kl
-              lda = 2*kl + ku + 1
+              lda = 2*dm(id)%kl + dm(id)%ku + 1
               allocate(asigma(id)%mat(lda,d_dim))
 #ifdef USE_MULTI
               call make_asigma_band_local(sigma,asigma(id)%mat,id)
@@ -316,7 +314,7 @@ contains
               print*, "Sorry, complexe valued band matrix are not yet implemented in TOP"
               stop "not yet implemented"
 #else
-              call DGBTRF(d_dim,d_dim,kl,ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
+              call DGBTRF(d_dim,d_dim,dm(id)%kl,dm(id)%ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
 #endif
           else
               print*, "mattype:", grd(id)%mattype
@@ -349,9 +347,9 @@ contains
 #endif
 #else
 #ifdef USE_COMPLEX
-              call ZGBTRF(d_dim,d_dim,kl,ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
+              call ZGBTRF(d_dim,d_dim,dm(id)%kl,dm(id)%ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
 #else
-              call DGBTRF(d_dim,d_dim,kl,ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
+              call DGBTRF(d_dim,d_dim,dm(id)%kl,dm(id)%ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
 #endif
               if (info_lapack.ne.0) then
                   print*,info_lapack,' info'
@@ -368,6 +366,9 @@ contains
 
           iteration=1
           revcom=0
+          normA = 0.d0
+          deg = 0
+
 ! big loop starts here ------------------------------------------
           do
 #ifdef USE_MPI
@@ -382,6 +383,9 @@ contains
                   vrcom,iord,v,h,z,wr,wi,work,work1,workc,  &
                   y,revcom,info)
 #endif
+              if (print_normA) then
+                  print*, "iter ", iteration, " normA = ", normA
+              endif
 #ifdef USE_MPI
               call IGEBS2D(ictxt,'A',topo,1,1,revcom,1)
           else
@@ -644,7 +648,7 @@ contains
                   call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
                       vect(1:a_dim), info_lapack)
               elseif (grd(1)%mattype.eq.'BAND') then
-                  call DGBTRS('N', a_dim, kl, ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+                  call DGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
                       vect(1:a_dim), a_dim, info_lapack)
               else
                   stop 'mattype has a faulty value in solve_amsigmb'
@@ -697,17 +701,13 @@ contains
               call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
                   vect(1:a_dim), info_lapack)
           elseif (grd(1)%mattype.eq.'BAND') then
-              call DGBTRS('N', a_dim, kl, ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+              call DGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
                   vect(1:a_dim), a_dim, info_lapack)
           else
               stop 'mattype has a faulty value in solve_amsigmb'
           endif
           if (info_lapack.ne.0) &
               stop 'Problem solving linear system, in arncheb'
-          do i=1,power_max-1
-              vect(1+i*a_dim:(i+1)*a_dim) = vect(1+i*a_dim:(i+1)*a_dim)+&
-                  sigma*vect(1+(i-1)*a_dim:i*a_dim)
-          enddo
 #endif
 #ifdef USE_MPI
           if (iproc.eq.0) then
