@@ -416,7 +416,8 @@ contains
 #ifdef USE_COMPLEX
                   aux = zdotc(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
 #else
-                  aux = ddot(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+                  ! aux = ddot(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+                  aux = dot_product(vrcom(1:t_dim,1), vrcom(1:t_dim,2))
 #endif
                   vrcom(1,3) = aux
 #ifdef USE_MPI
