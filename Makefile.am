@@ -23,6 +23,10 @@ docs:
 	$(MAKE) html latexpdf -C $(top_srcdir)/doc
 
 tests: install
+	@$(prefix)/bin/top-build --model=cesam \
+		--order=examples/cesam/order-cesam.inc \
+		examples/cesam/eq_cesam_all_lagrange_avg
+	$(PYTHON) examples/cesam/check.py
 	@$(prefix)/bin/top-build --model=poly_ester examples/poly_ester/eq_poly_ester
 	$(PYTHON) examples/poly_ester/check.py
 

@@ -1,0 +1,31 @@
+#!@PYTHON@
+
+import top
+import sys
+
+freqs = [12.523911536548210,
+        12.650326577441433,
+        11.196064713434813,
+        11.067181386063739]
+
+if __name__ == '__main__':
+    cesam = top.load('eq_cesam_all_lagrange_avg')
+    cesam.read_dati('@builddir@/dati')
+    cesam.init_model('@builddir@/sismique_ultime_2099couches_tronc.osc')
+    res = cesam.run_arncheb(cesam.dati.shift)
+
+    cf = []
+
+    for i in range(0, cesam.dati.nsol):
+        f, v, l = res.get_sol(0, i, 'Phi')
+        cf.append(f)
+
+    freqs.sort()
+    ef = freqs
+    cf.sort()
+
+    for i in range(0, len(ef)):
+        print('Expected freq: %e, Computed freq = %e' % (ef[i], cf[i]))
+        if abs(cf[i] - ef[i]) > 1e-9:
+            print('Error: Unexpected frequency (error=%e)' % abs(cf[i] - ef[i]))
+            sys.exit(1)
