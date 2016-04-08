@@ -5,7 +5,7 @@ iCor = 1
 dertype = CHEB          # FD = finite differences, CHEB = Chebyshev spectral method
 orderFD = 2             # order of the method when using finite differences
 mattype = FULL          # BAND = banded structure for the matrix, FULL = full structure for the matrix
-nsol=1
+nsol=10
 # shift =  0.791171838986203E-01
 shift =  0.144313319414688E+00
 dirmodel = @builddir@/model/

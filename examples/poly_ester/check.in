@@ -7,6 +7,8 @@ if __name__ == '__main__':
     poly = top.load('eq_poly_ester')
     poly.read_dati('@builddir@/dati')
     poly.init_model('@builddir@/model/')
+    poly.dati.nt = 20
+    poly.dati.nsol = 1
     res = poly.run_arncheb(poly.dati.shift)
 
     f, v, l = res.get_sol(0, 0, 'Phi')
