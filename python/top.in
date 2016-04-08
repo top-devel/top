@@ -453,3 +453,7 @@ class load:
             dir = dir + '/'
         _mkpath(dir)
         self.lib.pywrite_output(dir)
+
+    def set_nt(self, nt):
+        self.lib.set_nt(nt)
+        self.dati.nt = nt

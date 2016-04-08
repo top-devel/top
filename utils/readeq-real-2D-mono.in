@@ -120,8 +120,6 @@ sub countterm{
 sub writehead{
   print PUITS "      subroutine init_a()\n\n";
   print PUITS "      use model\n";
-  print PUITS "      use mod_grid, only: grd\n";
-  print PUITS "      use inputs\n";
   print PUITS "      use integrales\n\n";
   print PUITS "      implicit none\n";
   print PUITS "      integer i,j,jj,der_min,der_max\n\n";

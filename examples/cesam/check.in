@@ -3,10 +3,10 @@
 import top
 import sys
 
-freqs = [12.523911536548210,
-        12.650326577441433,
-        11.196064713434813,
-        11.067181386063739]
+freqs = [12.5242750802189,
+        12.6481335775403,
+        11.1935688026684,
+        11.0675524408717]
 
 if __name__ == '__main__':
     cesam = top.load('eq_cesam_all_lagrange_avg')
@@ -26,6 +26,6 @@ if __name__ == '__main__':
 
     for i in range(0, len(ef)):
         print('Expected freq: %e, Computed freq = %e' % (ef[i], cf[i]))
-        if abs(cf[i] - ef[i]) > 1e-9:
+        if abs(cf[i] - ef[i]) > 1e-8:
             print('Error: Unexpected frequency (error=%e)' % abs(cf[i] - ef[i]))
             sys.exit(1)

@@ -6,7 +6,8 @@
 !------------------------------------------------------------------------------
       module matrices
 
-      use mod_grid
+      use mod_grid, only: grd, nt, ndomains
+      use inputs
       use derivative
 
       use cfg

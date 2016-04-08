@@ -107,6 +107,13 @@ contains
 
     end subroutine
 
+    subroutine set_nt(n_t)
+        integer, intent(in) :: n_t
+
+        nt = n_t
+
+    end subroutine
+
     subroutine get_grid_size(nr, nt)
         integer, intent(out) :: nr, nt
 
