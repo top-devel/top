@@ -22,6 +22,10 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 docs:
 	$(MAKE) html latexpdf -C $(top_srcdir)/doc
 
+tests: install
+	@$(prefix)/bin/top-build --model=poly_ester examples/poly_ester/eq_poly_ester
+	$(PYTHON) examples/poly_ester/check.py
+
 do_subst = sed -e 's,[@]SHELL[@],$(SHELL),g'	\
                -e 's,[@]prefix[@],$(prefix),g'	\
                -e 's,[@]bindir[@],$(bindir),g'	\

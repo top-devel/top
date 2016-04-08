@@ -1,0 +1,20 @@
+#!/usr/bin/python
+
+import top
+import numpy as np
+import sys
+
+if __name__ == '__main__':
+    ester = top.load('eq_poly_ester')
+    ester.read_dati('@builddir@/dati')
+    ester.init_model('@builddir@/model/')
+    res = ester.run_arncheb(ester.dati.shift)
+
+    # res.plot(0, 0, 'B')
+    f, v, l = res.get_sol(0, 0, 'Phi')
+    print('expected freq: %e, freq = %e' % (ester.dati.shift, f))
+    if abs(f - ester.dati.shift < 1e-12):
+        sys.exit(0)
+    else:
+        print('Error: Unexpected frequency')
+        sys.exit(1)
