@@ -245,7 +245,11 @@ class results:
         :return: the model used to perform computation
         """
         p = load(self.libname)
-        p.dati.lres = self.lres
+        for k in self.dati.keys():
+            p.dati.k = self.dati[k]
+            r, t = self.get_grid()
+            p.set_nt(len(t))
+            p.set_nr(len(r))
         return p.init_model(self.modelfile)
 
 
@@ -457,3 +461,6 @@ class load:
     def set_nt(self, nt):
         self.lib.set_nt(nt)
         self.dati.nt = nt
+
+    def set_nr(self, nr):
+        self.lib.set_nr(nr)

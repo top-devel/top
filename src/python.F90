@@ -107,6 +107,16 @@ contains
 
     end subroutine
 
+    subroutine set_nr(n_r)
+        integer, intent(in) :: n_r
+
+        integer id
+
+        do id=1, ndomains
+            grd(id)%nr = n_r
+        end do
+
+    end subroutine
     subroutine set_nt(n_t)
         integer, intent(in) :: n_t
 
