@@ -183,8 +183,8 @@ class results:
             id_range = range(0, self.nsol)
         else:
             id_range = ids
-        for isol in id_range:
-            sgrp = f.create_group('sol%d' % isol)
+        for ii, isol in enumerate(id_range):
+            sgrp = f.create_group('sol%d' % ii)
             skip = 0
             for idom in range(0, self.ndom):
                 nr = self.nr[idom]
