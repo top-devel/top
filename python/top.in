@@ -161,7 +161,7 @@ class results:
         else:
             return self.r, self.theta
 
-    def save(self, h5file):
+    def save(self, h5file, ids = []):
         """
         saves the results in HDF5 format in file named `h5file`
         """
@@ -179,7 +179,11 @@ class results:
         valp = 0.0
         f.create_dataset('r', data = self.r)
         f.create_dataset('theta', data = self.theta)
-        for isol in range(0, self.nsol):
+        if ids == []:
+            id_range = range(0, self.nsol)
+        else:
+            id_range = ids
+        for isol in id_range:
             sgrp = f.create_group('sol%d' % isol)
             skip = 0
             for idom in range(0, self.ndom):
