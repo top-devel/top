@@ -166,15 +166,15 @@ class results:
         saves the results in HDF5 format in file named `h5file`
         """
         f = _h5py.File(h5file, 'w')
-        f.attrs['modelfile'] = self.modelfile
-        f.attrs['shift'] = self.shift
-        f.attrs['lres'] = self.lres
-        f.attrs['eq'] = self.libname
         for k, v in self.dati.items():
             if type(v) == _np.ndarray and v.dtype == _np.dtype('S1'):
                 f.attrs[k] = v.tostring().strip()
             else:
                 f.attrs[k] = v
+        f.attrs['shift'] = self.shift
+        f.attrs['lres'] = self.lres
+        f.attrs['eq'] = self.libname
+        f.attrs['modelfile'] = self.modelfile
 
         valp = 0.0
         f.create_dataset('r', data = self.r)
