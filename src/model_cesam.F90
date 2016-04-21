@@ -14,7 +14,7 @@ module model
     double precision, allocatable, save :: Gamma1_1D(:),uhx(:),&
         rho1D(:),p1D(:),&
         r_model(:),pe1D(:), &
-        mass1D(:), NN(:)
+        mass1D(:), NN1D(:)
 
     ! stellar parameters:
     double precision, save :: radius ! in cm
@@ -30,7 +30,8 @@ module model
     double precision, allocatable, dimension(:,:), save :: rhom,NNt,&
         rhom_z, rhom_t, pm, pm_z, pm_t, Gamma1, c2,pe,pe_z, &
         pe_t, grd_pe_z, grd_pe_t, grd_pe_zz, grd_pe_zt,NNr, &
-        grd_pe_tz, grd_pe_tt
+        grd_pe_tz, grd_pe_tt, NN
+    ! /!\ NN is never perturbated
     double precision, save :: Lambda
 
     ! geometric terms
@@ -114,8 +115,8 @@ contains
             allocate(field(grd(1)%nr, lres))
             field = Gamma1
         elseif (fname == 'NN') then
-            allocate(field(grd(1)%nr, 1))
-            field(:, 1) = NN
+            allocate(field(grd(1)%nr, lres))
+            field(:, :) = NN
         elseif (fname == 'NNr') then
             allocate(field(grd(1)%nr, lres))
             field = NNr
@@ -330,9 +331,9 @@ contains
         double precision :: P_total, P_target, mu, C1, C2, C3, C0
         integer i, j
 
-        if (allocated(NN))      deallocate(NN)
+        if (allocated(NN1D))      deallocate(NN1D)
 
-        allocate(NN(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
+        allocate(NN1D(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
 
         print*, "Grid type: ", trim(grid_type)
         if (trim(grid_type) == 'grid_g') then
@@ -358,20 +359,20 @@ contains
         ! find scaled Brunt-Vaisala frequency: N/r
         do i = 2, nrmod
 
-            !NN(i) = sqrt(max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2))
-            !NN(i) = max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2)
+            !NN1D(i) = sqrt(max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2))
+            !NN1D(i) = max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2)
 
-            NN(i)= mass1D(i) / r_model(i)**5 * abs(var(15, i))
-            ! NN(i)= mass1D(i)**2 / r_model(i)**6*rho1D(i)/p1D(i)*var(8, i) / var(7, i) * &
+            NN1D(i)= mass1D(i) / r_model(i)**5 * abs(var(15, i))
+            ! NN1D(i)= mass1D(i)**2 / r_model(i)**6*rho1D(i)/p1D(i)*var(8, i) / var(7, i) * &
             !     (var(10, i)-var(9, i)+var(12, i))
 
-            !NN(i) = sqrt(abs(var(15, i)*exp(var(2, i))/r_model(i)**5))
+            !NN1D(i) = sqrt(abs(var(15, i)*exp(var(2, i))/r_model(i)**5))
             CC1(i) = rho1D(i)/Gamma1_1D(i)/p1D(i) ! Corresp au terme en C1
             CC3(i) = (mass1D(i)*rho1D(i)/(r_model(i)**2*p1D(i)))**2
 
         enddo
 
-        NN(1)=0d0
+        NN1D(1)=0d0
         CC1(1)=rho1D(1)/Gamma1_1D(1)/p1D(1)
         CC3(1)=0d0
 
@@ -380,7 +381,7 @@ contains
         PP(1) = 0d0
         do i= 2, nrmod
             PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))* &
-                sqrt(C2*((NN(i)+NN(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
+                sqrt(C2*((NN1D(i)+NN1D(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
                 C3*((CC3(i)+CC3(i-1))/2d0)+C0) ! 09/03
             ! print*, "PP: ", PP(i)
         enddo
@@ -413,7 +414,7 @@ contains
         ! open(unit=3, file="info_diagram", status="unknown")
         do i=1, nrmod
             V_son(i)=Gamma1_1D(i)*p1D(i)/rho1D(i)
-            ! write(3, *) r_model(i) , NN(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2))
+            ! write(3, *) r_model(i) , NN1D(i)*r_model(i)*r_model(i), V_son(i) !, sqrt(2*Gamma1_1D(i)*p1D(i)/rho1D(i)/(r_model(i)**2))
         enddo
 
         ! close(3)
@@ -426,7 +427,7 @@ contains
         deallocate(CC3)
         deallocate(V_son)
 
-        ! print*, NN(1)
+        ! print*, NN1D(1)
     end subroutine init_radial_grid_g_modes
 
     !--------------------------------------------------------------------------
@@ -740,13 +741,14 @@ contains
         if (allocated(c2))      deallocate(c2)
         if (allocated(NNt))     deallocate(NNt)
         if (allocated(NNr))     deallocate(NNr)
+        if (allocated(NN))     deallocate(NN)
 
         allocate(rhom(grd(1)%nr,lres), rhom_z(grd(1)%nr,lres), rhom_t(grd(1)%nr,lres), &
             pm(grd(1)%nr,lres), pm_z(grd(1)%nr,lres), pm_t(grd(1)%nr,lres),       &
             Gamma1(grd(1)%nr,lres), aux(grd(1)%nr,lres), NNt(grd(1)%nr,lres),     &
             pe(grd(1)%nr,lres), pe_z(grd(1)%nr,lres), pe_t(grd(1)%nr,lres),       &
             c2(grd(1)%nr,lres),ws1(nrmod),ws2(grd(1)%nr), NNr(grd(1)%nr,lres),    &
-            p_aux(nrmod), p1D_bis(nrmod))
+            p_aux(nrmod), p1D_bis(nrmod), NN(grd(1)%nr, lres))
 
         ! The spherically averaged pressure is modifed as follows:
         do i=1,nrmod
@@ -760,6 +762,7 @@ contains
         call map2D_der_p_bis(rho1D, rhom, rhom_t, rhom_z, aux)
         call map2D_der_p_bis(p1D_bis, pm, pm_t, pm_z, aux)
         call map2D(Gamma1_1D, Gamma1)
+        call map2D(NN1D, NN)
         c2 = Gamma1*pm/rhom
         call map2D_der_bis(pe1D, pe, pe_t, pe_z, aux)
 

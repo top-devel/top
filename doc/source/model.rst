@@ -63,7 +63,7 @@ Fields:
  * ``pm_z``: :math:`\frac{\partial{p}}{\partial{\zeta}}`
  * ``pm_t``: :math:`\frac{\partial{p}}{\partial{\theta}}`
  * ``Gamma1``: first adiabatic exponent
- * ``NN``: Brunt-Vaisala frequency
+ * ``NN``: Brunt-Vaisala frequency (not perturbated)
  * ``NNr``: :math:`\frac{\partial{NN}}{\partial{\zeta}}`
  * ``NNt``: :math:`\frac{\partial{NN}}{\partial{\theta}}`
  * ``pe``: pressure potential
