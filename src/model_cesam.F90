@@ -230,8 +230,10 @@ contains
 
 
         ! setting some global variables:
-        mass    = glob(1) ! in g
-        radius  = glob(2) ! in cm
+!        mass    = glob(1)*dexp(var(2, nrmod)) ! in g
+!        radius  = var(1, nrmod) ! in cm
+         mass    = glob(1) ! in g
+         radius  = glob(2) ! in cm
         ! age     = glob(13) ! in some unknown unit
         p_ref   = G * mass**2 / radius**4
         rho_ref = mass / radius**3
@@ -258,16 +260,22 @@ contains
         if (allocated(rho1D))     deallocate(rho1D)
         if (allocated(p1D))       deallocate(p1D)
         if (allocated(mass1D))    deallocate(mass1D)
+        if (allocated(NN1D))      deallocate(NN1D)
 
-        allocate(Gamma1_1D(nrmod), rho1D(nrmod), p1D(nrmod),mass1D(nrmod))
+        allocate(Gamma1_1D(nrmod), rho1D(nrmod), p1D(nrmod),mass1D(nrmod),NN1D(nrmod))
 
         ! open(111,file='mon_model',form='formatted',status="unknown")
         do i=1,nrmod
             rho1D(i)     = var(5, i)/rho_ref
             p1D(i)       = var(4, i)/p_ref
             Gamma1_1D(i) = var(10, i)
-            mass1D(i)    = dexp(var(2, i)) ! /dexp(var(2, nrmod))
+            !mass1D(i)    = dexp(var(2, i)-var(2,nrmod))
+            mass1D(i)    = dexp(var(2, i))
             ! write(111,'(5e15.7)') r_model(i),rho1D(i),p1D(i),Gamma1_1D(i),mass1D(i)
+        enddo
+        NN1D(1) = 0d0
+        do i=2,nrmod
+           NN1D(i)      = var(15,i)*mass1D(i)/r_model(i)**3
         enddo
         ! close(111)
 
@@ -327,13 +335,11 @@ contains
 
         use inputs, C0_dati => C0, C1_dati => C1, C2_dati => C2, C3_dati => C3
 
-        double precision, allocatable ::  PP(:), CC1(:), CC3(:), V_son(:)
+        double precision, allocatable ::  PP(:), CC1(:), CC2(:), CC3(:), V_son(:)
         double precision :: P_total, P_target, mu, C1, C2, C3, C0
         integer i, j
 
-        if (allocated(NN1D))      deallocate(NN1D)
-
-        allocate(NN1D(nrmod), PP(nrmod), CC1(nrmod), CC3(nrmod), V_son(nrmod))
+        allocate(PP(nrmod), CC1(nrmod), CC2(nrmod), CC3(nrmod), V_son(nrmod))
 
         print*, "Grid type: ", trim(grid_type)
         if (trim(grid_type) == 'grid_g') then
@@ -359,21 +365,14 @@ contains
         ! find scaled Brunt-Vaisala frequency: N/r
         do i = 2, nrmod
 
-            !NN1D(i) = sqrt(max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2))
-            !NN1D(i) = max(var(15, i)*exp(var(2, i))/r_model(i)**5, 1d-2)
-
-            NN1D(i)= mass1D(i) / r_model(i)**5 * abs(var(15, i))
-            ! NN1D(i)= mass1D(i)**2 / r_model(i)**6*rho1D(i)/p1D(i)*var(8, i) / var(7, i) * &
-            !     (var(10, i)-var(9, i)+var(12, i))
-
-            !NN1D(i) = sqrt(abs(var(15, i)*exp(var(2, i))/r_model(i)**5))
             CC1(i) = rho1D(i)/Gamma1_1D(i)/p1D(i) ! Corresp au terme en C1
+            CC2(i) = abs(NN1D(i))/r_model(i)**2
             CC3(i) = (mass1D(i)*rho1D(i)/(r_model(i)**2*p1D(i)))**2
 
         enddo
 
-        NN1D(1)=0d0
         CC1(1)=rho1D(1)/Gamma1_1D(1)/p1D(1)
+        CC2(1)=0d0
         CC3(1)=0d0
 
         ! approximate time travel integral (from center), with
@@ -381,7 +380,7 @@ contains
         PP(1) = 0d0
         do i= 2, nrmod
             PP(i)=PP(i-1)+(r_model(i)-r_model(i-1))* &
-                sqrt(C2*((NN1D(i)+NN1D(i-1))/2d0)+C1*((CC1(i)+CC1(i-1))/2d0)+ &
+                sqrt(C1*((CC1(i)+CC1(i-1))/2d0)+C2*((CC2(i)+CC2(i-1))/2d0)+ &
                 C3*((CC3(i)+CC3(i-1))/2d0)+C0) ! 09/03
             ! print*, "PP: ", PP(i)
         enddo
