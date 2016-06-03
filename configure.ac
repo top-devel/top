@@ -44,7 +44,7 @@ AC_LANG_PUSH(C++)
 AC_MSG_CHECKING([whether C++ compiler works])
 AC_COMPILE_IFELSE(
               [AC_LANG_PROGRAM([], [
-               int main() {return 0;}
+               return 0;
                ])],
               [cxx_works=yes],
               [cxx_works=no])
