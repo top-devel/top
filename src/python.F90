@@ -46,7 +46,11 @@ contains
 
     subroutine get_valps_real(ret, n)
         integer, intent(in) :: n
+#ifdef USE_COMPLEX
+        complex(kind=8), intent(out) :: ret(n)
+#else
         real(kind=8), intent(out) :: ret(n)
+#endif
 
         ret = omega
 
@@ -54,14 +58,22 @@ contains
 
     subroutine get_vecps_cplx(vecps, n, adim)
         integer, intent(in) :: n, adim
+#ifdef USE_COMPLEX
         complex(kind=8), intent(out) :: vecps(adim, n)
+#else
+        real(kind=8), intent(out) :: vecps(adim, n)
+#endif
 
         vecps = vec
     end subroutine get_vecps_cplx
 
     subroutine get_vecps_real(vecps, n, adim)
         integer, intent(in) :: n, adim
+#ifdef USE_COMPLEX
+        complex(kind=8), intent(out) :: vecps(adim, n)
+#else
         real(kind=8), intent(out) :: vecps(adim, n)
+#endif
 
         vecps = vec
     end subroutine get_vecps_real
@@ -215,7 +227,11 @@ contains
         integer, intent(in) :: idom, isol
         integer, intent(in) :: nr, nt
         character(len=*), intent(in) :: var
+#ifdef USE_COMPLEX
+        complex(kind=8), intent(out) :: valp, vecp(nr, nt)
+#else
         real(kind=8), intent(out) :: valp, vecp(nr, nt)
+#endif
 
         call get_sol(idom, isol, var, valp, vecp)
     end subroutine get_sol_real

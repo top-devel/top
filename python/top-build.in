@@ -27,6 +27,10 @@ def is_cplx(f):
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument('--cplx',
+        dest='cplx_opt', action='store_true',
+        help='Forces usage of complex version')
+
 parser.add_argument('mpi',
         nargs='?',
         choices=['mpi'],
@@ -60,7 +64,7 @@ readeq = "@abs_top_builddir@/utils/readeq"
 
 flags="top_flags="
 f2py_def=''
-if is_cplx(eqfile):
+if is_cplx(eqfile) or args.cplx_opt:
     readeq += "-cplx"
     flags += " -DUSE_COMPLEX"
     f2py_def='-DUSE_COMPLEX'
@@ -107,7 +111,7 @@ if args.debug:
     sys.stdout.write("Building [DEBUG] " + os.path.basename(eqfile) + " (")
 else:
     sys.stdout.write("Building " + os.path.basename(eqfile) + " (")
-if is_cplx(eqfile):
+if is_cplx(eqfile) or args.cplx_opt:
     sys.stdout.write("complex ")
 else:
     sys.stdout.write("real ")
@@ -225,4 +229,3 @@ except Exception as e:
     print("[Failed]")
     print(e)
     sys.exit(1)
-

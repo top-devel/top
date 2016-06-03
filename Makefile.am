@@ -1,11 +1,12 @@
 SUBDIRS = lib utils python examples
 
 EXTRA_DIST = src/Makefile.am src/Makefile.in \
-			 src/order.inc \
+			 src/order-default.inc \
 			 src/model_ester.F90 \
 			 src/model_scf.F90 \
 			 src/model_polytrope.F90 \
 			 src/model_poly_ester.F90 \
+			 src/model_cesam.F90 \
 			 src/mod_blacs.F90 \
 			 src/hpsort_index.F90 \
 			 src/matrices.F90 \
@@ -16,6 +17,7 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/abstract_model.F90 \
 			 src/postproc.F90 \
 			 src/legpy.F90 \
+			 src/config.F90 \
 			 sourceme.in
 
 

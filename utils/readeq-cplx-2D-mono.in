@@ -138,6 +138,9 @@ sub writehead{
   }
   print PUITS "\n";
 
+  print PUITS "      allocate(dm(1))\n";
+  print PUITS "      allocate(dmat(1))\n";
+  print PUITS "      allocate(idm(1, 1))\n\n";
   print PUITS "      if (allocated(dm(1)%as)) deallocate(dm(1)%as)\n";
   print PUITS "      if (allocated(dm(1)%art)) deallocate(dm(1)%art)\n";
   print PUITS "      if (allocated(dm(1)%artt)) deallocate(dm(1)%artt)\n";
