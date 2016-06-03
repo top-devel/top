@@ -247,7 +247,7 @@ c
         call zhseqr( 'S', 'I', iarn, i, j, h, iarn+1, w, z,
      &             iarn+1, work, iarn+1, info)
         if (info.ne.0) then
-		info = -15	
+		info = -15
                 goto 100
         endif
 c

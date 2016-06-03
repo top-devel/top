@@ -61,7 +61,7 @@ contains
 #ifdef USE_COMPLEX
           double complex, intent(in) :: sigma
 #else
-          real(kind=c_double), intent(in) :: sigma
+          double precision, intent(in) :: sigma
 #endif
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -414,7 +414,8 @@ contains
               if (iproc.eq.0) then
 #endif
 #ifdef USE_COMPLEX
-                  aux = zdotc(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+                  ! aux = zdotc(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
+                  aux = dot_product(vrcom(1:t_dim,1), vrcom(1:t_dim,2))
 #else
                   ! aux = ddot(t_dim,vrcom(1:t_dim,1), 1, vrcom(1:t_dim,2), 1)
                   aux = dot_product(vrcom(1:t_dim,1), vrcom(1:t_dim,2))
@@ -646,11 +647,21 @@ contains
               call solve_multi_domain(sigma,vect(1:a_dim))
 #else
               if (grd(1)%mattype.eq.'FULL') then
+#ifdef USE_COMPLEX
+                  call ZGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
+                      vect(1:a_dim), info_lapack)
+#else
                   call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
                       vect(1:a_dim), info_lapack)
+#endif
               elseif (grd(1)%mattype.eq.'BAND') then
+#ifdef USE_COMPLEX
+                  call ZGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+                      vect(1:a_dim), a_dim, info_lapack)
+#else
                   call DGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
                       vect(1:a_dim), a_dim, info_lapack)
+#endif
               else
                   stop 'mattype has a faulty value in solve_amsigmb'
               endif
@@ -699,10 +710,20 @@ contains
           call solve_multi_domain(sigma,vect(1:a_dim))
 #else
           if (grd(1)%mattype.eq.'FULL') then
+#ifdef USE_COMPLEX
+              call ZGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
+                  vect(1:a_dim), info_lapack)
+#else
               call DGETRV('N', a_dim, asigma(1)%mat, a_dim, asigma(1)%ipiv, &
                   vect(1:a_dim), info_lapack)
+#endif
           elseif (grd(1)%mattype.eq.'BAND') then
+#ifdef USE_COMPLEX
+              call ZGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+#else
+                  vect(1:a_dim), a_dim, info_lapack)
               call DGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
+#endif
                   vect(1:a_dim), a_dim, info_lapack)
           else
               stop 'mattype has a faulty value in solve_amsigmb'
