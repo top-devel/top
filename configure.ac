@@ -40,6 +40,22 @@ AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py)
 
 # Checks for libraries.
 
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([whether C++ compiler works])
+AC_COMPILE_IFELSE(
+              [AC_LANG_PROGRAM([], [
+               int main() {return 0;}
+               ])],
+              [cxx_works=yes],
+              [cxx_works=no])
+AC_MSG_RESULT($cxx_works)
+AC_LANG_POP(C++)
+
+AS_IF([test "x$cxx_works" == "xno"],
+      [AC_PROG_FC(mpif90 mpiifort)
+      AC_ERROR(CXX compiler ($CXX) does not work)])
+
+
 AC_LANG_PUSH(Fortran)
 AC_MSG_CHECKING([whether Fortran compiler supports procedure interface])
 AC_COMPILE_IFELSE(
@@ -168,6 +184,7 @@ TOP version:    $VERSION
 python version: $PYTHON_VERSION
 install prefix: $prefix
 FC:             $FC
+CXX:            $CXX
 FCFLAGS:        $FCFLAGS
 FFLAGS:         $FFLAGS
 LDLFAGS:        $LDFLAGS
