@@ -138,6 +138,7 @@ sub writehead{
   }
   print PUITS "\n";
 
+  print PUITS "      nr => grd(1)%nr\n";
   print PUITS "      allocate(dm(1))\n";
   print PUITS "      allocate(dmat(1))\n";
   print PUITS "      allocate(idm(1, 1))\n\n";
@@ -184,6 +185,7 @@ sub writetail{
   for ($i=0; $i < scalar @imat; $i++) {print PUITS "$isub[$i]";}
   print PUITS "      power_max=$power_max\n";
   print PUITS "      a_dim = nt*grd(1)%nr*dm(1)%nvar\n";
+  print PUITS "      dm(1)%d_dim = a_dim\n";
   print PUITS "      call find_llmax()\n";
   print PUITS "      print*,'Dimension of problem: ',a_dim\n\n";
   print PUITS "      call find_der_range(der_min,der_max)\n";
@@ -685,7 +687,7 @@ sub callsubbc{
   elsif ($list[1] eq "tt")
   {
     $nattbc++;
-    $string =~ s/\$a/idm(1, i)%attbc($j_index,$jj_index,$nattbc)/;
+    $string =~ s/\$a/idm(1, 1)%attbc($j_index,$jj_index,$nattbc)/;
     push @amat, mywrap("      call $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
     push @imat,"      idm(1, 1)%attbci(1,$nattbc) = $power\n";

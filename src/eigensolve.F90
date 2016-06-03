@@ -321,7 +321,7 @@ contains
               stop 'faulty matrix type'
               if (info_lapack.ne.0) then
                   print*, info_lapack,' info'
-                  print*, 'Factorisation (1) problem in domain ', id
+                  print*, 'Factorisation (2) problem in domain ', id
                   stop
               endif
 
@@ -331,7 +331,7 @@ contains
                   asigma(id)%ipiv,info_lapack)
               if (info_lapack.ne.0) then
                   print*,info_lapack,' info'
-                  print*,'Factorisation (2) problem in domain ',id
+                  print*,'Factorisation (3) problem in domain ',id
                   call BLACS_ABORT(ictxt,1)
               endif
 #else
@@ -340,7 +340,7 @@ contains
               if (info_lapack.ne.0) then
                   if (iproc.eq.0) then
                       print*,info_lapack,' info'
-                      print*,'Factorisation (2) problem in domain ',id
+                      print*,'Factorisation (4) problem in domain ',id
                   endif
                   call BLACS_ABORT(ictxt,1)
               endif
@@ -353,7 +353,7 @@ contains
 #endif
               if (info_lapack.ne.0) then
                   print*,info_lapack,' info'
-                  print*,'Factorisation (3) problem in domain ',id
+                  print*,'Factorisation (5) problem in domain ',id
                   stop
               endif
 #endif
