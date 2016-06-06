@@ -190,5 +190,6 @@ FFLAGS:         $FFLAGS
 LDLFAGS:        $LDFLAGS
 LIBS:           $LIBS
 F2PY:           $F2PY
+ESTER lib:      $found_ester
 
 EOF

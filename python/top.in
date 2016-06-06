@@ -216,7 +216,7 @@ class results:
         # _plt.colorbar()
         _plt.show()
 
-    def plot(self, idom, isol, var, m=0):
+    def plot(self, idom, isol, var, m=None):
         """
         Plots isol'th solution of variable var in domain number idom
 
@@ -231,6 +231,8 @@ class results:
         sint = _np.sin(theta)
 
         # fg = vec
+        if m == None:
+            m = self.dati['m']
         fg = leg.eval2d(vec, cost, l[0], 2, m)
 
         x = r * sint

@@ -29,4 +29,4 @@ top-build: top-build.in Makefile
 __init__.py: top.in Makefile
 	$(do_subst) < $< > $@
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) __init__.py
