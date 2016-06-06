@@ -26,7 +26,9 @@ module model
         ! raw variables (of dimension grd(id)%nr x nthm)
         real(kind=c_double), pointer, dimension(:, :) ::    &
             rr, p_raw, rho_raw, Gamma1_raw, Rota_raw,       &
-            p_z_raw, rho_z_raw, Rota_z_raw
+            p_z_raw, rho_z_raw, Rota_z_raw, kappa_raw,      &
+            xi_raw, enuc_raw, t_raw, t_z_raw, cv_raw,       &
+            Gamma3m_raw, xiT_raw, xirho_raw
 
         ! final variables (of dimension grd(id)%nr x lres)
         real(kind=c_double), pointer, dimension(:, :) ::    &
@@ -34,16 +36,22 @@ module model
             c2, NNtoz, Rota, Rota_z, Rota_t, pm_zz,         &
             pm_zt, pm_tz, pm_tt, pm_ez, grd_pe_z,           &
             grd_pe_t, grd_pe_zz, grd_pe_zt, grd_pe_tz,      &
-            grd_pe_tt, det_rhom_pm
+            grd_pe_tt, det_rhom_pm, kappa, xi, enuc,        &
+            tm, tm_z, tm_t, Gamma3m, cv, xiT, xirho, PT,    &
+            Fz, Ft, Fz_z, Fz_t, Ft_z, Ft_t, Fzoz, Ftoz,     &
+            Fttoz, Fztoz, Tzoz, Ttoz, Ttozz, Prho, Dad,     &
+            Dad_z, Dad_t, cp
+
         real(kind=c_double), pointer, dimension(:, :) :: r_t, r_z, r_map, &
-            r_zz, r_zt, r_tt, zeta, cost, sint, cott, rrt, roz
+            r_zz, r_zt, r_tt, zeta, cost, sint, cott, rrt, roz, rrtt
 
     end type STAR_DOMAIN
 
     integer, save :: nrm, nthm, ndom, nconv, npts_max
     real(kind=c_double), save :: mass_input, radius, luminosity, rotation
-    real(kind=c_double), save :: X, Z, Xc, Req, Rp
-    real(kind=c_double), save :: rho_ref, p_ref, t_ref
+    real(kind=c_double), save :: X, Z, Xc, Req, Rp, T_c
+    real(kind=c_double), save :: rho_ref, p_ref, t_ref, Lum_ref, Temp_ref
+    real(kind=c_double), save :: xi_ref, F_ref, cv_ref, enuc_ref
     real(kind=c_double), allocatable, save :: theta(:), zeta(:), sth(:), cth(:)
     type(STAR_DOMAIN), allocatable, save :: s(:)
     logical, save :: first_model = .true.
@@ -154,17 +162,26 @@ contains
         call get_X(X)
         call get_Z(Z)
         call get_Xc(Xc)
+        call get_Tc(T_c)
 
         call get_theta(theta)
         call get_zeta(zeta)
 
         do i=1, ndom-1
-            call get_Rs(i,  s(i)%Rs)
-            call get_rr(i,  s(i)%rr)
-            call get_p(i,   s(i)%p_raw)
-            call get_rho(i, s(i)%rho_raw)
-            call get_G1(i,  s(i)%Gamma1_raw)
-            call get_w(i,   s(i)%Rota_raw)
+            call get_Rs(i,          s(i)%Rs)
+            call get_rr(i,          s(i)%rr)
+            call get_p(i,           s(i)%p_raw)
+            call get_rho(i,         s(i)%rho_raw)
+            call get_G1(i,          s(i)%Gamma1_raw)
+            call get_G3m(i,         s(i)%Gamma3m_raw)
+            call get_w(i,           s(i)%Rota_raw)
+            call get_kappa(i,       s(i)%kappa_raw)
+            call get_xi(i,          s(i)%xi_raw)
+            call get_dlnxi_lnt(i,   s(i)%xiT_raw)
+            call get_dlnxi_lnrho(i, s(i)%xirho_raw)
+            call get_eps(i,         s(i)%enuc_raw)
+            call get_T(i,           s(i)%t_raw)
+            call get_cv(i,          s(i)%cv_raw)
         enddo
 
         ! Find equatorial and polar radii
@@ -192,14 +209,21 @@ contains
         enddo
 
         rho_ref  = mass_input/Req**3
-        p_ref    = G*mass_input**2/Req**4
         t_ref    = sqrt(Req**3/(G*mass_input))
+        p_ref    = G*mass_input**2/Req**4
+        Lum_ref  = luminosity
+        Temp_ref = T_c
+        cv_ref   = sqrt(Req**3/(G*mass_input**3))*Lum_ref/Temp_ref
+        enuc_ref = Lum_ref/mass_input
+        xi_ref   = Lum_ref/(Req*Temp_ref)
+        F_ref    = Lum_ref/Req**2
         mass     = mass_input/solar_mass
         rota_avg = rotation*t_ref
 
 #else
         print"(A)", "TOP was compiled without libester support..."
         print"(A)", "Cannot read Ester models"
+        stop "reading failed"
 #endif
 
     end subroutine read_model
@@ -245,6 +269,10 @@ contains
             allocate(grd(id)%r(grd(id)%nr))
         enddo
 
+        id = 1
+        allocate(s(id)%rrtt(grd(id)%nr,lres))
+        s(id)%rrtt = 0d0
+
         do id=1, ndom-1
             allocate(s(id)%p_raw(grd(id)%nr, nthm))
             allocate(s(id)%p_z_raw(grd(id)%nr, nthm))
@@ -277,6 +305,49 @@ contains
             allocate(s(id)%grd_pe_tz(grd(id)%nr, lres))
             allocate(s(id)%grd_pe_tt(grd(id)%nr, lres))
             allocate(s(id)%det_rhom_pm(grd(id)%nr, lres))
+
+
+            allocate(s(id)%kappa_raw(grd(id)%nr, nthm))
+            allocate(s(id)%xi_raw(grd(id)%nr, nthm))
+            allocate(s(id)%enuc_raw(grd(id)%nr, nthm))
+            allocate(s(id)%t_raw(grd(id)%nr, nthm))
+            allocate(s(id)%t_z_raw(grd(id)%nr, nthm))
+            allocate(s(id)%cv_raw(grd(id)%nr, nthm))
+            allocate(s(id)%Gamma3m_raw(grd(id)%nr, nthm))
+            allocate(s(id)%xiT_raw(grd(id)%nr, nthm))
+            allocate(s(id)%xirho_raw(grd(id)%nr, nthm))
+
+            allocate(s(id)%kappa(grd(id)%nr, lres))
+            allocate(s(id)%xi(grd(id)%nr, lres))
+            allocate(s(id)%enuc(grd(id)%nr, lres))
+            allocate(s(id)%tm(grd(id)%nr, lres))
+            allocate(s(id)%tm_z(grd(id)%nr, lres))
+            allocate(s(id)%tm_t(grd(id)%nr, lres))
+            allocate(s(id)%Gamma3m(grd(id)%nr, lres))
+            allocate(s(id)%cv(grd(id)%nr, lres))
+            allocate(s(id)%xiT(grd(id)%nr, lres))
+            allocate(s(id)%xirho(grd(id)%nr, lres))
+            allocate(s(id)%PT(grd(id)%nr, lres))
+            allocate(s(id)%Fz(grd(id)%nr, lres))
+            allocate(s(id)%Ft(grd(id)%nr, lres))
+            allocate(s(id)%Fz_z(grd(id)%nr, lres))
+            allocate(s(id)%Fz_t(grd(id)%nr, lres))
+            allocate(s(id)%Ft_z(grd(id)%nr, lres))
+            allocate(s(id)%Ft_t(grd(id)%nr, lres))
+            allocate(s(id)%Fzoz(grd(id)%nr, lres))
+            allocate(s(id)%Ftoz(grd(id)%nr, lres))
+            allocate(s(id)%Fttoz(grd(id)%nr, lres))
+            allocate(s(id)%Fztoz(grd(id)%nr, lres))
+            allocate(s(id)%Tzoz(grd(id)%nr, lres))
+            allocate(s(id)%Ttoz(grd(id)%nr, lres))
+            allocate(s(id)%Ttozz(grd(id)%nr, lres))
+            allocate(s(id)%Prho(grd(id)%nr, lres))
+            allocate(s(id)%Dad(grd(id)%nr, lres))
+            allocate(s(id)%Dad_z(grd(id)%nr, lres))
+            allocate(s(id)%Dad_t(grd(id)%nr, lres))
+            allocate(s(id)%cp(grd(id)%nr, lres))
+
+
             s(id)%NNtoz = 0d0
             s(id)%pm_zz = 0d0
             s(id)%pm_zt = 0d0
@@ -290,6 +361,63 @@ contains
             s(id)%grd_pe_tz = 0d0
             s(id)%grd_pe_tt = 0d0
             s(id)%det_rhom_pm = 0d0
+            s(id)%kappa = 0d0
+            s(id)%xi = 0d0
+            s(id)%xiT = 0d0
+            s(id)%xirho = 0d0
+            s(id)%PT = 0d0
+            s(id)%Prho = 0d0
+            s(id)%Dad = 0d0
+            s(id)%Dad_z = 0d0
+            s(id)%Dad_t = 0d0
+            s(id)%enuc = 0d0
+            s(id)%Fz = 0d0
+            s(id)%Ft = 0d0
+            s(id)%Fz_z = 0d0
+            s(id)%Fz_t = 0d0
+            s(id)%Ft_z = 0d0
+            s(id)%Ft_t = 0d0
+
+            s(id)%kappa_raw = 0d0
+            s(id)%xi_raw = 0d0
+            s(id)%enuc_raw = 0d0
+            s(id)%t_raw = 0d0
+            s(id)%t_z_raw = 0d0
+            s(id)%cv_raw = 0d0
+            s(id)%Gamma3m_raw = 0d0
+            s(id)%xiT_raw = 0d0
+            s(id)%xirho_raw = 0d0
+
+            s(id)%kappa = 0d0
+            s(id)%xi = 0d0
+            s(id)%enuc = 0d0
+            s(id)%tm = 0d0
+            s(id)%tm_z = 0d0
+            s(id)%tm_t = 0d0
+            s(id)%Gamma3m = 0d0
+            s(id)%cv = 0d0
+            s(id)%xiT = 0d0
+            s(id)%xirho = 0d0
+            s(id)%PT = 0d0
+            s(id)%Fz = 0d0
+            s(id)%Ft = 0d0
+            s(id)%Fz_z = 0d0
+            s(id)%Fz_t = 0d0
+            s(id)%Ft_z = 0d0
+            s(id)%Ft_t = 0d0
+            s(id)%Fzoz = 0d0
+            s(id)%Ftoz = 0d0
+            s(id)%Fttoz = 0d0
+            s(id)%Fztoz = 0d0
+            s(id)%Tzoz = 0d0
+            s(id)%Ttoz = 0d0
+            s(id)%Ttozz = 0d0
+            s(id)%Prho = 0d0
+            s(id)%Dad = 0d0
+            s(id)%Dad_z = 0d0
+            s(id)%Dad_t = 0d0
+            s(id)%cp = 0d0
+
         enddo
 
         do id=1, ndom
@@ -319,6 +447,10 @@ contains
 
         implicit none
         integer id
+
+
+        id = 1
+        deallocate(s(id)%rrtt)
 
         do id=1, ndom-1
             deallocate(s(id)%p_raw)
@@ -352,6 +484,46 @@ contains
             deallocate(s(id)%grd_pe_tz)
             deallocate(s(id)%grd_pe_tt)
             deallocate(s(id)%det_rhom_pm)
+
+            deallocate(s(id)%kappa_raw)
+            deallocate(s(id)%xi_raw)
+            deallocate(s(id)%enuc_raw)
+            deallocate(s(id)%t_raw)
+            deallocate(s(id)%t_z_raw)
+            deallocate(s(id)%cv_raw)
+            deallocate(s(id)%Gamma3m_raw)
+            deallocate(s(id)%xiT_raw)
+            deallocate(s(id)%xirho_raw)
+
+            deallocate(s(id)%kappa)
+            deallocate(s(id)%xi)
+            deallocate(s(id)%enuc)
+            deallocate(s(id)%tm)
+            deallocate(s(id)%tm_z)
+            deallocate(s(id)%tm_t)
+            deallocate(s(id)%Gamma3m)
+            deallocate(s(id)%cv)
+            deallocate(s(id)%xiT)
+            deallocate(s(id)%xirho)
+            deallocate(s(id)%PT)
+            deallocate(s(id)%Fz)
+            deallocate(s(id)%Ft)
+            deallocate(s(id)%Fz_z)
+            deallocate(s(id)%Fz_t)
+            deallocate(s(id)%Ft_z)
+            deallocate(s(id)%Ft_t)
+            deallocate(s(id)%Fzoz)
+            deallocate(s(id)%Ftoz)
+            deallocate(s(id)%Fttoz)
+            deallocate(s(id)%Fztoz)
+            deallocate(s(id)%Tzoz)
+            deallocate(s(id)%Ttoz)
+            deallocate(s(id)%Ttozz)
+            deallocate(s(id)%Prho)
+            deallocate(s(id)%Dad)
+            deallocate(s(id)%Dad_z)
+            deallocate(s(id)%Dad_t)
+            deallocate(s(id)%cp)
         enddo
 
         do id=1, ndom
@@ -424,13 +596,18 @@ contains
           implicit none
           integer i, j, id, npid, nrs, nrf
           double precision, allocatable :: mat_raw(:, :), mat(:, :)
+          double precision :: cnst
           type(DERMAT) :: dmat
+
+          allocate(mat_raw(npts_max, nthm*2), mat(npts_max, lres))
 
           ! Don't forget to initialise the radial derivative of p, rho and
           ! Rota.
           nrs = 1
           nrf = grd(1)%nr
           do id=1, ndomains-1
+              npid = grd(id)%nr
+
               call init_derive_cheb(dmat, zeta(nrs), grd(id)%nr, 1, 0)
               call dgemm("N", "N", grd(id)%nr, nthm, grd(id)%nr, 1d0, &
                   dmat%derive(:, :, 1), grd(id)%nr,          &
@@ -444,15 +621,11 @@ contains
                   dmat%derive(:, :, 1), grd(id)%nr,          &
                   s(id)%Rota_raw, grd(id)%nr, 0d0,           &
                   s(id)%Rota_z_raw, grd(id)%nr)
-              nrs = nrs + grd(id)%nr
-              nrf = nrs + grd(id+1)%nr - 1
-              call clear_derive(dmat)
-          enddo
+              call dgemm("N", "N", grd(id)%nr, nthm, grd(id)%nr, 1d0, &
+                  dmat%derive(:, :, 1), grd(id)%nr,          &
+                  s(id)%t_raw, grd(id)%nr, 0d0,           &
+                  s(id)%t_z_raw, grd(id)%nr)
 
-          allocate(mat_raw(npts_max, nthm*2), mat(npts_max, lres))
-
-          do id=1, ndom-1
-              npid = grd(id)%nr
               do j=1, nthm
                   mat_raw(1:npid, nthm+j)   = s(id)%p_raw(:, j)/p_ref
                   mat_raw(1:npid, nthm+1-j) = s(id)%p_raw(:, j)/p_ref
@@ -463,6 +636,19 @@ contains
               call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%pm, lres,         &
                   grd(id)%nr, 0, -1)
               call legendrep(mat(1:grd(id)%nr, 1:lres), s(id)%pm_t, lres,      &
+                  grd(id)%nr, 0)
+
+              npid = grd(id)%nr
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%t_raw(:, j)/Temp_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%t_raw(:, j)/Temp_ref
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%tm, lres,         &
+                  grd(id)%nr, 0, -1)
+              call legendrep(mat(1:grd(id)%nr, 1:lres), s(id)%tm_t, lres,      &
                   grd(id)%nr, 0)
 
               do j=1, nthm
@@ -499,7 +685,25 @@ contains
               call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%Gamma1, lres, &
                   grd(id)%nr, 0, -1)
 
-              s(id)%c2 = s(id)%Gamma1*s(id)%pm/s(id)%rhom
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%Gamma3m_raw(:, j)
+                  mat_raw(1:npid, nthm+1-j) = s(id)%Gamma3m_raw(:, j)
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%Gamma3m, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%cv_raw(:, j)/cv_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%cv_raw(:, j)/cv_ref
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%cv, lres, &
+                  grd(id)%nr, 0, -1)
 
               do j=1, nthm
                   mat_raw(1:npid, nthm+j)   = s(id)%p_z_raw(:, j)/p_ref
@@ -509,6 +713,16 @@ contains
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
                   (2*nthm), grd(id)%nr, 0, 1)
               call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%pm_z, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%t_z_raw(:, j)/Temp_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%t_z_raw(:, j)/Temp_ref
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%tm_z, lres, &
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
@@ -531,7 +745,90 @@ contains
               call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%Rota_z, lres, &
                   grd(id)%nr, 0, -1)
 
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%kappa_raw(:, j)
+                  mat_raw(1:npid, nthm+1-j) = s(id)%kappa_raw(:, j)
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%kappa, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%xi_raw(:, j)/xi_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%xi_raw(:, j)/xi_ref
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%xi, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%xiT_raw(:, j)
+                  mat_raw(1:npid, nthm+1-j) = s(id)%xiT_raw(:, j)
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%xiT, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%xirho_raw(:, j)
+                  mat_raw(1:npid, nthm+1-j) = s(id)%xirho_raw(:, j)
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%xirho, lres, &
+                  grd(id)%nr, 0, -1)
+
+              do j=1, nthm
+                  mat_raw(1:npid, nthm+j)   = s(id)%enuc_raw(:, j)*enuc_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%enuc_raw(:, j)*enuc_ref
+              enddo
+              mat = 0d0
+              call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
+                  (2*nthm), grd(id)%nr, 0, 1)
+              call legendre(mat(1:grd(id)%nr, 1:lres), s(id)%enuc, lres, &
+                  grd(id)%nr, 0, -1)
+
+              cnst      = cv_ref*rho_ref*Temp_ref/p_ref
+              s(id)%PT  = cnst*s(id)%Gamma3m*s(id)%cv*s(id)%rhom*s(id)%tm/s(id)%pm
+              s(id)%Prho= s(id)%Gamma1 - s(id)%Gamma3m*s(id)%PT
+              s(id)%cp  = s(id)%cv*s(id)%Gamma1/s(id)%Prho
+              s(id)%Dad = s(id)%Gamma3m/s(id)%Gamma1
+              s(id)%c2  = s(id)%Gamma1*s(id)%pm/s(id)%rhom
+              s(id)%Fz  =-s(id)%xi*((s(id)%r_map**2+s(id)%r_t**2)*s(id)%tm_z/s(id)%r_z &
+                  - s(id)%r_t*s(id)%tm_t)/s(id)%zeta**2
+              s(id)%Ft  =-s(id)%xi*(-s(id)%r_t*s(id)%tm_z+s(id)%r_z*s(id)%tm_t)/s(id)%zeta
+              if (id.eq.1) then
+                  s(id)%Fz(1, :) = 0d0
+                  s(id)%Ft(1, :) = 0d0
+              endif
+
+              call dgemm("N", "N", npid, lres, npid, 1d0, dmat%derive(:, :, 1), npid, &
+                  s(id)%Fz, npid, 0d0, s(id)%Fz_z, npid)
+              call dgemm("N", "N", npid, lres, npid, 1d0, dmat%derive(:, :, 1), npid, &
+                  s(id)%Ft, npid, 0d0, s(id)%Ft_z, npid)
+              call dgemm("N", "N", npid, lres, npid, 1d0, dmat%derive(:, :, 1), npid, &
+                  s(id)%Dad, npid, 0d0, s(id)%Dad_z, npid)
+
+              call legendre(s(id)%Fz, mat, lres, npid, 0, 1)
+              call legendrep(mat, s(id)%Fz_t, lres, npid, 0)
+              call legendre(s(id)%Ft, mat, lres, npid, 0, 1)
+              call legendrep(mat, s(id)%Ft_t, lres, npid, 0)
+              call legendre(s(id)%Dad, mat, lres, npid, 0, 1)
+              call legendrep(mat, s(id)%Dad_t, lres, npid, 0)
+
+              nrs = nrs + grd(id)%nr
+              nrf = nrs + grd(id+1)%nr - 1
+              call clear_derive(dmat)
+
           enddo
+
           deallocate(mat, mat_raw)
       end subroutine interpolate_model
 

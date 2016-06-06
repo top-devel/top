@@ -61,8 +61,48 @@ void get_g1_(int *id, double *G1) {
 }
 
 extern "C"
+void get_g3m_(int *id, double *G3m) {
+    cpy_mat(*id, G3m, s.eos.G3_1);
+}
+
+extern "C"
+void get_cv_(int *id, double *cv) {
+    cpy_mat(*id, cv, s.eos.cv);
+}
+
+extern "C"
 void get_w_(int *id, double *w) {
     cpy_mat(*id, w, s.w);
+}
+
+extern "C"
+void get_kappa_(int *id, double *k) {
+    cpy_mat(*id, k, s.opa.k);
+}
+
+extern "C"
+void get_xi_(int *id, double *xi) {
+    cpy_mat(*id, xi, s.opa.xi);
+}
+
+extern "C"
+void get_dlnxi_lnrho_(int *id, double *dlnxi_lnrho) {
+    cpy_mat(*id, dlnxi_lnrho, s.opa.dlnxi_lnrho);
+}
+
+extern "C"
+void get_dlnxi_lnt_(int *id, double *dlnxi_lnT) {
+    cpy_mat(*id, dlnxi_lnT, s.opa.dlnxi_lnT);
+}
+
+extern "C"
+void get_t_(int *id, double *t) {
+    cpy_mat(*id, t, s.T);
+}
+
+extern "C"
+void get_eps_(int *id, double *eps) {
+    cpy_mat(*id, eps, s.nuc.eps);
 }
 
 extern "C"
@@ -107,6 +147,11 @@ void get_radius_(double *r) {
 extern "C"
 void get_lum_(double *lum) {
     *lum = s.luminosity();
+}
+
+extern "C"
+void get_tc_(double *tc) {
+    *tc = s.Tc;
 }
 
 extern "C"
