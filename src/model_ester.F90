@@ -108,8 +108,8 @@ contains
         character(len=*), intent(in) :: filename
 
         call read_model(filename)
-        call interpolate_model()
         call make_mapping()
+        call interpolate_model()
         call find_NNtoz()
         call find_grd_pm()
         call find_grd_pe()
