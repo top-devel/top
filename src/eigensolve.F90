@@ -28,7 +28,7 @@ module eigensolve
 #endif
       integer, save :: lda, t_dim, nsol_out
 #ifdef USE_COMPLEX
-      double complex, save, allocatable :: temp(:),tmp_s(:), &
+      double complex, save, allocatable :: temp(:), tmp_s(:), &
           temp2(:,:)
 #else
       double precision, save, allocatable :: temp(:),tmp_s(:), &
@@ -100,7 +100,7 @@ contains
 
           ! additional variables in zeigvec.f
 #ifdef USE_COMPLEX
-          double complex, allocatable, dimension(:,:) :: z1,z2,vec_arncheb
+          double complex, allocatable, dimension(:,:) :: z1, z2, vec_arncheb
           double complex, allocatable, dimension(:)   :: work2
 #else
           double precision, allocatable, dimension(:,:) :: z1,z2,vec_arncheb
@@ -114,12 +114,9 @@ contains
 
 #ifdef USE_COMPLEX
           double complex aux
-#else
-          double precision aux
-#endif
-#ifdef USE_COMPLEX
           double complex, external :: zdotc
 #else
+          double precision aux
           double complex, external :: ddot
 #endif
 #ifdef USE_MPI
@@ -383,9 +380,6 @@ contains
                   vrcom,iord,v,h,z,wr,wi,work,work1,workc,  &
                   y,revcom,info)
 #endif
-              if (print_normA) then
-                  print*, "iter ", iteration, " normA = ", normA
-              endif
 #ifdef USE_MPI
               call IGEBS2D(ictxt,'A',topo,1,1,revcom,1)
           else
@@ -720,8 +714,8 @@ contains
           elseif (grd(1)%mattype.eq.'BAND') then
 #ifdef USE_COMPLEX
               call ZGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
-#else
                   vect(1:a_dim), a_dim, info_lapack)
+#else
               call DGBTRS('N', a_dim, dm(1)%kl, dm(1)%ku, 1, asigma(1)%mat, lda, asigma(1)%ipiv, &
 #endif
                   vect(1:a_dim), a_dim, info_lapack)

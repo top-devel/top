@@ -36,23 +36,23 @@ void cpy_mat(int id, double *farray, const matrix& field) {
 extern "C"
 void get_rs_(int *id, double *Rs) {
     for (int i=0; i<s.nth; i++) {
-        Rs[i] = s.r(-1, i);
+        Rs[i] = s.r(-1, i) * s.units.r;
     }
 }
 
 extern "C"
 void get_rr_(int *id, double *rr) {
-    cpy_mat(*id, rr, s.r);
+    cpy_mat(*id, rr, s.r*s.units.r);
 }
 
 extern "C"
 void get_p_(int *id, double *p) {
-    cpy_mat(*id, p, s.p);
+    cpy_mat(*id, p, s.p*s.units.p);
 }
 
 extern "C"
 void get_rho_(int *id, double *rho) {
-    cpy_mat(*id, rho, s.rho);
+    cpy_mat(*id, rho, s.rho*s.units.rho);
 }
 
 extern "C"
@@ -72,7 +72,7 @@ void get_cv_(int *id, double *cv) {
 
 extern "C"
 void get_w_(int *id, double *w) {
-    cpy_mat(*id, w, s.w);
+    cpy_mat(*id, w, s.w*s.units.Omega);
 }
 
 extern "C"
@@ -97,7 +97,7 @@ void get_dlnxi_lnt_(int *id, double *dlnxi_lnT) {
 
 extern "C"
 void get_t_(int *id, double *t) {
-    cpy_mat(*id, t, s.T);
+    cpy_mat(*id, t, s.T*s.units.T);
 }
 
 extern "C"
@@ -156,7 +156,7 @@ void get_tc_(double *tc) {
 
 extern "C"
 void get_omega_(double *omega) {
-    *omega = s.Omega;
+    *omega = s.Omega * s.units.Omega;
 }
 
 extern "C"

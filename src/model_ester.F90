@@ -168,7 +168,7 @@ contains
         call get_zeta(zeta)
 
         do i=1, ndom-1
-            call get_Rs(i,          s(i)%Rs)
+            ! call get_Rs(i,          s(i)%Rs)
             call get_rr(i,          s(i)%rr)
             call get_p(i,           s(i)%p_raw)
             call get_rho(i,         s(i)%rho_raw)
@@ -182,6 +182,9 @@ contains
             call get_eps(i,         s(i)%enuc_raw)
             call get_T(i,           s(i)%t_raw)
             call get_cv(i,          s(i)%cv_raw)
+
+            s(i)%Rs(:) = s(i)%rr(grd(i)%nr, :)
+
         enddo
 
         ! Find equatorial and polar radii
@@ -219,7 +222,6 @@ contains
         F_ref    = Lum_ref/Req**2
         mass     = mass_input/solar_mass
         rota_avg = rotation*t_ref
-
 #else
         print"(A)", "TOP was compiled without libester support..."
         print"(A)", "Cannot read Ester models"
@@ -627,8 +629,8 @@ contains
                   s(id)%t_z_raw, grd(id)%nr)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%p_raw(:, j)/p_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%p_raw(:, j)/p_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%p_raw(:, j) / p_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%p_raw(:, j) / p_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -640,8 +642,8 @@ contains
 
               npid = grd(id)%nr
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%t_raw(:, j)/Temp_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%t_raw(:, j)/Temp_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%t_raw(:, j) / Temp_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%t_raw(:, j) / Temp_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -652,8 +654,8 @@ contains
                   grd(id)%nr, 0)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%rho_raw(:, j)/rho_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%rho_raw(:, j)/rho_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%rho_raw(:, j) / rho_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%rho_raw(:, j) / rho_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -664,8 +666,8 @@ contains
                   grd(id)%nr, 0)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%Rota_raw(:, j)*t_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%Rota_raw(:, j)*t_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%Rota_raw(:, j) * t_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%Rota_raw(:, j) * t_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -696,8 +698,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%cv_raw(:, j)/cv_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%cv_raw(:, j)/cv_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%cv_raw(:, j) / cv_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%cv_raw(:, j) / cv_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -706,8 +708,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%p_z_raw(:, j)/p_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%p_z_raw(:, j)/p_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%p_z_raw(:, j) / p_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%p_z_raw(:, j) / p_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -716,8 +718,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%t_z_raw(:, j)/Temp_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%t_z_raw(:, j)/Temp_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%t_z_raw(:, j) / Temp_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%t_z_raw(:, j) / Temp_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -726,8 +728,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%rho_z_raw(:, j)/rho_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%rho_z_raw(:, j)/rho_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%rho_z_raw(:, j) / rho_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%rho_z_raw(:, j) / rho_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -736,8 +738,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%Rota_z_raw(:, j)*t_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%Rota_z_raw(:, j)*t_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%Rota_z_raw(:, j) * t_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%Rota_z_raw(:, j) * t_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
@@ -756,8 +758,8 @@ contains
                   grd(id)%nr, 0, -1)
 
               do j=1, nthm
-                  mat_raw(1:npid, nthm+j)   = s(id)%xi_raw(:, j)/xi_ref
-                  mat_raw(1:npid, nthm+1-j) = s(id)%xi_raw(:, j)/xi_ref
+                  mat_raw(1:npid, nthm+j)   = s(id)%xi_raw(:, j) / xi_ref
+                  mat_raw(1:npid, nthm+1-j) = s(id)%xi_raw(:, j) / xi_ref
               enddo
               mat = 0d0
               call legendre(mat_raw(1:npid, :), mat(1:grd(id)%nr, 1:(2*nthm)), &
