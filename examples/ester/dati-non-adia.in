@@ -1,6 +1,6 @@
-nr(9) = 30             # the radial resolution
-nt =  30                # the number of spherical harmonics (lmax = |m| + 2*nt)
-lres = 300              # the number of points used in calculating coupling integrals
+nr(9) = 30              # the radial resolution
+nt =  10                # the number of spherical harmonics (lmax = |m| + 2*nt)
+lres = 301              # the number of points used in calculating coupling integrals
 dertype(1) = CHEB       # derivation type
 dertype(2) = CHEB       # derivation type
 dertype(3) = CHEB       # derivation type
@@ -21,5 +21,6 @@ mattype(8) = FULL       # matrix structure
 mattype(9) = FULL       # matrix structure
 iparity = 0
 m = 0
-shift = 18.484 # 18.48490552055010d0
+shift_real =  4
+shift_imag =  0
 nsol = 4
