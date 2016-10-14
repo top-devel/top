@@ -31,6 +31,10 @@ parser.add_argument('--cplx',
         dest='cplx_opt', action='store_true',
         help='Forces usage of complex version')
 
+parser.add_argument('--parser',
+        dest='new_parser', action='store_true',
+        help='Use new parser')
+
 parser.add_argument('mpi',
         nargs='?',
         choices=['mpi'],
@@ -60,32 +64,40 @@ if not os.path.isfile(eqfile):
 
 # get abs path for equation file
 eqfile = os.path.dirname(os.path.abspath(eqfile)) + "/" + os.path.basename(eqfile)
-readeq = "@abs_top_builddir@/utils/readeq"
+
+if args.new_parser:
+    readeq = "/home/bputigny/Work/Code/top-parser/BUILD/bin/edl-top"
+else:
+    readeq = "@abs_top_builddir@/utils/readeq"
 
 flags="top_flags="
 f2py_def=''
-if is_cplx(eqfile) or args.cplx_opt:
-    readeq += "-cplx"
-    flags += " -DUSE_COMPLEX"
-    f2py_def='-DUSE_COMPLEX'
-else:
-    readeq += "-real"
+if args.new_parser:
+    flags += " -DUSE_REAL"
     f2py_def='-DUSE_REAL'
-
-if is_2D(eqfile):
-    readeq += "-2D"
 else:
-    readeq += "-1D"
-    flags += " -DUSE_1D"
+    if is_cplx(eqfile) or args.cplx_opt:
+        readeq += "-cplx"
+        flags += " -DUSE_COMPLEX"
+        f2py_def='-DUSE_COMPLEX'
+    else:
+        readeq += "-real"
+        f2py_def='-DUSE_REAL'
 
-if is_multi(eqfile):
-    readeq += "-multi"
-    flags += " -DUSE_MULTI"
-else:
-    readeq += "-mono"
+    if is_2D(eqfile):
+        readeq += "-2D"
+    else:
+        readeq += "-1D"
+        flags += " -DUSE_1D"
 
-if args.mpi == "mpi":
-    readeq += "-mpi"
+    if is_multi(eqfile):
+        readeq += "-multi"
+        flags += " -DUSE_MULTI"
+    else:
+        readeq += "-mono"
+
+    if args.mpi == "mpi":
+        readeq += "-mpi"
 
 if args.order:
     order = args.order[0]
@@ -104,7 +116,7 @@ if not os.access('@abs_top_srcdir@/src/model_%s.F90' % args.model, os.F_OK):
 
 # print("TOP flavor: " + readeq)
 if not os.path.isfile(readeq):
-    print("Error incompatible options")
+    print("Error incompatible options (readeq: `%s\')" % readeq)
     sys.exit(1)
 
 if args.debug:
@@ -116,7 +128,7 @@ if is_cplx(eqfile) or args.cplx_opt:
 else:
     sys.stdout.write("real ")
 
-if is_2D(eqfile):
+if is_2D(eqfile) or args.new_parser:
     sys.stdout.write("2D ")
 else:
     sys.stdout.write("1D ")
@@ -137,8 +149,12 @@ try:
         stderr=subprocess.STDOUT)
 
     os.chdir("@abs_top_builddir@/src")
-    subprocess.check_output(["@PERL@", readeq, eqfile],
-            stderr=subprocess.STDOUT)
+    if args.new_parser:
+        subprocess.check_output([readeq, "-o", "matrices.inc", eqfile],
+                stderr=subprocess.STDOUT)
+    else:
+        subprocess.check_output(["@PERL@", readeq, eqfile],
+                stderr=subprocess.STDOUT)
     os.chdir(oldwd)
 
     subprocess.check_output(["make",

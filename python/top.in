@@ -131,8 +131,8 @@ class results:
 
     def get_sol(self, idom, isol, var):
         """
-        returns `isol` th solution in domain number `idom` for variable named
-        `var`
+        returns the `isol` th solution in domain number `idom` for variable
+        named `var`
 
         :rtype: tuple (eigenvalue, eigenvector, Legendre degree)
         :return: eigenvalue, eigenvector of the solution. The solution is given in spectral space (Legendre), so the of the degrees of Legendre polynomial are also returned

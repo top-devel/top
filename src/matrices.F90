@@ -3721,4 +3721,42 @@ contains
 
       end subroutine a_product
 !------------------------------------------------------------------------------
+#ifndef USE_MULTI
+      subroutine dump_coef()
+          use mod_grid, only: grd, nt, ndomains
+          use model
+          implicit none
+          integer i
+          open(42, file="as.coef")
+          do i=1, dm(1)%nas
+            write(42, *), dm(1)%as(i)
+          enddo
+          close(42)
+
+          open(42, file="art.coef")
+          do i=1, dm(1)%nart
+            write(42, *), dm(1)%art(1:nr, 1:nt, i)
+          enddo
+          close(42)
+
+          open(42, file="artt.coef")
+          do i=1, dm(1)%nartt
+            write(42, *), "i=", i, dm(1)%artt(1:nr, 1:nt, 1:nt, i)
+          enddo
+          close(42)
+
+          open(42, file="atbc.coef")
+          do i=1, idm(1, 1)%natbc
+            write(42, *), "i=", i, idm(1, 1)%atbc(:, i)
+          enddo
+          close(42)
+
+          open(42, file="attbc.coef")
+          do i=1, idm(1, 1)%nattbc
+            write(42, *), "i=", i, idm(1, 1)%attbc(:, :, i)
+          enddo
+          close(42)
+      end subroutine dump_coef
+#endif
+
       end module matrices
