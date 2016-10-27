@@ -382,7 +382,10 @@ class load:
         :param str var: variable name
         """
         nr, nt = self.lib.get_solsize(idom+1)
-        valp, vecp = self.lib.get_sol_real(idom+1, isol+1, var, nr, nt)
+        if self.lib.dtype() == "real":
+            valp, vecp = self.lib.get_sol_real(idom+1, isol+1, var, nr, nt)
+        else:
+            valp, vecp = self.lib.get_sol_cplx(idom+1, isol+1, var, nr, nt)
         l = self.lib.pyget_lvar(idom+1, var, nt)
         return valp, vecp, l
 

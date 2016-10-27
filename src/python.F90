@@ -7,7 +7,7 @@ module toppy
     use abstract_model_mod, only: abstract_model, model_ptr
     use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
     use inputs, only: read_inputs, lres, init_default
-    use postproc, only: write_output, get_sol, get_lvar_size, get_lvar
+    use postproc, only: write_output, get_sol_r, get_sol_c, get_lvar_size, get_lvar
 
     implicit none
 
@@ -227,14 +227,17 @@ contains
         integer, intent(in) :: idom, isol
         integer, intent(in) :: nr, nt
         character(len=*), intent(in) :: var
-#ifdef USE_COMPLEX
-        complex(kind=8), intent(out) :: valp, vecp(nr, nt)
-#else
         real(kind=8), intent(out) :: valp, vecp(nr, nt)
-#endif
-
-        call get_sol(idom, isol, var, valp, vecp)
+        call get_sol_r(idom, isol, var, valp, vecp)
     end subroutine get_sol_real
+
+    subroutine get_sol_cplx(idom, isol, var, valp, vecp, nr, nt)
+        integer, intent(in) :: idom, isol
+        integer, intent(in) :: nr, nt
+        character(len=*), intent(in) :: var
+        complex(kind=8), intent(out) :: valp, vecp(nr, nt)
+        call get_sol_c(idom, isol, var, valp, vecp)
+    end subroutine get_sol_cplx
 
     subroutine get_var_name(idom, ivar, var_name)
         integer, intent(in) :: idom, ivar

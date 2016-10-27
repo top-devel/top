@@ -37,17 +37,12 @@ contains
         return
     end subroutine
     !-----------------------------------------------------
-    subroutine get_sol(idom, nsol, var, valp, vecp)
+    subroutine get_sol_c(idom, nsol, var, valp, vecp)
 
         integer, intent(in) :: idom, nsol
         character(len=*), intent(in) :: var
-#ifdef USE_COMPLEX
         complex(kind=8), intent(out) :: vecp(:, :), valp
         complex(kind=8) :: vec_value
-#else
-        real(kind=8), intent(out) :: vecp(:, :), valp
-        real(kind=8) :: vec_value
-#endif
         integer :: iv, is, ivar, j, i, ii, der_id, lbder, ubder
         integer :: isol
 
@@ -68,11 +63,7 @@ contains
 
         do j=1, nt
             do i=1, grd(idom)%nr
-#ifdef USE_COMPLEX
                 vec_value = (0d0, 0d0)
-#else
-                vec_value = 0d0
-#endif
                 der_id = dmat(idom)%der_id
                 lbder = dmat(idom)%lbder(der_id)
                 ubder = dmat(idom)%ubder(der_id)
@@ -87,7 +78,50 @@ contains
 
         valp = omega(isol)
 
-    end subroutine get_sol
+    end subroutine get_sol_c
+    !-----------------------------------------------------
+    subroutine get_sol_r(idom, nsol, var, valp, vecp)
+
+        integer, intent(in) :: idom, nsol
+        character(len=*), intent(in) :: var
+        real(kind=8), intent(out) :: vecp(:, :), valp
+        real(kind=8) :: vec_value
+        integer :: iv, is, ivar, j, i, ii, der_id, lbder, ubder
+        integer :: isol
+
+        if (idom > ndomains) then
+            print'(A, I2, A)', "error only have ", ndomains, " domains"
+            return
+        endif
+
+        if (nsol > nsol_out) then
+            print'(A, I2, A)', "error only have ", nsol_out, " solutions"
+            return
+        endif
+
+        call init_index()
+        isol = Ndex(nsol)
+
+        ivar = get_ivar(idom, var)
+
+        do j=1, nt
+            do i=1, grd(idom)%nr
+                vec_value = 0d0
+                der_id = dmat(idom)%der_id
+                lbder = dmat(idom)%lbder(der_id)
+                ubder = dmat(idom)%ubder(der_id)
+                do ii=max(1, i-lbder), min(grd(idom)%nr, i+ubder)
+                    vec_value = vec_value &
+                        + dmat(idom)%derive(i, ii, der_id) &
+                        * vec(dm(idom)%offset+dm(idom)%ivar(ivar, ii, j), isol)
+                enddo
+                vecp(i, j) = vec_value
+            enddo
+        enddo
+
+        valp = omega(isol)
+
+    end subroutine get_sol_r
     !-----------------------------------------------------
     subroutine write_vecp(dir)
 
