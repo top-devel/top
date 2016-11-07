@@ -44,6 +44,7 @@ foreach $chaine(<SOURCE>)
   elsif ($list[0] eq "input")    {&addinput;}
   elsif ($list[0] eq "stamp")    {$stamp = join(" ",@list[1..(scalar @list - 1)]);}
   elsif ($list[0] eq "instruction") {&writeinstruction;}
+  elsif ($list[0] eq "suppress") {&suppressvar;}
   elsif ($list[0] eq "definition") {}
   elsif (scalar @list >= 1)
     {die "Error on line $nline: \"$list[0]\" unknown command.\n";}
@@ -99,36 +100,39 @@ sub writehead{
     print PUITS mywrap("      $defs[$i] = $defs_value[$i]",$ncols);
   }
   print PUITS "\n";
-  print PUITS "      if (allocated(as)) deallocate(as)\n";
-  print PUITS "      if (allocated(ar)) deallocate(ar)\n";
-  print PUITS "      if (allocated(asbc)) deallocate(asbc)\n";
-  print PUITS "      if (allocated(asi)) deallocate(asi)\n";
-  print PUITS "      if (allocated(ari)) deallocate(ari)\n";
-  print PUITS "      if (allocated(asbci)) deallocate(asbci)\n";
-  print PUITS "      if (allocated(var_name)) deallocate(var_name)\n";
-  print PUITS "      if (allocated(eq_name)) deallocate(eq_name)\n";
-  print PUITS "      nas=$nas\n";
-  print PUITS "      nar=$nar\n";
-  print PUITS "      nasbc=$nasbc\n";
-  print PUITS "      allocate(as(nas),asi(4,nas))\n";
-  print PUITS "      as = 0d0; asi=0\n";
-  print PUITS "      allocate(ar(nr,nar),ari(4,nar))\n";
-  print PUITS "      ar = 0d0; ari=0\n";
-  print PUITS "      allocate(asbc(nasbc),asbci(6,nasbc))\n";
-  print PUITS "      asbc = 0d0; asbci=0\n";
+  print PUITS "      grd(1)%mattype = mattype\n";
+  print PUITS "      if (allocated(dm(1)%as)) deallocate(dm(1)%as)\n";
+  print PUITS "      if (allocated(dm(1)%ar)) deallocate(dm(1)%ar)\n";
+  print PUITS "      if (allocated(dm(1)%asbc)) deallocate(dm(1)%asbc)\n";
+  print PUITS "      if (allocated(dm(1)%asi)) deallocate(dm(1)%asi)\n";
+  print PUITS "      if (allocated(dm(1)%ari)) deallocate(dm(1)%ari)\n";
+  print PUITS "      if (allocated(dm(1)%asbci)) deallocate(dm(1)%asbci)\n";
+  print PUITS "      if (allocated(dm(1)%var_name)) deallocate(dm(1)%var_name)\n";
+  print PUITS "      if (allocated(dm(1)%eq_name)) deallocate(dm(1)%eq_name)\n";
+  print PUITS "      dm(1)%nas=$nas\n";
+  print PUITS "      dm(1)%nar=$nar\n";
+  print PUITS "      dm(1)%nasbc=$nasbc\n";
+  print PUITS "      allocate(dm(1)%as(dm(1)%nas),dm(1)%asi(4,dm(1)%nas))\n";
+  print PUITS "      dm(1)%as = 0d0; dm(1)%asi=0\n";
+  print PUITS "      allocate(dm(1)%ar(nr,dm(1)%nar),dm(1)%ari(4,dm(1)%nar))\n";
+  print PUITS "      dm(1)%ar = 0d0; dm(1)%ari=0\n";
+  print PUITS "      allocate(dm(1)%asbc(dm(1)%nasbc),dm(1)%asbci(6,dm(1)%nasbc))\n";
+  print PUITS "      dm(1)%asbc = 0d0; dm(1)%asbci=0\n";
   print PUITS "\n";
 }
 ########################################################################
 sub writetail{
   print PUITS "      power_max=$power_max\n\n";
-  print PUITS "      a_dim = nr*nvar\n";
+  print PUITS "      a_dim = nr*dm(1)%nvar\n";
+  print PUITS "      dm(1)%d_dim = a_dim\n";
   print PUITS "      print*,'Dimension of problem: ',a_dim\n\n";
   print PUITS "      call find_der_range(der_min,der_max)\n";
-  print PUITS "      if (allocated(vect_der)) deallocate(vect_der)\n";
-  print PUITS "      allocate(vect_der(a_dim,der_min:der_max))\n\n";
-  print PUITS "      if (.not.first_dmat) call clear_derive(dmat)\n";
-  print PUITS "      call init_derive(dmat,r,nr,der_max,der_min,orderFD,dertype)\n";
+  print PUITS "      if (allocated(dm(1)%vect_der)) deallocate(dm(1)%vect_der)\n";
+  print PUITS "      allocate(dm(1)%vect_der(a_dim, der_min:der_max))\n\n";
+  print PUITS "      if (.not.first_dmat) call clear_derive(dmat(1))\n";
+  print PUITS "      call init_derive(dmat(1),r,nr,der_max,der_min,orderFD,dertype)\n";
   print PUITS "      first_dmat = .false.\n\n";
+  print PUITS "      call init_var_list()\n";
   for ($i=0;$i<scalar @amat;$i++) {print PUITS "$amat[$i]";}
 }
 ########################################################################
@@ -152,6 +156,21 @@ sub writeinstruction{
   for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
 }
 ########################################################################
+sub suppressvar{
+  if (scalar @list < 2) {die "Error on line $nline: missing arguments\n";}
+
+  for($i=1;$i<scalar @list;$i++) {
+    $varname = $list[$i];
+    $variable = 0;
+    for($j=0;$j < scalar @varlist;$j++) {
+      if ($varname eq $varlist[$j]) {$variable = $j+1;}
+    }
+    if ($variable == 0)
+      {die "Error on line $nline: \"$varname\" unknown variable.\n";}
+    print PUITS "      dm(1)%var_keep($variable) = .false.\n";
+  }
+}
+########################################################################
 sub readvarlist{
   if (scalar @list < 2) {die "Error on line $nline: empty variable list!\n";}
   @varlist = ();
@@ -171,10 +190,12 @@ sub readvarlist{
       if ($nvar != scalar @varlist) 
       {die "Error on line $nline: number of equations and variables differ.\n"}
     }
-  print PUITS "      nvar=$nvar\n";
-  print PUITS "      allocate(var_name(nvar))\n";
+  print PUITS "      dm(1)%nvar=$nvar\n";
+  print PUITS "      allocate(dm(1)%var_name(dm(1)%nvar))\n";
   for ($i=1;$i <= $nvar;$i++)
-    {print PUITS "      var_name($i)='$varlist[$i-1]'\n";}
+    {print PUITS "      dm(1)%var_name($i)='$varlist[$i-1]'\n";}
+  print PUITS "      allocate(dm(1)%var_keep($nvar))\n";
+  print PUITS "      dm(1)%var_keep = .true.\n";
   print PUITS "\n";
 }
 ########################################################################
@@ -197,9 +218,9 @@ sub readeqlist{
       if ($nvar != scalar @eqlist) 
       {die "Error on line $nline: number of equations and variables differ.\n"}
     }
-  print PUITS "      allocate(eq_name($nvar))\n";
+  print PUITS "      allocate(dm(1)%eq_name($nvar))\n";
   for ($i=1; $i <= $nvar;$i++)
-    {print PUITS "      eq_name($i)='$eqlist[$i-1]'\n";}
+    {print PUITS "      dm(1)%eq_name($i)='$eqlist[$i-1]'\n";}
 }
 ########################################################################
 sub seteq{
@@ -257,23 +278,24 @@ sub addterm{
   if ($list[1] eq "s")
   {
     $nas++;
-    push @amat, mywrap("      as($nas) = $string",$ncols);
+    push @amat, mywrap("      dm(1)%as($nas) = $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
-    print PUITS "      asi(1,$nas) = $power\n";
-    print PUITS "      asi(2,$nas) = $der\n";
-    print PUITS "      asi(3,$nas) = $equation\n";
-    print PUITS "      asi(4,$nas) = $variable\n";
+    print PUITS "      dm(1)%offset=0\n";
+    print PUITS "      dm(1)%asi(1,$nas) = $power\n";
+    print PUITS "      dm(1)%asi(2,$nas) = $der\n";
+    print PUITS "      dm(1)%asi(3,$nas) = $equation\n";
+    print PUITS "      dm(1)%asi(4,$nas) = $variable\n";
     print PUITS "\n";
   }
   elsif ($list[1] eq "r")
   {
     $nar++;
-    push @amat, mywrap("      ar($i_index,$nar) = $string",$ncols);
+    push @amat, mywrap("      dm(1)%ar($i_index,$nar) = $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
-    print PUITS "      ari(1,$nar) = $power\n";
-    print PUITS "      ari(2,$nar) = $der\n";
-    print PUITS "      ari(3,$nar) = $equation\n";
-    print PUITS "      ari(4,$nar) = $variable\n";
+    print PUITS "      dm(1)%ari(1,$nar) = $power\n";
+    print PUITS "      dm(1)%ari(2,$nar) = $der\n";
+    print PUITS "      dm(1)%ari(3,$nar) = $equation\n";
+    print PUITS "      dm(1)%ari(4,$nar) = $variable\n";
     print PUITS "\n";
   }
   else {die "Error on line $nline: unrecognised term type.\n";}
@@ -326,14 +348,14 @@ sub addtermbc{
   if ($list[1] eq "s")
   {
     $nasbc++;
-    push @amat, mywrap("      asbc($nasbc) = $string",$ncols);
+    push @amat, mywrap("      dm(1)%asbc($nasbc) = $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
-    print PUITS "      asbci(1,$nasbc) = $power\n";
-    print PUITS "      asbci(2,$nasbc) = $der\n";
-    print PUITS "      asbci(3,$nasbc) = $equation\n";
-    print PUITS "      asbci(4,$nasbc) = $variable\n";
-    print PUITS "      asbci(5,$nasbc) = $eqloc\n";
-    print PUITS "      asbci(6,$nasbc) = $varloc\n";
+    print PUITS "      dm(1)%asbci(1,$nasbc) = $power\n";
+    print PUITS "      dm(1)%asbci(2,$nasbc) = $der\n";
+    print PUITS "      dm(1)%asbci(3,$nasbc) = $equation\n";
+    print PUITS "      dm(1)%asbci(4,$nasbc) = $variable\n";
+    print PUITS "      dm(1)%asbci(5,$nasbc) = $eqloc\n";
+    print PUITS "      dm(1)%asbci(6,$nasbc) = $varloc\n";
     print PUITS "\n";
   }
   else {die "Error on line $nline: unrecognised term type.\n";}
@@ -392,13 +414,13 @@ sub callsub{
   elsif ($list[1] eq "r")
   {
     $nar++;
-    $string =~ s/\$a/ar($i_index,$nar)/g;
+    $string =~ s/\$a/dm(1)%ar($i_index,$nar)/g;
     push @amat, mywrap("      call $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
-    print PUITS "      ari(1,$nar) = $power\n";
-    print PUITS "      ari(2,$nar) = $der\n";
-    print PUITS "      ari(3,$nar) = $equation\n";
-    print PUITS "      ari(4,$nar) = $variable\n";
+    print PUITS "      dm(1)%ari(1,$nar) = $power\n";
+    print PUITS "      dm(1)%ari(2,$nar) = $der\n";
+    print PUITS "      dm(1)%ari(3,$nar) = $equation\n";
+    print PUITS "      dm(1)%ari(4,$nar) = $variable\n";
     print PUITS "\n";
   }
   else {die "Error on line $nline: unrecognised term type.\n";}
@@ -451,15 +473,15 @@ sub callsubbc{
   if ($list[1] eq "s")
   {
     $nasbc++;
-    $string =~ s/\$a/asbc($nasbc)/;
+    $string =~ s/\$a/dm(1)%asbc($nasbc)/;
     push @amat, mywrap("      call $string",$ncols);
     for($i=0;$i<$nloops;$i++) {push @amat, "      enddo\n";}
-    print PUITS "      asbci(1,$nasbc) = $power\n";
-    print PUITS "      asbci(2,$nasbc) = $der\n";
-    print PUITS "      asbci(3,$nasbc) = $equation\n";
-    print PUITS "      asbci(4,$nasbc) = $variable\n";
-    print PUITS "      asbci(5,$nasbc) = $eqloc\n";
-    print PUITS "      asbci(6,$nasbc) = $varloc\n";
+    print PUITS "      dm(1)%asbci(1,$nasbc) = $power\n";
+    print PUITS "      dm(1)%asbci(2,$nasbc) = $der\n";
+    print PUITS "      dm(1)%asbci(3,$nasbc) = $equation\n";
+    print PUITS "      dm(1)%asbci(4,$nasbc) = $variable\n";
+    print PUITS "      dm(1)%asbci(5,$nasbc) = $eqloc\n";
+    print PUITS "      dm(1)%asbci(6,$nasbc) = $varloc\n";
     print PUITS "\n";
   }
   else {die "Error on line $nline: unrecognised term type.\n";}
@@ -496,7 +518,8 @@ sub writeinputs{
   open(INPUTS, "> $input_file") or die "File $input_file cannot be created.\n";
   print INPUTS "      module inputs\n\n";
   print INPUTS "      use iso_c_binding\n";
-  print INPUTS "      use mod_grid, only: nr, init_grid\n";
+  print INPUTS "      use mod_grid, only: nr, r, init_grid\n";
+  print INPUTS "      integer, parameter :: lres = 1\n";
   for ($i=0; $i < scalar @inputs; $i++)
     {print INPUTS "      $inputs_datatype[$i], save :: $inputs[$i]\n";}
 
@@ -508,10 +531,10 @@ sub writeinputs{
 
   print INPUTS "\ncontains\n";
   print INPUTS "!".("-"x60)."\n";
-  print INPUTS "      subroutine read_inputs(dati)\n\n";
   print INPUTS "      subroutine init_default()\n\n";
   print INPUTS "      call init_grid(1)\n";
   print INPUTS "      end subroutine init_default\n\n";
+  print INPUTS "      subroutine read_inputs(dati)\n\n";
   print INPUTS "      use mgetpar\n";
   print INPUTS "      implicit none\n\n";
   print INPUTS "      character(len=*), intent(in) :: dati\n";
@@ -595,7 +618,7 @@ sub treat_string{
 
   if ($string =~ m/\$i/)
   {
-    push @amat, "      do i=1,nr\n";
+    push @amat, "      do i=1, nr\n";
     $nloops++;
     $i_index = "i";
   }
@@ -604,9 +627,9 @@ sub treat_string{
 
   if ($string =~ m/\$prev/)
   {
-       if ($prev eq "s")     {$string =~ s/\$prev/as($nas)/g;}
-    elsif ($prev eq "r")     {$string =~ s/\$prev/ar($i_index,$nar)/g;}
-    elsif ($prev eq "sbc")   {$string =~ s/\$prev/asbc($nasbc)/g;}
+       if ($prev eq "s")     {$string =~ s/\$prev/dm(1)%as($nas)/g;}
+    elsif ($prev eq "r")     {$string =~ s/\$prev/dm(1)%ar($i_index,$nar)/g;}
+    elsif ($prev eq "sbc")   {$string =~ s/\$prev/dm(1)%asbc($nasbc)/g;}
     elsif ($prev eq "empty") {die "Error on line $nline: instruction on non-existant term\n";}
     else {die "Error on line $nline: Programming error in readeq\n";}
   }

@@ -2,25 +2,90 @@
 
 if __name__ == '__main__':
     import top
+    import sys
+    import os.path
     import subprocess as sp
 
-    tests = [
-            ('poly_ester',  'eq_poly_ester'),
-            ('cesam',       'eq_cesam_all_lagrange_avg'),
-            ('ester',       'eq_ESTER_all_lagrange')]
+    try:
+        from colorama import Fore, Style
+        red = Fore.RED
+        green = Fore.GREEN
+        reset = Style.RESET_ALL
+        bold = Style.BRIGHT
+    except:
+        red = ""
+        green = ""
+        reset = ""
+        bold = ""
 
-    for model_name, eq_file in tests:
+
+    tests = [ # name, model, equation_file, order, test_file
+            ('poly (real 2D mono)',
+                'poly_ester',
+                'eq_poly_ester',
+                None,
+                'check'),
+            ('cesam (real 2D mono)',
+                'cesam',
+                'eq_cesam_all_lagrange_avg',
+                'order-cesam.inc',
+                'check'),
+            ('cesam1D (real 1D mono)',
+                'cesam',
+                'eq_cesam_all_lagrange_avg_1D',
+                None,
+                'check1D'),
+            ('ester (real 2D multi)',
+                'ester',
+                'eq_ESTER_all_lagrange',
+                None,
+                'check'),
+            ('ester non adiabatic (cplx 2D multi)',
+                'ester',
+                'eq_non_adiabatic',
+                None,
+                'check-non-adia')
+            ]
+
+    fnull = open(os.devnull, 'w')
+
+    for name, model, eq_file, order, test in tests:
         try:
-            sp.check_call(['@prefix@/bin/top-build',
-                '--model=%s' % model_name,
-                '@abs_top_builddir@/examples/%s/%s' % (model_name, eq_file)])
+            print('Checking %s: ' % name)
+            print('  Build: '),
+            sys.stdout.flush()
+            if order == None:
+                sp.check_call(['@prefix@/bin/top-build',
+                    '--model=%s' % model,
+                    '@abs_top_builddir@/examples/%s/%s' % (model, eq_file)],
+                    stdout=fnull,
+                    stderr=fnull)
+            else:
+                sp.check_call(['@prefix@/bin/top-build',
+                    '--model=%s' % model,
+                    '--order=@abs_top_builddir@/examples/%s/%s' % (model, order),
+                    '@abs_top_builddir@/examples/%s/%s' % (model, eq_file)],
+                    stdout=fnull,
+                    stderr=fnull)
 
-            sp.check_call(['@PYTHON@',
-                '@abs_top_builddir@/examples/%s/test.py' % model_name])
+            print(green + '[Ok]'),
+            print(reset)
 
-        except Exception as e:
-            print('Something went wrong with `%s\' test' % eq_file)
-            print('Error was:')
-            print(e)
+            print('  Run:   '),
+            sys.stdout.flush()
+            test_file = '@abs_top_builddir@/examples/%s/%s.py' % (model, test)
+            if os.path.exists(test_file):
+                sp.check_call(['@PYTHON@',
+                    test_file],
+                    stdout=fnull,
+                    stderr=fnull)
+                print(green + '[Ok]'),
+                print(reset)
+            else:
+                print(red + 'no test provided'),
+                print(reset)
 
-    print('OK')
+        except sp.CalledProcessError as e:
+            print(red + bold + '[Failed]'),
+            print(reset)
+            # print(e)

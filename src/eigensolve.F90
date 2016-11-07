@@ -4,9 +4,12 @@ module eigensolve
       use mod_grid
       use mod_blacs
       use matrices
-      use inputs, only: nsol, lres
+      use inputs, only: nsol
       use iso_c_binding
       use cfg
+      use model
+
+      implicit none
 
       type MULTI_MAT
 
@@ -193,6 +196,52 @@ contains
           shift = sigma
           t_dim = a_dim * power_max
 
+          call dump_coef()
+#if 0
+          open(42, file="cesam1D-Gamma1.dat")
+          do i=1, nr
+            write(42, *), "i=", i, Gamma1(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-r.dat")
+          do i=1, nr
+            write(42, *), "i=", i, r(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-pm.dat")
+          do i=1, nr
+            write(42, *), "i=", i, pm(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-rhom.dat")
+          do i=1, nr
+            write(42, *), "i=", i, rhom(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-rhom_z.dat")
+          do i=1, nr
+            write(42, *), "i=", i, rhom_z(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-g_m.dat")
+          do i=1, nr
+            write(42, *), "i=", i, g_m(i)
+          enddo
+          close(42)
+
+          open(42, file="cesam1D-dg_m.dat")
+          do i=1, nr
+            write(42, *), "i=", i, dg_m(i)
+          enddo
+          close(42)
+#endif
+
+
 #ifdef USE_MPI
           if (iproc.eq.0) then
 #endif
@@ -252,15 +301,15 @@ contains
 #endif
 
           ! downward sweep method:
-          do id=1,ndomains
+          do id=1, ndomains
           d_dim = dm(id)%d_dim
 #ifdef USE_MPI
-          dm(id)%vlsize = NUMROC(dm(id)%d_dim ,blk,irow,0,nrows)
-          dm(id)%hlsize = NUMROC(dm(id)%d_dim ,blk,icol,0,ncols)
+          dm(id)%vlsize = NUMROC(d_dim ,blk,irow,0,nrows)
+          dm(id)%hlsize = NUMROC(d_dim ,blk,icol,0,ncols)
           allocate(asigma(id)%ipiv(dm(id)%vlsize +blk))
           allocate(asigma(id)%desc(9))
 #else
-          allocate(asigma(id)%ipiv(dm(id)%d_dim ))
+          allocate(asigma(id)%ipiv(d_dim ))
 #endif
           if (grd(id)%mattype.eq.'FULL') then
 #ifdef USE_MPI
@@ -284,7 +333,11 @@ contains
               if (id.gt.1) call correct_asigma_downward(id,sigma)
 
 #else
+#ifdef USE_1D
+              call make_asigma_full(sigma,asigma(id)%mat)
+#else
               call make_asigma_full_total(sigma,asigma(id)%mat)
+#endif
 #endif
 
 #ifdef USE_COMPLEX
@@ -308,7 +361,7 @@ contains
 #endif
 #ifdef USE_COMPLEX
               ! call ZGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
-              print*, "Sorry, complexe valued band matrix are not yet implemented in TOP"
+              print*, "Sorry, complex valued band matrix are not yet implemented in TOP"
               stop "not yet implemented"
 #else
               call DGBTRF(d_dim,d_dim,dm(id)%kl,dm(id)%ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)

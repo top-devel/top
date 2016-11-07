@@ -451,7 +451,6 @@ class load:
                 res.vecps[-1].append(vecps)
                 res.l[-1].append(ls)
             res.valps[isol] = valp
-
         return res
 
     def get_dtype(self):

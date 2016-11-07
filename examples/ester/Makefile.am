@@ -10,10 +10,11 @@ noinst_DATA = dati d.dat star.h5 rasalhague.h5 \
 EXTRA_DIST = dati.in d.in star.in rasalhague.in \
 			 test.in test-old.in test-non-adia.in \
 			 eq_ESTER_all_lagrange.in eq_ESTER_old_all_lagrange.in \
-			 eq_non_adiabatic.in
+			 eq_non_adiabatic.in \
+			 dati-non-adia
 BUILT_SOURCES = dati test.py test-old.py d.dat star.h5 \
 				eq_ESTER_all_lagrange eq_ESTER_old_all_lagrange \
-				eq_non_adiabatic
+				eq_non_adiabatic dati-non-adia test-non-adia.py rasalhague.h5
 
 .in.py: Makefile
 	$(do_subst) < $< > $@

@@ -129,6 +129,7 @@ contains
         end do
 
     end subroutine
+
     subroutine set_nt(n_t)
         integer, intent(in) :: n_t
 
@@ -265,7 +266,11 @@ contains
         character(len=*), intent(in) :: var
         integer, intent(out) :: lsize
 
+#ifdef USE_1D
+        lsize = 1
+#else
         call get_lvar_size(idom, var, lsize)
+#endif
     end subroutine pyget_lvar_size
 
     subroutine pyget_lvar(idom, var, lm, l)
@@ -273,7 +278,11 @@ contains
         character(len=*), intent(in) :: var
         integer, intent(out) :: l(lm)
 
+#ifdef USE_1D
+        l = 0
+#else
         call get_lvar(idom, var, l)
+#endif
     end subroutine pyget_lvar
 
     subroutine init_dati()

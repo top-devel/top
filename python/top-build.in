@@ -89,10 +89,12 @@ else:
     else:
         readeq += "-1D"
         flags += " -DUSE_1D"
+        f2py_def+=' -DUSE_1D'
 
     if is_multi(eqfile):
         readeq += "-multi"
         flags += " -DUSE_MULTI"
+        f2py_def+=' -DUSE_MULTI'
     else:
         readeq += "-mono"
 
@@ -105,7 +107,10 @@ if args.order:
         print('Error: no such file `%s\'' % order)
         sys.exit(1)
 else:
-    order = '@abs_top_srcdir@/src/order-default.inc'
+    if is_2D(eqfile):
+        order = '@abs_top_srcdir@/src/order-default.inc'
+    else:
+        order = '@abs_top_srcdir@/src/order-default-1D.inc'
 
 shutil.copy(order,
         '@abs_top_builddir@/src/order.inc')

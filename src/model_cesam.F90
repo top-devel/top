@@ -1,5 +1,7 @@
 module model
     use mod_grid
+    use derivative
+    use mod_legendre
     use inputs, only: lres, rota, mass, dertype, orderFD, pert_model, grid_type
     use abstract_model_mod, only: model_ptr, abstract_model
 
@@ -27,19 +29,32 @@ module model
     double precision :: rota_pert
 
     ! variables needed for pulsation calculations
-    double precision, allocatable, dimension(:,:), save :: rhom,NNt,&
+#ifdef USE_1D
+    double precision, allocatable, dimension(:), save :: &
+        rhom, rhom_z, pm, pm_z, c2, g_m, dg_m, Gamma1, NN, gm_r, &
+        rF, diffrho_r2
+#else
+    double precision, allocatable, dimension(:,:), save :: rhom, NNt,&
         rhom_z, rhom_t, pm, pm_z, pm_t, Gamma1, c2,pe,pe_z, &
         pe_t, grd_pe_z, grd_pe_t, grd_pe_zz, grd_pe_zt,NNr, &
         grd_pe_tz, grd_pe_tt, NN
+#endif
     ! /!\ NN is never perturbated
     double precision, save :: Lambda
+#ifdef USE_1D
+    double precision, save :: CC, rhom_zz
+#endif
 
     ! geometric terms
-    double precision,allocatable,dimension(:,:),save::r_t,r_z,r_map,&
+#ifdef USE_1D
+    double precision, allocatable, dimension(:), save :: r_map
+#else
+    double precision, allocatable, dimension(:,:), save :: r_t,r_z,r_map,&
         re_t,re_z,re_map,r_zz,r_zt,r_tt,re_zz,re_zt,&
         re_tt,zeta,cost,sint,cott,roz,rrt,r_aux
-    double precision,allocatable,dimension(:),save::cth,sth
-    double precision,save :: K
+    double precision, allocatable, dimension(:), save :: cth, sth
+#endif
+    double precision, save :: K
 
     ! different physical constants
     double precision, parameter :: solar_mass = 1.98919d33 ! g
@@ -62,6 +77,11 @@ contains
         class(cesam_model), target :: this
         character(len=*), intent(in) :: filename
 
+#ifdef USE_1D
+        call read_model(filename)
+        call init_radial_grid()
+        call init_fields()
+#else
         call read_model(filename)
         ! call init_radial_grid_file()
         call init_radial_grid_g_modes()
@@ -82,6 +102,7 @@ contains
         ! call write_radial_grid() ! this stops the program
         ! call write_amdl()        ! this stops the program
         ! call write_fields()      ! this stops the program
+#endif
 
         model_ptr => this
 
@@ -93,67 +114,70 @@ contains
         character(len=*), intent(in) :: fname
         real(kind=8), allocatable, intent(out) :: field(:, :)
 
+#ifdef USE_1D
+#else
         if (fname == 'rhom') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = rhom
         elseif (fname == 'rhom_z') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = rhom_z
         elseif (fname == 'rhom_t') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = rhom_t
         elseif (fname == 'pm') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pm
         elseif (fname == 'pm_z') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pm_z
         elseif (fname == 'pm_t') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pm_t
         elseif (fname == 'Gamma1') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = Gamma1
         elseif (fname == 'NN') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field(:, :) = NN
         elseif (fname == 'NNr') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = NNr
         elseif (fname == 'NNt') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = NNt
         elseif (fname == 'pe') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pe
         elseif (fname == 'pe_z') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pe_z
         elseif (fname == 'pe_t') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = pe_t
         elseif (fname == 'grd_pe_z') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_z
         elseif (fname == 'grd_pe_t') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_t
         elseif (fname == 'grd_pe_zz') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_zz
         elseif (fname == 'grd_pe_zt') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_zt
         elseif (fname == 'grd_pe_tz') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_tz
         elseif (fname == 'grd_pe_tt') then
-            allocate(field(grd(1)%nr, lres))
+            allocate(field(nr, lres))
             field = grd_pe_tt
         else
             allocate(field(1, 1))
             field = 0.d0
         endif
+#endif
 
     end subroutine cesam_get_field
 
@@ -163,8 +187,13 @@ contains
         real(kind=8), intent(out) :: r(nr, nt), th(nt)
         integer, intent(in) :: nr, nt
 
+#ifdef USE_1D
+        r(:, 1) = r_map
+        th = 0
+#else
         r = r_map
         th = acos(cth)
+#endif
 
     end subroutine cesam_get_grid
 
@@ -172,9 +201,13 @@ contains
 
         class(cesam_model) :: this
         integer, intent(out) :: n_r, n_t
-
+#ifdef USE_1D
+        n_r = nr
+        n_t = 1
+#else
         n_r = grd(1)%nr
         n_t = lres
+#endif
 
     end subroutine cesam_get_grid_size
 
@@ -218,6 +251,7 @@ contains
 143    format(1p5d19.12)
 
         read(37,140) nrmod,iconst,ivar,nbelem
+        nr = nrmod
         allocate(glob(iconst),var(ivar+nbelem,nrmod))
 
         read(37,143) (glob(i),i=1,iconst)
@@ -288,34 +322,49 @@ contains
 
         integer i
 
+#ifdef USE_1D
+        nr = nrmod
+        call init_radial_grid()
+        do i=1, nr
+            r(i) = var(1, i) / var(1, nr)
+        enddo
+#else
         grd(1)%nr = nrmod
         call init_radial_grid()
         do i=1, grd(1)%nr
             grd(1)%r(i) = var(1, i) / var(1, grd(1)%nr)
         enddo
+#endif
 
     end subroutine init_radial_grid_simple
 
     !--------------------------------------------------------------------------
     ! This does a simple initialisation for the radial grid
     !--------------------------------------------------------------------------
-#if 1
     subroutine init_radial_grid_file()
 
         use inputs, only: gridfile
         integer i, j
 
         open(unit=37,file=trim(gridfile),status="old")
+#ifdef USE_1D
+        nr = 0
+#else
         grd(1)%nr = 0
+#endif
         do
             read(37,*,end=10)
+#ifdef USE_1D
+            nr = nr + 1
+#else
             grd(1)%nr = grd(1)%nr + 1
+#endif
         enddo
         10     rewind(37)
-        print*,"New grid resolution:",grd(1)%nr
+        print*,"New grid resolution:", grd(1)%nr
         grd(1)%nr = grd(1)%nr
         call init_radial_grid()
-        do i=1,grd(1)%nr
+        do i=1, grd(1)%nr
             read(37,*) j, grd(1)%r(i)
         enddo
         close(37)
@@ -326,7 +375,6 @@ contains
         enddo
 
     end subroutine init_radial_grid_file
-#endif
 
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for g-modes:
@@ -508,9 +556,8 @@ contains
     !  symmetric component of the perturbation to the density profile is
     !  zero.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine find_pert()
-
-        use derivative
 
         type(DERMAT) :: dm
         integer, allocatable :: ipiv(:)
@@ -565,6 +612,7 @@ contains
         deallocate(aux)
 
     end subroutine find_pert
+#endif
 
     !--------------------------------------------------------------------------
     !  Set rotational perturbations to zero - i.e. no centrifugal deformation.
@@ -580,6 +628,7 @@ contains
     !  It is necessary to interpolate in the angular direction - this is done
     !  by spectral methods involving Legendre polynomials.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine make_mapping()
 
         double precision xi, epsilon, uprime
@@ -716,7 +765,8 @@ contains
         enddo
 
         deallocate(rs, rsp, rss, w)
-    end subroutine
+    end subroutine make_mapping
+#endif
 
     !--------------------------------------------------------------
     !  This subroutine prepares different non-dimensional variables
@@ -726,7 +776,94 @@ contains
 
         double precision, allocatable :: aux(:,:), p_aux(:), p1D_bis(:)
         integer i, j
+#ifdef USE_1D
+        type(DERMAT) :: dm
+        integer :: order, der_max, der_min
+        integer :: ii
+        character*(4) :: dertype
 
+       if (allocated(r_map)) deallocate(r_map)
+       allocate(r_map(nr))
+       call init_radial_grid()
+       
+       do j=1,nr
+         r(j) = var(1,j)/glob(2)
+         r_map(j) = r(j)
+       enddo
+
+       order = 1
+       der_max = 1
+       der_min = 0
+       dertype = "FD  "
+       call init_derive(dm,r,nr,der_max,der_min,order,dertype)
+
+       if (allocated(rhom))       deallocate(rhom)
+       if (allocated(rhom_z))     deallocate(rhom_z)
+       if (allocated(diffrho_r2)) deallocate(diffrho_r2)
+       if (allocated(pm))         deallocate(pm)
+       if (allocated(pm_z))       deallocate(pm_z)
+       if (allocated(c2))         deallocate(c2)
+       if (allocated(g_m))        deallocate(g_m)
+       if (allocated(dg_m))       deallocate(dg_m)
+       if (allocated(gm_r))       deallocate(gm_r)
+       if (allocated(Gamma1))     deallocate(Gamma1)
+       if (allocated(NN))         deallocate(NN)
+       if (allocated(rF))         deallocate(rF)
+
+       ! calculate the different fields
+       allocate(rhom(nr),rhom_z(nr),pm(nr),pm_z(nr),c2(nr),g_m(nr), &
+                dg_m(nr),Gamma1(nr),NN(nr),gm_r(nr),rF(nr),         &
+                diffrho_r2(nr))
+       do i=1,nr
+           rhom(i)   = var(5,i)/rho_ref
+           pm(i)     = var(4,i)/p_ref
+           c2(i)     = var(10,i)*pm(i)/rhom(i)
+           Gamma1(i) = var(10,i)
+       enddo
+       do i=2,nr
+           g_m(i)        = exp(var(2,i))/r_map(i)**2
+           gm_r(i)       = exp(var(2,i))/r_map(i)**3
+           diffrho_r2(i) = (1d0 - 4d0*pi*r_map(i)**3*rhom(i) &
+                         / (3d0*exp(var(2,i))))/(r_map(i)**2)
+       enddo
+       g_m(1) = 0d0
+       gm_r(1) = 4d0*pi*rhom(1)/3d0
+
+       ! finding the radial derivative of various fields:
+       do i=1,nr
+         rhom_z(i) = 0d0
+         pm_z(i)   = 0d0
+         dg_m(i)    = 0d0
+         do ii=max(1,i-dm%lbder(1)),min(nr,i+dm%ubder(1))
+           rhom_z(i) = rhom_z(i) + dm%derive(i,ii,1)*rhom(ii)
+           pm_z(i)   = pm_z(i)   + dm%derive(i,ii,1)*pm(ii)
+           dg_m(i)   = dg_m(i)   + dm%derive(i,ii,1)*g_m(ii)
+         enddo
+       enddo
+
+       rhom_z(1) = 0d0 ! it is extremely important to do this before
+                       ! calculating the 2nd derivative
+       rhom_zz = 0d0
+       do ii=1,min(nr,1+dm%ubder(1))
+         rhom_zz = rhom_zz + dm%derive(1,ii,1)*rhom_z(ii)
+       enddo
+       diffrho_r2(1) = -rhom_zz/(5d0*rhom(1))
+       CC = 20d0*pi*rhom(1)**2/(3d0*c2(1)*rhom_zz)
+
+       ! find the quantity NN which is related to the
+       ! Brunt-Vaisala frequency:
+       do i=2,nr
+         NN(i) = (pm_z(i)-c2(i)*rhom_z(i))/r(i)
+         rF(i) = 4d0*pi*rhom(i)*r_map(i)**3/(3d0*exp(var(2,i))) &
+               - g_m(i)/(r_map(i)*diffrho_r2(i)*c2(i))          &
+               - r_map(i)*rhom_z(i)/(2d0*rhom(i))
+       enddo
+       !NN(708:) = 0d0
+
+       ! the center needs special treatment
+       NN(1) = 2d0*(pm(2)-pm(1)-c2(1)*(rhom(2)-rhom(1)))/r(2)**2
+       rF(1) = 1 + CC
+#else
         if (allocated(rhom))    deallocate(rhom)
         if (allocated(rhom_z))  deallocate(rhom_z)
         if (allocated(rhom_t))  deallocate(rhom_t)
@@ -782,6 +919,7 @@ contains
         enddo
 
         deallocate(aux,ws1,ws2,p_aux,p1D_bis)
+#endif
 
     end subroutine
 
@@ -789,10 +927,8 @@ contains
     ! This subroutine initialises all of the grd_pe arrays in such a way
     ! that there are no singularities in the center of the star.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine init_grd_pe()
-
-        use derivative
-        use mod_legendre
 
         type(DERMAT) :: dm
         double precision, allocatable :: aux(:,:)
@@ -874,10 +1010,12 @@ contains
         call clear_derive(dm)
 
     end subroutine init_grd_pe
+#endif
 
     !--------------------------------------------------------------------------
     ! This writes an amdl which can be used by ADIPLS.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine write_amdl()
 
         double precision dta(8), mu
@@ -930,6 +1068,7 @@ contains
         stop
 
     end subroutine write_amdl
+#endif
 
     !--------------------------------------------------------------------------
     ! This subroutine calculates pe1D using Poisson's equation.
@@ -997,6 +1136,7 @@ contains
     !  This subroutine maps a field from the iso-potentials grid to a
     !  new mapping, which introduces dependance of theta.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D(f1D,f2D)
 
         double precision f1D(nrmod), f2D(grd(1)%nr,lres)
@@ -1008,16 +1148,16 @@ contains
         f2D(1:grd(1)%nr,lres+1-j) = f2D(1:grd(1)%nr,j)
         enddo
 
-    end subroutine
+    end subroutine map2D
+#endif
 
     !--------------------------------------------------------------------------
     !  This subroutine maps a field from the iso-potentials grid to a
     !  new mapping, which introduces dependance of theta.  It also calculates
     !  the theta and zeta derivatives on the new mapping.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D_der(f1D,f2D,f2D_t,f2D_z,aux)
-
-        use mod_legendre
 
         double precision f1D(nrmod), aux(grd(1)%nr,lres)
         double precision, dimension(grd(1)%nr,lres) :: f2D, f2D_t, f2D_z
@@ -1038,16 +1178,15 @@ contains
         f2D_z = 2d0*f2D_z*r_z*r_map
 
     end subroutine
+#endif
 
     !--------------------------------------------------------------------------
     !  This subroutine maps a field from the iso-potentials grid to a new
     !  mapping, which introduces a dependance on theta.  It also calculates
     !  the theta and zeta derivatives on the new mapping.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D_der_bis(f1D,f2D,f2D_t,f2D_z,aux)
-
-        use mod_legendre
-        use derivative
 
         double precision f1D(nrmod), aux(grd(1)%nr,lres)
         double precision, dimension(grd(1)%nr,lres) :: f2D, f2D_t, f2D_z
@@ -1077,12 +1216,14 @@ contains
         !f2D_z = 2d0*f2D_z*r_z*r_map
         call clear_derive(dm)
 
-    end subroutine
+    end subroutine map2D_der_bis
+#endif
 
     !--------------------------------------------------------------------------
     !  This subroutine maps a field from the iso-potentials grid to a
     !  new mapping, which introduces dependance of theta.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D_p(f1D,f2D)
 
         use mod_legendre
@@ -1100,12 +1241,14 @@ contains
         enddo
 
     end subroutine
+#endif
 
     !--------------------------------------------------------------------------
     !  This subroutine maps a field from the iso-potentials grid to a
     !  new mapping, which introduces dependance of theta.  It also calculates
     !  the theta and zeta derivatives on the new mapping.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D_der_p(f1D,f2D,f2D_t,f2D_z,aux)
 
         use mod_legendre
@@ -1133,12 +1276,14 @@ contains
         f2D_z = 2d0*f2D_z*r_z*r_map
 
     end subroutine
+#endif
 
     !--------------------------------------------------------------------------
     !  This subroutine maps a field from the iso-potentials grid to a
     !  new mapping, which introduces dependance of theta.  It also calculates
     !  the theta and zeta derivatives on the new mapping.
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine map2D_der_p_bis(f1D,f2D,f2D_t,f2D_z,aux)
 
         use mod_legendre
@@ -1176,6 +1321,7 @@ contains
         call clear_derive(dm)
 
     end subroutine
+#endif
 
     !------------------------------------------------------------------------------ 
     ! This subroutine calculates the anti-derivative of a function f defined on an
@@ -1365,6 +1511,7 @@ contains
     !  This subroutine removes half the points from the model so as to do
     !  Richardson extrapolation
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine reduce_model()
 
         integer i, nr_in, nr_out
@@ -1510,7 +1657,7 @@ contains
 
         deallocate(aux,aux1D)
 
-    end subroutine
+    end subroutine reduce_model
     !--------------------------------------------------------------------------
     !  This copies half of 2D array f_in into f_out.
     !--------------------------------------------------------------------------
@@ -1559,10 +1706,12 @@ contains
         f_out(nr_out) = f_in(nr_in)
 
     end subroutine
+#endif
     !-------------------------------------------------------------
     !  This subroutine prints different fields so as to help debug
     !  the program...
     !-------------------------------------------------------------
+#ifndef USE_1D
     subroutine write_fields()
         integer i,j
 
@@ -1649,6 +1798,7 @@ contains
 
         101    format(3(1pe22.15,2X))
         stop
-    end subroutine
+    end subroutine write_fields
+#endif
     !--------------------------------------------------------------------------
 end module

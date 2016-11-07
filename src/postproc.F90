@@ -22,7 +22,9 @@ contains
         call write_vecp(dir)
         call write_valp(dir)
         call write_grid(dir)
+#ifndef USE_1D
         call find_lmax()
+#endif
     end subroutine
     !-----------------------------------------------------
     subroutine init_index()
@@ -70,7 +72,11 @@ contains
                 do ii=max(1, i-lbder), min(grd(idom)%nr, i+ubder)
                     vec_value = vec_value &
                         + dmat(idom)%derive(i, ii, der_id) &
+#ifdef USE_1D
+                        * vec(dm(idom)%ivar(ivar, ii), isol)
+#else
                         * vec(dm(idom)%offset+dm(idom)%ivar(ivar, ii, j), isol)
+#endif
                 enddo
                 vecp(i, j) = vec_value
             enddo
@@ -113,7 +119,11 @@ contains
                 do ii=max(1, i-lbder), min(grd(idom)%nr, i+ubder)
                     vec_value = vec_value &
                         + dmat(idom)%derive(i, ii, der_id) &
+#ifdef USE_1D
+                        * vec(dm(idom)%ivar(ivar, ii), isol)
+#else
                         * vec(dm(idom)%offset+dm(idom)%ivar(ivar, ii, j), isol)
+#endif
                 enddo
                 vecp(i, j) = vec_value
             enddo
@@ -124,13 +134,45 @@ contains
     end subroutine get_sol_r
     !-----------------------------------------------------
     subroutine write_vecp(dir)
-
         character(len=*), intent(in) :: dir
-
         integer isol, iisol, id, i, ii, j, var, vvar, der_id, lbder, ubder
         double complex vec_value
         character*(64) str
 
+#ifdef USE_1D
+        integer :: jj
+        double complex :: sum
+
+        der_id = dmat(1)%der_id
+        lbder  = dmat(1)%lbder(der_id)
+        ubder  = dmat(1)%ubder(der_id)
+        open(unit=2,file=trim(dir)//"vecp",status="unknown")
+        call write_stamp(2)
+        write(2,*) "dertype = ",dertype
+        write(2,*) "   1" ! later on this will be ndomains
+        write(2,*) nr
+        write(2,99) r(1),r(nr) 
+99      format(2(2X,f7.5))
+        call write_inputs(2)
+        write(2,*) nsol_out, dm(1)%nvar
+        do isol=1,nsol_out
+        i = Ndex(isol)
+        write(2,100) omega(i)
+        do var=1, dm(1)%nvar
+        write(2,'(a)') trim(dm(1)%var_name(var))
+        do j=1,nr
+        sum = (0d0,0d0)
+        do jj=max(1,j-lbder),min(nr,j+ubder)
+        sum = sum + dmat(1)%derive(j,jj,der_id)*vec(dm(1)%ivar(var,jj),i)
+        enddo
+        write(2,101) sum
+        enddo
+        enddo
+        enddo
+        close(2)
+100     format(2X,1pe22.15,2X,1pe22.15)
+101     format(1pe22.15,2X,1pe22.15)
+#else
         open(unit=2, file=trim(dir)//"vecp", status="unknown")
         call write_stamp(2)
         write(str, 97) ndomains
@@ -177,7 +219,8 @@ contains
 101     format(1pe22.15, 2X, 1pe22.15)
 102     format(2X, I3, 2X, I3)
 
-    end subroutine
+#endif
+    end subroutine write_vecp
     !-----------------------------------------------------
     subroutine write_grid(dir)
 
@@ -214,6 +257,7 @@ contains
 
     end subroutine
     !-----------------------------------------------------
+#ifndef USE_1D
     subroutine find_lmax()
 
         integer isol, iisol, id, i, j, var, lmax
@@ -259,7 +303,8 @@ contains
 
         deallocate(iu)
 
-    end subroutine
+    end subroutine find_lmax
+#endif
     !-----------------------------------------------------
     subroutine get_valp(i, val)
 
@@ -286,7 +331,11 @@ contains
         integer :: ivar
 
         ivar = get_ivar(idom, var)
+#ifdef USE_1D
+        lsize = 1
+#else
         lsize = size(dm(idom)%lvar(:, ivar), 1)
+#endif
 
     end subroutine get_lvar_size
     !-----------------------------------------------------
@@ -298,7 +347,11 @@ contains
         integer :: ivar
 
         ivar = get_ivar(idom, var)
+#ifdef USE_1D
+        lvar = 0
+#else
         lvar = dm(idom)%lvar(:, ivar)
+#endif
 
     end subroutine get_lvar
     !-----------------------------------------------------

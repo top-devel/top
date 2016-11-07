@@ -1,0 +1,80 @@
+stamp eq_all_lagrange_avg
+
+input lh I4
+input mass 0pf5.2
+input Rota 1pe22.15
+input age  1pe9.2
+input modelfile a256
+input gridfile  a256
+input pert_model I1
+input grid_type a256
+input C0 1pe22.15
+input C1 1pe22.15
+input C2 1pe22.15
+input C3 1pe22.15
+
+#eqlist  eqdP_P eqEr eqEt eqPhi eqPhiP
+#varlist dP_P Er Et Phi PhiP
+
+eqlist  eqEt eqdP_P eqEr eqPhiP eqPhi
+varlist Et dP_P Er PhiP Phi
+
+#-------------------------------------------------------------------------------------
+equation eqdP_P
+
+sub r w0 avg(r/Gamma1,$a)               dP_P
+sub r w0 avg(r,$a)                      Er'
+term s w0 2d0                           Er
+term s w0 -dble(lh*(lh+1))              Et
+
+termbc s nr w0 1d0                      Er^-1(1)
+termbc s nr w0 -dble(lh)                Et^-1(1)
+#-------------------------------------------------------------------------------------
+equation eqEr
+
+term s w2 1d0                           Er
+sub r w0 avg(-pm/rhom,$a)               dP_P'
+sub r w0 avg(g_m*(1d0-1d0/Gamma1),$a)   dP_P
+term s w0 -1d0                          PhiP
+sub r w0 avg(-g_m,$a)                   Er'
+sub r w0 avg(-dg_m,$a)                  Er
+
+# this is equivalent to setting delta P/P_0 = 0 on the edge:
+termbc s nr w0 1d0                      dP_P^-1(nr)
+
+# this is equivalent to setting P_0/rho_0 d(delta P/P_0)/dr = 0 on the edge:
+#termbc s nr w2 1d0                      Er^-1(nr)
+#termbc s nr w0 g_m(nr)*(1d0-1d0/Gamma1(nr)) dP_P^-1(nr)
+#termbc s nr w0 -1d0                     PhiP^-1(nr)
+#termbc s nr w0 -dg_m(nr)                Er^-1(nr)
+#termbc s nr w0 2d0*g_m(nr)/r(nr)        Er^-1(nr)
+#termbc s nr w0 -dble(lh*(lh+1))*g_m(nr)/r(nr) Et^-1(nr)
+#termbc s nr w0 g_m(nr)/Gamma1(nr)       dP_P^-1(nr)
+#-------------------------------------------------------------------------------------
+equation eqEt
+
+term r w2 r                             Et^-1
+instruction if (lh.eq.0) $prev = 1d0
+term r w0 -pm/rhom                      dP_P^-1
+term s w0 -1d0                          Phi^-1
+term r w0 -g_m                          Er^-1
+#-------------------------------------------------------------------------------------
+equation eqPhi
+
+term s w0  1d0                          Phi'
+term s w0  -1d0                         PhiP
+
+termbc s nr w0 dble(lh)                 Phi^-1(1)
+termbc s nr w0 -r(1)+dble(max(0,1-lh))  PhiP^-1(1)
+#-------------------------------------------------------------------------------------
+equation eqPhiP
+
+sub r w0 avg(r**2,$a)                   PhiP'
+sub r w0 avg(2d0*r,$a)                  PhiP
+term s w0 -dble(lh*(lh+1))              Phi
+sub r w0 avg(-r**2*Lambda*rhom/Gamma1,$a) dP_P
+sub r w0 avg(r**2*Lambda*rhom_z,$a)     Er
+
+termbc s nr w0 r(nr)                    PhiP^-1(nr)
+termbc s nr w0 dble(lh+1)               Phi^-1(nr) 
+#-------------------------------------------------------------------------------------

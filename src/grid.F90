@@ -9,9 +9,16 @@
               integer(kind=c_int) :: nr
               double precision, allocatable :: r(:)
           end type GRID
+          type(GRID), allocatable, save, target :: grd(:)
+
+#ifndef USE_MULTI
+          integer, pointer :: nr
+#endif
+#ifdef USE_1D
+          double precision, pointer :: r(:)
+#endif
 
           integer(kind=c_int), save, bind(c) :: ndomains
-          type(GRID), allocatable, save, target :: grd(:)
 
           integer, save :: nt
 
@@ -26,14 +33,21 @@ contains
               if (allocated(grd)) deallocate(grd)
               allocate(grd(ndom))
 
+#ifndef USE_MULTI
+              nr => grd(1)%nr
+#endif
+#ifdef USE_1D
+              nt = 1
+#else
               do nd = 1, ndom
                   grd(nd)%nr = 0
                   grd(nd)%order = 2
                   grd(nd)%dertype = 'CHEB'
                   grd(nd)%mattype = 'FULL'
               end do
+#endif
 
-          end subroutine
+          end subroutine init_grid
 
           subroutine init_radial_grid()
               implicit none
@@ -43,6 +57,9 @@ contains
                   if (allocated(grd(id)%r)) deallocate(grd(id)%r)
                   allocate(grd(id)%r(1:grd(id)%nr))
               end do
+#ifdef USE_1D
+              r => grd(1)%r
+#endif
 
           end subroutine
 
