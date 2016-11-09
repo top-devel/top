@@ -49,7 +49,7 @@ contains
       integer, intent(in)          :: ngrid, der_max, der_min, order
       double precision, intent(in) :: grid(ngrid)
       character*(4), intent(in)    :: dertype
-     
+
       if (trim(dertype).eq.'FD') then
         print*,"Derivative type: finite differences"
         call init_derive_FD(dmat,grid,ngrid,der_max,der_min,order)

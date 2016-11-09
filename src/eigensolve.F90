@@ -196,7 +196,7 @@ contains
           shift = sigma
           t_dim = a_dim * power_max
 
-          call dump_coef()
+          ! call dump_coef()
 #if 0
           open(42, file="cesam1D-Gamma1.dat")
           do i=1, nr
@@ -241,7 +241,6 @@ contains
           close(42)
 #endif
 
-
 #ifdef USE_MPI
           if (iproc.eq.0) then
 #endif
@@ -268,7 +267,6 @@ contains
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !  Factorize the matrix A -shift*B
 !
-
 #ifdef USE_MULTI
           do id=1,ndomains
           if (grd(id)%mattype.eq.'BAND') then
@@ -359,6 +357,7 @@ contains
 #else
               call make_asigma_band(sigma,asigma(id)%mat)
 #endif
+
 #ifdef USE_COMPLEX
               ! call ZGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
               print*, "Sorry, complex valued band matrix are not yet implemented in TOP"

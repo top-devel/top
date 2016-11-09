@@ -14,7 +14,7 @@ def is_multi(f):
     return False
 
 def is_2D(f):
-    if '$j1' in open(f).read():
+    if 'llm' in open(f).read():
         return True
     return False
 
@@ -66,39 +66,43 @@ if not os.path.isfile(eqfile):
 eqfile = os.path.dirname(os.path.abspath(eqfile)) + "/" + os.path.basename(eqfile)
 
 if args.new_parser:
-    readeq = "/home/bputigny/Work/Code/top-parser/BUILD/bin/edl-top"
+    readeq = "/home/bputigny/Work/Code/top-parser/BUILD/bin/readeq"
 else:
     readeq = "@abs_top_builddir@/utils/readeq"
 
 flags="top_flags="
 f2py_def=''
-if args.new_parser:
-    flags += " -DUSE_REAL"
-    f2py_def='-DUSE_REAL'
-else:
-    if is_cplx(eqfile) or args.cplx_opt:
+
+if is_cplx(eqfile) or args.cplx_opt:
+    if not args.new_parser:
         readeq += "-cplx"
-        flags += " -DUSE_COMPLEX"
-        f2py_def='-DUSE_COMPLEX'
-    else:
+    flags += " -DUSE_COMPLEX"
+    f2py_def='-DUSE_COMPLEX'
+else:
+    if not args.new_parser:
         readeq += "-real"
-        f2py_def='-DUSE_REAL'
+    f2py_def='-DUSE_REAL'
 
-    if is_2D(eqfile):
+if is_2D(eqfile):
+    if not args.new_parser:
         readeq += "-2D"
-    else:
+else:
+    if not args.new_parser:
         readeq += "-1D"
-        flags += " -DUSE_1D"
-        f2py_def+=' -DUSE_1D'
+    flags += " -DUSE_1D"
+    f2py_def+=' -DUSE_1D'
 
-    if is_multi(eqfile):
+if is_multi(eqfile):
+    if not args.new_parser:
         readeq += "-multi"
-        flags += " -DUSE_MULTI"
-        f2py_def+=' -DUSE_MULTI'
-    else:
+    flags += " -DUSE_MULTI"
+    f2py_def+=' -DUSE_MULTI'
+else:
+    if not args.new_parser:
         readeq += "-mono"
 
-    if args.mpi == "mpi":
+if args.mpi == "mpi":
+    if not args.new_parser:
         readeq += "-mpi"
 
 if args.order:
@@ -128,12 +132,13 @@ if args.debug:
     sys.stdout.write("Building [DEBUG] " + os.path.basename(eqfile) + " (")
 else:
     sys.stdout.write("Building " + os.path.basename(eqfile) + " (")
+
 if is_cplx(eqfile) or args.cplx_opt:
     sys.stdout.write("complex ")
 else:
     sys.stdout.write("real ")
 
-if is_2D(eqfile) or args.new_parser:
+if is_2D(eqfile):
     sys.stdout.write("2D ")
 else:
     sys.stdout.write("1D ")

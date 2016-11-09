@@ -178,10 +178,31 @@
 
 contains
 
+      subroutine dump_asigma_matrix(asigma, filename)
+
+          character(len=*), intent(in) :: filename
+#ifdef USE_COMPLEX
+          double complex, intent(in) :: asigma(:, :)
+#else
+          double precision, intent(in) :: asigma(:, :)
+#endif
+          integer :: i, j
+
+          write(*, "(A, A)"), "dump asigma to file: ", filename
+          open(unit=42, file=filename)
+          do i = lbound(asigma, 1), ubound(asigma, 1)
+              do j = lbound(asigma, 2), ubound(asigma, 2)
+                  if (abs(asigma(i, j)) /= 0d0) &
+                      & write(42, *), i, j, asigma(i, j)
+              enddo
+          enddo
+          close(42)
+      end subroutine dump_asigma_matrix
+
+
 #ifdef USE_1D
       subroutine avg(vin, vout)
 
-          implicit none
           double precision, intent(in) :: vin(nr)
           double precision, intent(out) :: vout(nr)
           integer i,ii
@@ -206,14 +227,13 @@ contains
           use model
           use inputs
 
-          implicit none
           integer i, der_min, der_max
+
           allocate(dm(1))
           allocate(dmat(1))
 #endif
           include "matrices.inc"
 #ifdef USE_1D
-
       end subroutine
 #endif
 
@@ -223,7 +243,6 @@ contains
 #ifndef USE_1D
       subroutine find_llmax()
 
-      implicit none
       integer id,j,var
 
       llmax = 0
@@ -247,7 +266,6 @@ contains
 ! #ifndef USE_1D
       subroutine init_var_list()
 
-      implicit none
       integer id, var, var_out
 
       do id=1,ndomains
@@ -279,7 +297,6 @@ contains
 #ifndef USE_1D
 
       use derivative
-      implicit none
       integer id, id2
 
       ! clear derivation matrices
@@ -389,7 +406,6 @@ contains
         dm(1)%asbc = 0d0
 #else
 
-      implicit none
       integer, parameter :: nai   = 7
       integer, parameter :: nabci = 7
       integer id, id2
@@ -443,7 +459,6 @@ contains
 #ifdef USE_MULTI
       subroutine modify_l0(f,nr,mm)
 
-      implicit none
       integer, intent(in)             :: nr, mm
       double precision, intent(inout) :: f(1:nr,1:nt,1:nt)
       integer i
@@ -458,7 +473,6 @@ contains
 #else
       subroutine modify_l0(f,m)
 
-      implicit none
       double precision f(1:grd(1)%nr,1:nt,1:nt)
       integer m, i
 
@@ -486,7 +500,6 @@ contains
 #ifdef USE_MULTI
       subroutine avg1D(vin,vout,id)
 
-      implicit none
       integer, intent(in) :: id
       double precision, intent(in) :: vin(grd(id)%nr)
       double precision, intent(out) :: vout(grd(id)%nr)
@@ -513,7 +526,6 @@ contains
 !------------------------------------------------------------------------------
       subroutine assign1D(v1D,v2D,id)
 
-      implicit none
       integer, intent(in) :: id
       double precision, intent(in) :: v1D(grd(id)%nr)
       double precision, intent(out) :: v2D(grd(id)%nr,nt)
@@ -544,7 +556,6 @@ contains
       subroutine find_der_range(der_min,der_max)
 #endif
 
-      implicit none
 #ifdef USE_MULTI
       integer, intent(in)  :: id
 #else
@@ -594,6 +605,7 @@ contains
         if (der.gt.der_max)          der_max = der
         if (der.lt.der_min)          der_min = der
       enddo
+
 #else
 
       allocate(dm(id)%var_der_max(dm(id)%nvar))
@@ -672,7 +684,6 @@ contains
 
 #ifndef USE_1D
       subroutine check_order()
-      implicit none
       integer i,j,id,var,eq,max_value, min_value
       logical, allocatable :: eq_flag(:), var_flag(:)
 
@@ -766,7 +777,6 @@ contains
 
       subroutine init_bc_flag() bind(c)
 #ifdef USE_1D
-      implicit none
       integer n,eq,loc,l
 
       if (allocated(dm(1)%bc_flag)) deallocate(dm(1)%bc_flag)
@@ -782,7 +792,6 @@ contains
         dm(1)%bc_flag(l) = .true.
       enddo
 #else
-      implicit none
       integer id,id2,n,j,eq,loc
 
       do id=1,ndomains
@@ -848,7 +857,6 @@ contains
 #ifdef USE_MULTI
       subroutine init_bc_range()
 
-      implicit none
       integer id,id2,n,i,j,der,eq,var,eqloc,varloc,l,c
       integer n_v_bc, n_h_bc
       logical, allocatable :: v_bc_flag(:), h_bc_flag(:)
@@ -981,7 +989,6 @@ contains
       subroutine init_ku_kl()
 #endif
 
-      implicit none
 #ifdef USE_MULTI
       integer, intent(in) :: id
 #else
@@ -1162,7 +1169,6 @@ contains
 #ifdef USE_MULTI
       subroutine increase_ku_kl_downward (id)
 
-      implicit none
       integer, intent(in) :: id
       integer l, c
 
@@ -1194,7 +1200,6 @@ contains
 #ifndef USE_1D
       subroutine increase_ku_kl_upward (id)
 
-      implicit none
       integer, intent(in) :: id
       integer l, c
 
@@ -1230,7 +1235,6 @@ contains
 #ifdef USE_MULTI
       subroutine a_product_total(vect_in, vect_out, power)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in) :: vect_in(a_dim)
       double complex, intent(out):: vect_out(a_dim)
@@ -1420,7 +1424,6 @@ contains
 #ifdef USE_MULTI
       subroutine asigma_product_subtract_local(vect_in, vect_out, id, id2, sigma)
 
-      implicit none
       integer, intent(in) :: id, id2
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: sigma
@@ -1612,7 +1615,6 @@ contains
       subroutine asigma_full_product_subtract_local_hcomp(mat_in, &
                         mat_out, id, sigma)
 
-      implicit none
       integer, intent(in)           :: id
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: mat_in(dm(id-1)%d_dim,idm(id-1,id)%n_h_bc)
@@ -1724,7 +1726,6 @@ contains
       subroutine asigma_band_product_subtract_local_hcomp(mat_in, &
                  mat_out, id, sigma)
 
-      implicit none
       integer, intent(in)           :: id
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: mat_in(dm(id-1)%d_dim,idm(id-1,id)%n_h_bc)
@@ -1834,7 +1835,6 @@ contains
 #ifdef USE_MULTI
       subroutine a_product_total_transpose(vect_in,vect_out,power)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: vect_in(a_dim)
       double complex, intent(out) :: vect_out(a_dim)
@@ -2041,7 +2041,6 @@ contains
       subroutine asigma_product_subtract_local_transpose(vect_in, &
                                         vect_out, id, id2, sigma)
 
-      implicit none
       integer, intent(in)           :: id, id2
 #ifdef USE_COMPLEX
       double complex, intent(in)    :: vect_in(dm(id)%d_dim)
@@ -2237,7 +2236,6 @@ contains
 #ifdef USE_MULTI
       subroutine make_asigma_full_local(sigma, asigma, id, id2)
 
-      implicit none
       integer, intent(in)         :: id, id2
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
@@ -2393,11 +2391,13 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "asigma_full_local")
+
       end subroutine make_asigma_full_local
 #else
       subroutine make_asigma_full(sigma, asigma)
 
-      implicit none
       double precision sigma
       double precision asigma(a_dim,a_dim)
       double precision sigmap, temp
@@ -2560,6 +2560,9 @@ contains
       enddo
 #endif
 
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "asigma_full")
+
       end subroutine make_asigma_full
 #endif
 
@@ -2575,7 +2578,6 @@ contains
 #ifndef USE_1D
       subroutine make_asigma_full_total(sigma, asigma)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
       double complex, intent(out) :: asigma(a_dim,a_dim)
@@ -2738,6 +2740,9 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "asigma_full_total")
+
       end subroutine make_asigma_full_total
 #endif
 
@@ -2763,7 +2768,6 @@ contains
 #ifdef USE_MULTI
       subroutine make_asigma_full_local_hcomp(sigma, asigma, id, id2)
 
-      implicit none
       integer, intent(in)         :: id, id2
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
@@ -2838,6 +2842,9 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "asigma_full_local_hcomp")
+
       end subroutine make_asigma_full_local_hcomp
 #endif
 
@@ -2855,7 +2862,6 @@ contains
 #ifdef USE_MULTI
       subroutine make_a_full_local(power, apower, id, id2)
 
-      implicit none
       integer, intent(in)         :: power, id, id2
 #ifdef USE_COMPLEX
       double complex, intent(out) :: apower(dm(id)%d_dim,dm(id2)%d_dim)
@@ -3020,7 +3026,6 @@ contains
 #ifndef USE_1D
       subroutine make_a_full_total(power, apower)
 
-      implicit none
       integer, intent(in)         :: power
 #ifdef USE_COMPLEX
       double complex, intent(out) :: apower(a_dim,a_dim)
@@ -3197,7 +3202,6 @@ contains
 #ifdef USE_MULTI
       subroutine make_asigma_band_local(sigma, asigma, id)
 
-      implicit none
       integer, intent(in)         :: id
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
@@ -3350,6 +3354,9 @@ contains
         enddo
       enddo
 
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "a_band_local")
+
       end subroutine make_asigma_band_local
 #endif
 
@@ -3372,7 +3379,6 @@ contains
 #ifdef USE_MULTI
       subroutine make_a_band_local(power, apower, id)
 
-      implicit none
       integer, intent(in)         :: power, id
 #ifdef USE_COMPLEX
       double complex, intent(out) :: apower(2*dm(id)%kl+dm(id)%ku+1,dm(id)%d_dim)
@@ -3535,7 +3541,6 @@ contains
 !------------------------------------------------------------------------------
       subroutine a_product_transpose(vect_in,vect_out,power)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in) :: vect_in(a_dim)
       double complex, intent(out):: vect_out(a_dim)
@@ -3728,7 +3733,6 @@ contains
 !------------------------------------------------------------------------------
       subroutine make_asigma_band(sigma, asigma)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex sigma
       double complex asigma(2*dm(1)%kl+dm(1)%ku+1,a_dim)
@@ -3805,15 +3809,15 @@ contains
 
       pos = dm(1)%kl + dm(1)%ku + 1
 
-      if (dump_asigma) then
-          open(unit=42, file="asigma-0.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-0.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
 
       ! The equations:
       do n=1,dm(1)%nas
@@ -3836,15 +3840,15 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) then
-          open(unit=42, file="asigma-1.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-1.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
 
       do n=1,dm(1)%nart
         power = dm(1)%arti(1,n)
@@ -3866,15 +3870,15 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) then
-          open(unit=42, file="asigma-2.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-2.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
 
       do n=1,dm(1)%nartt
         power = dm(1)%artti(1,n)
@@ -3898,15 +3902,15 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) then
-          open(unit=42, file="asigma-3.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-3.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
 
       ! Boundary conditions:
       do n=1,idm(1, 1)%natbc
@@ -3927,15 +3931,15 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) then
-          open(unit=42, file="asigma-4.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-4.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
 
       do n=1,idm(1, 1)%nattbc
         power = idm(1, 1)%attbci(1,n)
@@ -3958,22 +3962,24 @@ contains
       enddo
 
 #endif
-      if (dump_asigma) then
-          open(unit=42, file="asigma-5.txt")
-          do i=1, 2*dm(1)%kl+dm(1)%ku+1
-            do j=1, a_dim
-                if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-            enddo
-          enddo
-          close(42)
-      endif
+      ! if (dump_asigma) then
+      !     open(unit=42, file="asigma-5.txt")
+      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
+      !       do j=1, a_dim
+      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
+      !       enddo
+      !     enddo
+      !     close(42)
+      ! endif
+
+      if (dump_asigma) &
+          call dump_asigma_matrix(asigma, "asigma_band")
 
       end subroutine make_asigma_band
 !------------------------------------------------------------------------------
 #ifdef USE_1D
       subroutine a_product(vect_in, vect_out, power)
 
-      implicit none
       double precision, intent(in) :: vect_in(a_dim)
       double precision, intent(out) :: vect_out(a_dim)
       integer, intent(in) :: power
@@ -4049,7 +4055,6 @@ contains
 #else
       subroutine a_product(vect_in, vect_out, power)
 
-      implicit none
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: vect_in(a_dim)
       double complex, intent(out) :: vect_out(a_dim)
@@ -4178,7 +4183,6 @@ contains
       subroutine dump_coef()
           use mod_grid, only: grd, nt, ndomains
           use model
-          implicit none
           integer i
 #ifdef USE_1D
           open(42, file="as.coef")

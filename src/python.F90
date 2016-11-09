@@ -193,6 +193,8 @@ contains
 
     subroutine init_arncheb()
 
+        integer eq
+
         call init_a()
         call init_order()
         call init_bc_flag()

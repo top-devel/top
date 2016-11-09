@@ -16,7 +16,7 @@ input C3 1pe22.15
 #eqlist  eqdP_P eqEr eqEt eqPhi eqPhiP
 #varlist dP_P Er Et Phi PhiP
 
-eqlist  eqEt eqdP_P eqEr eqPhiP eqPhi
+eqlist  eqdP_P eqEr eqEt eqPhi eqPhiP
 varlist Et dP_P Er PhiP Phi
 
 #-------------------------------------------------------------------------------------

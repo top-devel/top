@@ -115,6 +115,67 @@ contains
         real(kind=8), allocatable, intent(out) :: field(:, :)
 
 #ifdef USE_1D
+        if (fname == 'rhom') then
+            allocate(field(nr, 1))
+            field(:, 1) = rhom
+        elseif (fname == 'rhom_z') then
+            allocate(field(nr, 1))
+            field(:, 1) = rhom_z
+        ! elseif (fname == 'rhom_t') then
+        !     allocate(field(nr, 1))
+        !     field(:, 1) = rhom_t
+        elseif (fname == 'pm') then
+            allocate(field(nr, 1))
+            field(:, 1) = pm
+        elseif (fname == 'pm_z') then
+            allocate(field(nr, 1))
+            field(:, 1) = pm_z
+        ! elseif (fname == 'pm_t') then
+        !     allocate(field(nr, 1))
+        !     field(:, 1) = pm_t
+        elseif (fname == 'Gamma1') then
+            allocate(field(nr, 1))
+            field(:, 1) = Gamma1
+        elseif (fname == 'NN') then
+            allocate(field(nr, 1))
+            field(:, 1) = NN
+        ! elseif (fname == 'NNr') then
+        !     allocate(field(nr))
+        !     field = NNr
+        ! elseif (fname == 'NNt') then
+        !     allocate(field(nr))
+        !     field = NNt
+        ! elseif (fname == 'pe') then
+        !     allocate(field(nr))
+        !     field = pe
+        ! elseif (fname == 'pe_z') then
+        !     allocate(field(nr))
+        !     field = pe_z
+        ! elseif (fname == 'pe_t') then
+        !     allocate(field(nr))
+        !     field = pe_t
+        ! elseif (fname == 'grd_pe_z') then
+        !     allocate(field(nr))
+        !     field = grd_pe_z
+        ! elseif (fname == 'grd_pe_t') then
+        !     allocate(field(nr))
+        !     field = grd_pe_t
+        ! elseif (fname == 'grd_pe_zz') then
+        !     allocate(field(nr))
+        !     field = grd_pe_zz
+        ! elseif (fname == 'grd_pe_zt') then
+        !     allocate(field(nr))
+        !     field = grd_pe_zt
+        ! elseif (fname == 'grd_pe_tz') then
+        !     allocate(field(nr))
+        !     field = grd_pe_tz
+        ! elseif (fname == 'grd_pe_tt') then
+        !     allocate(field(nr))
+        !     field = grd_pe_tt
+        else
+            allocate(field(1, 1))
+            field = 0.d0
+        endif
 #else
         if (fname == 'rhom') then
             allocate(field(nr, lres))
@@ -1320,7 +1381,7 @@ contains
         !f2D_z = 2d0*f2D_z*r_z*r_map
         call clear_derive(dm)
 
-    end subroutine
+    end subroutine map2D_der_p_bis
 #endif
 
     !------------------------------------------------------------------------------ 

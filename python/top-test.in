@@ -33,7 +33,7 @@ if __name__ == '__main__':
             ('cesam1D (real 1D mono)',
                 'cesam',
                 'eq_cesam_all_lagrange_avg_1D',
-                None,
+                'order-cesam-1D.inc',
                 'check1D'),
             ('ester (real 2D multi)',
                 'ester',
