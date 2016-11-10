@@ -5,7 +5,7 @@ module toppy
     use eigensolve, only: run_arncheb, vec, omega, nsol_out
     use mod_grid, only: ndomains, grd, nt
     use abstract_model_mod, only: abstract_model, model_ptr
-    use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm
+    use matrices, only: a_dim, init_order, init_a, init_bc_flag, dm, dump_aterms
     use inputs, only: read_inputs, lres, init_default
     use postproc, only: write_output, get_sol_r, get_sol_c, get_lvar_size, get_lvar
 
@@ -193,9 +193,12 @@ contains
 
     subroutine init_arncheb()
 
+        use cfg
+
         integer eq
 
         call init_a()
+        if (dump_terms) call dump_aterms()
         call init_order()
         call init_bc_flag()
 

@@ -58,6 +58,7 @@ contains
                   allocate(grd(id)%r(1:grd(id)%nr))
               end do
 #ifdef USE_1D
+              nt = 1
               r => grd(1)%r
 #endif
 

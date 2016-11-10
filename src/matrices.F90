@@ -13,6 +13,9 @@
 #endif
       use inputs
       use derivative
+#ifndef USE_1D
+      use integrales
+#endif
 
       use cfg
 
@@ -188,7 +191,7 @@ contains
 #endif
           integer :: i, j
 
-          write(*, "(A, A)"), "dump asigma to file: ", filename
+          write(*, "(A, A)") "dump asigma to file: ", filename
           open(unit=42, file=filename)
           do i = lbound(asigma, 1), ubound(asigma, 1)
               do j = lbound(asigma, 2), ubound(asigma, 2)
@@ -199,15 +202,74 @@ contains
           close(42)
       end subroutine dump_asigma_matrix
 
+      subroutine dump_aterms()
+          integer :: i, j
+
+#ifdef USE_1D
+
+          write(*, "(A)") "dump asi to asi.txt"
+          open(unit=42, file="asi.txt")
+          do i = lbound(dm(1)%asi, 1), ubound(dm(1)%asi, 1)
+              do j = lbound(dm(1)%asi, 2), ubound(dm(1)%asi, 2)
+                  write(42, *) i, j, dm(1)%asi(i, j)
+              enddo
+          enddo
+          close(42)
+
+          write(*, "(A)") "dump as to as.txt"
+          open(unit=42, file="as.txt")
+          do i = lbound(dm(1)%as, 1), ubound(dm(1)%as, 1)
+              write(42, *) i, dm(1)%as(i)
+          enddo
+          close(42)
+
+          write(*, "(A)") "dump ari to ari.txt"
+          open(unit=42, file="ari.txt")
+          do i = lbound(dm(1)%ari, 1), ubound(dm(1)%ari, 1)
+              do j = lbound(dm(1)%ari, 2), ubound(dm(1)%ari, 2)
+                  write(42, *), i, j, dm(1)%ari(i, j)
+              enddo
+          enddo
+          close(42)
+
+          write(*, "(A)") "dump ar to ar.txt"
+          open(unit=42, file="ar.txt")
+          do j = lbound(dm(1)%ar, 2), ubound(dm(1)%ar, 2)
+              do i = lbound(dm(1)%ar, 1), ubound(dm(1)%ar, 1)
+                  write(42, *), i, j, dm(1)%ar(i, j)
+              enddo
+          enddo
+          close(42)
+
+          write(*, "(A)") "dump asbci to asbci.txt"
+          open(unit=42, file="asbci.txt")
+          do i = lbound(dm(1)%asbci, 1), ubound(dm(1)%asbci, 1)
+              do j = lbound(dm(1)%asbci, 2), ubound(dm(1)%asbci, 2)
+                  write(42, *) i, j, dm(1)%asbci(i, j)
+              enddo
+          enddo
+          close(42)
+
+          write(*, "(A)") "dump asbc to asbc.txt"
+          open(unit=42, file="asbc.txt")
+          do i = lbound(dm(1)%asbc, 1), ubound(dm(1)%asbc, 1)
+              write(42, *) i, dm(1)%asbc(i)
+          enddo
+          close(42)
+
+#endif
+
+      end subroutine dump_aterms
+
 
 #ifdef USE_1D
       subroutine avg(vin, vout)
 
           double precision, intent(in) :: vin(nr)
           double precision, intent(out) :: vout(nr)
-          integer i,ii
+          integer i, ii
 
-          do i=1,nr
+          do i=1, nr
               vout(i) = 0d0
               do ii=max(1,i-dmat(1)%lbder(0)),min(nr,i+dmat(1)%ubder(0))
                   vout(i) = vout(i) + dmat(1)%derive(i,ii,0)*vin(ii)
