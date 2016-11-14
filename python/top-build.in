@@ -160,7 +160,13 @@ try:
 
     os.chdir("@abs_top_builddir@/src")
     if args.new_parser:
-        subprocess.check_output([readeq, "-o", "matrices.inc", eqfile],
+        if is_2D(eqfile):
+            subprocess.check_output([readeq,
+                "-o", "matrices.inc", eqfile],
+                stderr=subprocess.STDOUT)
+        else:
+            subprocess.check_output([readeq, "-d", "1",
+                "-o", "matrices.inc", eqfile],
                 stderr=subprocess.STDOUT)
     else:
         subprocess.check_output(["@PERL@", readeq, eqfile],

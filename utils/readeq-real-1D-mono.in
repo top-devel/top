@@ -92,6 +92,12 @@ sub countterm{
 }
 ########################################################################
 sub writehead{
+  print PUITS "      subroutine init_a\n";
+  print PUITS "      use model\n";
+  print PUITS "      use inputs\n";
+  print PUITS "      integer i, der, der_min, der_max\n";
+  print PUITS "      allocate(dm(1))\n";
+  print PUITS "      allocate(dmat(1))\n";
   for($i=0; $i < scalar @defs; $i++) {
     print PUITS mywrap("      $defs_type[$i] $defs[$i]",$ncols);
   }
@@ -134,6 +140,7 @@ sub writetail{
   print PUITS "      first_dmat = .false.\n\n";
   print PUITS "      call init_var_list()\n";
   for ($i=0;$i<scalar @amat;$i++) {print PUITS "$amat[$i]";}
+  print PUITS "      end subroutine init_a\n";
 }
 ########################################################################
 sub add_definition{

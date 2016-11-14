@@ -283,21 +283,7 @@ contains
 ! idm, which contain the equations and boundary/interface conditions are
 ! initialised in "matrices.inc" which is written by readeq.
 !------------------------------------------------------------------------------
-#ifdef USE_1D
-      subroutine init_a()
-
-          use model
-          use inputs
-
-          integer i, der_min, der_max
-
-          allocate(dm(1))
-          allocate(dmat(1))
-#endif
           include "matrices.inc"
-#ifdef USE_1D
-      end subroutine
-#endif
 
 !------------------------------------------------------------------------------
 ! This subroutine finds the maximum l value in the lvar and leq arrays.
