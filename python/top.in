@@ -36,7 +36,9 @@ class model:
         else:
             self.filename = filename.tostring().strip()
         self.libmodel = libmodel
-        self.libmodel.py_init_model(filename)
+        ierr = self.libmodel.py_init_model(filename)
+        if ierr != 0:
+            raise Exception("Error initializing model")
 
     def __getitem__(self, name):
         n1, n2 = self.libmodel.get_field_size(name)
@@ -345,7 +347,9 @@ class load:
         if self.modelfile != '':
             self.lib.init_arncheb()
             self.shift = shift
-            self.lib.py_run_arncheb(shift)
+            ierr = self.lib.py_run_arncheb(shift)
+            if ierr != 0:
+                raise Exception("Error running arncheb")
             return self.get_results()
         else:
             _error('model not initialized')

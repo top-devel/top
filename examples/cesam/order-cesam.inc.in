@@ -8,8 +8,6 @@
       integer, parameter :: eq_shifted(2)   = (/1,4/)
       integer i,j,var,eq,eqn,offset
 
-      print*, "init_order: nr, nt", nr, nt, dm(1)%nvar
-
       if (allocated(dm(1)%ivar)) deallocate(dm(1)%ivar)
       if (allocated(dm(1)%ieq)) deallocate(dm(1)%ieq)
       allocate(dm(1)%ivar(dm(1)%nvar,nr,nt),dm(1)%ieq(dm(1)%nvar,nr,nt))

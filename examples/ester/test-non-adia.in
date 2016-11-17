@@ -1,12 +1,29 @@
 #!@PYTHON@
 
 import top
+import matplotlib.pyplot as plt
+import numpy as np
 
 if __name__ == '__main__':
-    l = top.load('eq_non_adiabatic')
-    l.read_dati('@builddir@/dati-non-adia')
-    l.init_model('@builddir@/rasalhague.h5')
-    res = l.run_arncheb(l.dati.shift_real + 1J*l.dati.shift_imag)
+    ester = top.load('eq_non_adiabatic')
+    ester.read_dati('@builddir@/dati-non-adia')
+    ester.init_model('@builddir@/rasalhague.h5')
+    res = ester.run_arncheb(ester.dati.shift_real + ester.dati.shift_imag * 1j)
 
     for idom in range(0, res.ndom-1):
-        res.plot(idom, 2, 'Phi%d' % (idom+1))
+        val, vec, l = res.get_sol(idom, 2, 'Phi%d' % (idom+1))
+        vmin = np.min(vec)
+        vmax = np.max(vec)
+
+    for idom in range(0, res.ndom-1):
+        r, theta = res.get_grid(idom)
+        cost = np.cos(theta)
+        sint = np.sin(theta)
+        val, vec, l = res.get_sol(idom, 2, 'Phi%d' % (idom+1))
+        color = top.leg.eval2d(vec, cost, l[0], 2, ester.dati.m)
+        x = r * sint
+        y = r * cost
+
+        plt.pcolormesh(x, y, color, vmin=vmin, vmax=vmax)
+
+    plt.show()

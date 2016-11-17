@@ -194,6 +194,7 @@ try:
         "@abs_top_builddir@/src/lib"],
         stderr=subprocess.STDOUT)
 
+    libname = os.path.basename(eqfile).split('.')[0]
     subprocess.check_output(["@F2PY@",
         "--f90exec=@FC@",
         "-I@abs_top_builddir@",
@@ -206,7 +207,7 @@ try:
         f2py_def,
         "-c",
         "-m",
-        os.path.basename(eqfile),
+        libname,
         "-lgetpar",
         "-llegendre",
         "-larnoldi",
@@ -229,9 +230,9 @@ try:
         "@abs_top_builddir@/src/inputs.F90"],
         stderr=subprocess.STDOUT)
 
-    shutil.copy(os.path.basename(eqfile) + '.so',
-            '@abs_top_builddir@/src/lib/' + os.path.basename(eqfile) + '.so')
-    os.remove(os.path.basename(eqfile) + '.so')
+    shutil.copy(libname + '.so',
+            '@abs_top_builddir@/src/lib/' + libname + '.so')
+    os.remove(libname + '.so')
 
     # if args.debug == False:
     #     subprocess.check_output(["make",

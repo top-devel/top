@@ -166,34 +166,38 @@ contains
 
       end subroutine poly_ester_get_field
 !------------------------------------------------------------------------
-      subroutine init_poly_ester_model(this, filename)
+      subroutine init_poly_ester_model(this, filename, ierr)
 
           class(model_poly_ester), target :: this
           character(len=*), intent(in) :: filename
+          integer, intent(out) :: ierr
 
-          call read_model(filename)
-          call read_poly(filename)
+          call read_model(filename, ierr)
+          if (ierr /= 0) return
+          call read_poly(filename, ierr)
+          if (ierr /= 0) return
           call init_radial_grid()
           call write_grid()
-          call make_mapping(filename, lres)
+          call make_mapping(filename, lres, ierr)
+          if (ierr /= 0) return
 
           model_ptr => this
 
       end subroutine init_poly_ester_model
 !------------------------------------------------------------------------
-      subroutine init_model(filename)
+      subroutine init_model(filename, ierr)
 
           character(len=*), intent(in) :: filename
-
+          integer, intent(out) :: ierr
           class(model_poly_ester), allocatable :: model
 
           allocate(model)
 
-          call model%init(filename)
+          call model%init(filename, ierr)
 
       end subroutine
 !------------------------------------------------------------------------
-      subroutine read_model(dirmodel)
+      subroutine read_model(dirmodel, ierr)
 
           use inputs, only: rota, pindex
           use mod_grid
@@ -204,6 +208,7 @@ contains
           integer :: nr_tmp
           double precision :: tmp, pindex1, pindex2, rota_tmp
           character(len=255) :: filename
+          integer, intent(out) :: ierr
 
           filename = "lambda_eps"
           write(*, *) trim(dirmodel)
@@ -240,7 +245,7 @@ contains
       end subroutine read_model
 
 !------------------------------------------------------------------------
-      subroutine read_poly(dirmodel)
+      subroutine read_poly(dirmodel, ierr)
 
           use mod_legendre
           ! use inputs
@@ -251,6 +256,7 @@ contains
           double precision, allocatable :: hh_spec(:, :), hhz_spec(:, :)
           double precision, allocatable :: hhzz_spec(:, :)
           double precision aux
+          integer, intent(out) :: ierr
           character*(3) str
           character*(512) filename
 
@@ -268,7 +274,11 @@ contains
 
           lmod = lmod - 1
 
-          if (lmod.ge.lres) stop 'lmod.ge.lres: case not implemented'
+          if (lmod.ge.lres) then
+             print*, 'lmod.ge.lres: case not implemented'
+             ierr = 1
+             return
+         endif
 
           if (allocated(hh)) deallocate(hh)
           if (allocated(hhz)) deallocate(hhz)
@@ -294,7 +304,11 @@ contains
           do l=0, lmod, 2
           read(2, *) i
           ! verif
-          if(i .ne. l) stop 'problem reading h'
+          if(i .ne. l) then
+             print*, 'problem reading h'
+             ierr = 1
+             return
+         endif
           read(2, *) (hh_spec(j, i+1), j=1, grd(1)%nr)
           enddo
 
@@ -302,7 +316,10 @@ contains
           do l=0, lmod, 2
           read(2, *) i
           ! verif
-          if(i .ne. l) stop 'problem reading hz'
+          if(i .ne. l) then
+             print*, 'problem reading hz'
+             ierr = 1
+         endif
           read(2, *) (hhz_spec(j, i+1), j=1, grd(1)%nr)
           enddo
 
@@ -310,7 +327,10 @@ contains
           do l=0, lmod, 2
           read(2, *) i
           ! verif
-          if(i .ne. l) stop 'problem reading hzz'
+          if(i .ne. l) then
+             print*, 'problem reading hzz'
+             return
+         endif
           read(2, *) (hhzz_spec(j, i+1), j=1, grd(1)%nr)
           enddo
           close(2)
@@ -356,13 +376,14 @@ contains
           end subroutine
 
 !-----------------------------------------------------------------------
-          subroutine make_mapping(dirmodel, lres)
+          subroutine make_mapping(dirmodel, lres, ierr)
 
               use mod_legendre
               use inputs, only: lmod
 
               implicit none
               character(len=*), intent(in) :: dirmodel
+              integer, intent(out) :: ierr
               integer, intent(in) :: lres
               integer i, lmod_temp, l
               double precision cnst, pi, xi, aux
@@ -379,9 +400,16 @@ contains
               filename = "domains_boundaries"
               open(unit=3, file=trim(dirmodel)//filename, status="old")
               read(3, *) lmod_temp
-              if (lmod.ne.lmod_temp) &
-                  stop "Error: lmod in domains_boundaries is not compatible"
-              if (lmod.ge.lres) stop 'lmod.ge.lres: not implemented'
+              if (lmod.ne.lmod_temp) then
+                  print*, "Error: lmod in domains_boundaries is not compatible"
+                  ierr = 1
+                  return
+              endif
+              if (lmod.ge.lres) then
+                  print*, 'lmod.ge.lres: not implemented'
+                  ierr = 1
+                  return
+              endif
               if (allocated(r_map)) deallocate ( r_map, r_t,    &
                   r_z, re_map,                                  &
                   re_t, re_z,                                   &

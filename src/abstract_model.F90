@@ -17,10 +17,11 @@ module abstract_model_mod
 
     abstract interface
 !------------------------------------------------------------------------
-    subroutine init_interface(this, filename)
+    subroutine init_interface(this, filename, ierr)
         import abstract_model
         class(abstract_model), target :: this
         character(len=*), intent(in) :: filename
+        integer, intent(out) :: ierr
     end subroutine init_interface
 !------------------------------------------------------------------------
     subroutine get_field_interface(this, fname, field)

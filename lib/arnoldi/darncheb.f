@@ -483,13 +483,13 @@ c
         elseif (info.eq.-16) then
          write(stdout,*)'Problem swapping Schur form'
         elseif (info.eq.-17) then
-	 write(stdout,*)'Number Maximum of iterations reached'
+            write(stdout,*)'Number Maximum of iterations reached'
         endif
       else
-	revcom = -99
+        revcom = -99
         flagcom = -1
         info = 0
-	write(stdout,*)'Normal exit'
+        write(stdout,*)'Normal exit'
         ! if (iparam(8).ne.0) then 
         ! 	write(stdout,*)'The eigenvalues are in the file eigenval'
         ! endif

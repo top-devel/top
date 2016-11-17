@@ -63,7 +63,7 @@
                     wrk,lwrk,iwrk,ier)
 
         if (ier.gt.0) then
-          print*,"Failure in interpolate.  ier = ",ier
+          print*,"Failure in interpolate. ier = ", ier
           stop
         endif
 

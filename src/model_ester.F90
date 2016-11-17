@@ -102,12 +102,13 @@ contains
 
     end subroutine ester_get_grid
     !------------------------------------------------------------------------
-    subroutine init_ester_model(this, filename)
+    subroutine init_ester_model(this, filename, ierr)
 
         class(ester_model), target :: this
         character(len=*), intent(in) :: filename
+        integer, intent(out) :: ierr
 
-        call read_model(filename)
+        call read_model(filename, ierr)
         call make_mapping()
         call interpolate_model()
         call find_NNtoz()
@@ -118,9 +119,10 @@ contains
 
     end subroutine init_ester_model
     !------------------------------------------------------------------------
-    subroutine read_model(filename)
+    subroutine read_model(filename, ierr)
 
         character(len=*), intent(in) :: filename
+        integer, intent(out) :: ierr
         integer(c_int), allocatable :: npts(:)
 
         integer :: i, j
@@ -206,7 +208,8 @@ contains
             do j=1, nthm-1
                 if ((s(i)%Rs(j)-s(i-1)%Rs(j)).lt.aux) then
                     print*, "Problem with make_mapping."
-                    stop
+                    ierr = 1
+                    return
                 endif
             enddo
         enddo
@@ -225,7 +228,7 @@ contains
 #else
         print"(A)", "TOP was compiled without libester support..."
         print"(A)", "Cannot read Ester models"
-        stop "reading failed"
+        ierr = 1
 #endif
 
     end subroutine read_model
@@ -250,15 +253,16 @@ contains
 
     end subroutine ester_get_field
     !------------------------------------------------------------------------
-    subroutine init_model(filename)
+    subroutine init_model(filename, ierr)
 
         implicit none
         character(len=*), intent(in) :: filename
+        integer, intent(out) :: ierr
         class(ester_model), allocatable :: model
 
         allocate(model)
 
-        call model%init(filename)
+        call model%init(filename, ierr)
 
     end subroutine init_model
     !------------------------------------------------------------------------

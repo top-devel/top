@@ -72,10 +72,11 @@ module model
 
 contains
 
-    subroutine init_cesam_model(this, filename)
+    subroutine init_cesam_model(this, filename, ierr)
 
         class(cesam_model), target :: this
         character(len=*), intent(in) :: filename
+        integer, intent(out) :: ierr
 
 #ifdef USE_1D
         call read_model(filename)
@@ -84,7 +85,8 @@ contains
 #else
         call read_model(filename)
         ! call init_radial_grid_file()
-        call init_radial_grid_g_modes()
+        call init_radial_grid_g_modes(ierr)
+        if (ierr /=0) return
         if (pert_model == 1) then
             rota_pert = rota
             print*, "Pert model: rota=", rota_pert
@@ -276,14 +278,15 @@ contains
     ! This subroutine calls all of the necessary subroutines to initialise
     ! the model
     !--------------------------------------------------------------------------
-    subroutine init_model(modelfile)
+    subroutine init_model(modelfile, ierr)
 
         character(len=*), intent(in) :: modelfile
         class(cesam_model), allocatable :: model
+        integer, intent(out) :: ierr
 
         allocate(model)
 
-        call model%init(modelfile)
+        call model%init(modelfile, ierr)
 
     end subroutine
     !--------------------------------------------------------------------------
@@ -440,10 +443,11 @@ contains
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for g-modes:
     !--------------------------------------------------------------------------
-    subroutine init_radial_grid_g_modes()
+    subroutine init_radial_grid_g_modes(ierr)
 
         use inputs, C0_dati => C0, C1_dati => C1, C2_dati => C2, C3_dati => C3
 
+        integer, intent(out) :: ierr
         double precision, allocatable ::  PP(:), CC1(:), CC2(:), CC3(:), V_son(:)
         double precision :: P_total, P_target, mu, C1, C2, C3, C0
         integer i, j
@@ -963,7 +967,7 @@ contains
         c2 = Gamma1*pm/rhom
         call map2D_der_bis(pe1D, pe, pe_t, pe_z, aux)
 
-        ws1 = var(15,:) 
+        ws1 = var(15,:)
         call interpolate(r_aux(1:nrmod,1)**2,ws1,nrmod,r_map(1:grd(1)%nr,1)**2,ws2,grd(1)%nr)
         do i=2,grd(1)%nr
         do j=1,lres

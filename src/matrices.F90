@@ -181,9 +181,10 @@
 
 contains
 
-      subroutine dump_asigma_matrix(asigma, filename)
+      subroutine dump_asigma_matrix(asigma, filename, ierr)
 
           character(len=*), intent(in) :: filename
+          integer, intent(out) :: ierr
 #ifdef USE_COMPLEX
           double complex, intent(in) :: asigma(:, :)
 #else
@@ -195,8 +196,8 @@ contains
           open(unit=42, file=filename)
           do i = lbound(asigma, 1), ubound(asigma, 1)
               do j = lbound(asigma, 2), ubound(asigma, 2)
-                  if (abs(asigma(i, j)) /= 0d0) &
-                      & write(42, *), i, j, asigma(i, j)
+                  if (abs(asigma(i, j)) >= 1d-32) &
+                      & write(42, *) i, j, asigma(i, j)
               enddo
           enddo
           close(42)
@@ -227,7 +228,7 @@ contains
           open(unit=42, file="ari.txt")
           do i = lbound(dm(1)%ari, 1), ubound(dm(1)%ari, 1)
               do j = lbound(dm(1)%ari, 2), ubound(dm(1)%ari, 2)
-                  write(42, *), i, j, dm(1)%ari(i, j)
+                  write(42, *) i, j, dm(1)%ari(i, j)
               enddo
           enddo
           close(42)
@@ -236,7 +237,7 @@ contains
           open(unit=42, file="ar.txt")
           do j = lbound(dm(1)%ar, 2), ubound(dm(1)%ar, 2)
               do i = lbound(dm(1)%ar, 1), ubound(dm(1)%ar, 1)
-                  write(42, *), i, j, dm(1)%ar(i, j)
+                  write(42, *) i, j, dm(1)%ar(i, j)
               enddo
           enddo
           close(42)
@@ -731,9 +732,10 @@ contains
 !------------------------------------------------------------------------------
 
 #ifndef USE_1D
-      subroutine check_order()
+      subroutine check_order(ierr)
       integer i,j,id,var,eq,max_value, min_value
       logical, allocatable :: eq_flag(:), var_flag(:)
+      integer, intent(out) :: ierr
 
       do id=1,ndomains
         min_value = 1
@@ -754,7 +756,9 @@ contains
                 print*, "i = ",i
                 print*, "j = ",j
                 print*, "id = ",id
-                stop ! the following tests won't function correctly
+                ierr = 1
+                return
+                ! stop ! the following tests won't function correctly
               endif
             enddo
           enddo
@@ -770,7 +774,9 @@ contains
                 print*,"var = ",var
                 print*,"i = ",i
                 print*,"j = ",j
-                stop ! the following tests won't function correctly
+                ierr = 1
+                return
+                ! stop ! the following tests won't function correctly
               endif
             enddo
           enddo
@@ -811,6 +817,8 @@ contains
 
       print*,"ieq and ivar seem to be initialised correctly."
       print*,"Please remove 'check_order' and run program again."
+      ierr = 1
+      return
       ! stop
 
       end subroutine check_order
@@ -2282,7 +2290,7 @@ contains
 ! id,id2 = domain coordinates for asigma
 !------------------------------------------------------------------------------
 #ifdef USE_MULTI
-      subroutine make_asigma_full_local(sigma, asigma, id, id2)
+      subroutine make_asigma_full_local(sigma, asigma, id, id2, ierr)
 
       integer, intent(in)         :: id, id2
 #ifdef USE_COMPLEX
@@ -2297,6 +2305,7 @@ contains
       double precision :: zero = 0d0
 #endif
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
+      integer, intent(out) :: ierr
 
       asigma = zero
 
@@ -2439,17 +2448,20 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "asigma_full_local")
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_full_local", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_full_local
 #else
-      subroutine make_asigma_full(sigma, asigma)
+      subroutine make_asigma_full(sigma, asigma, ierr)
 
       double precision sigma
       double precision asigma(a_dim,a_dim)
       double precision sigmap, temp
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
+      integer, intent(out) :: ierr
 
       asigma = 0d0
 #ifdef USE_1D
@@ -2608,8 +2620,10 @@ contains
       enddo
 #endif
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "asigma_full")
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_full", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_full
 #endif
@@ -2624,7 +2638,7 @@ contains
 ! asigma = matrix which will contain asigma
 !------------------------------------------------------------------------------
 #ifndef USE_1D
-      subroutine make_asigma_full_total(sigma, asigma)
+      subroutine make_asigma_full_total(sigma, asigma, ierr)
 
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
@@ -2639,6 +2653,7 @@ contains
 #endif
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
       integer id, id2
+      integer, intent(out) :: ierr
 
       asigma = zero
 
@@ -2788,8 +2803,10 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "asigma_full_total")
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_full_total", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_full_total
 #endif
@@ -2814,9 +2831,10 @@ contains
 !------------------------------------------------------------------------------
 
 #ifdef USE_MULTI
-      subroutine make_asigma_full_local_hcomp(sigma, asigma, id, id2)
+      subroutine make_asigma_full_local_hcomp(sigma, asigma, id, id2, ierr)
 
       integer, intent(in)         :: id, id2
+      integer, intent(out) :: ierr
 #ifdef USE_COMPLEX
       double complex, intent(in)  :: sigma
       double complex, intent(out) :: asigma(dm(id)%d_dim,idm(id,id2)%n_h_bc)
@@ -2832,7 +2850,9 @@ contains
 
       ! Just in case:
       if (id.eq.id2) then
-        stop "id == id2 not allowed in make_asigma_full_local_hcomp"
+        print*, "id == id2 not allowed in make_asigma_full_local_hcomp"
+        ierr = 1
+        return
       endif
 
       asigma = zero
@@ -2890,8 +2910,10 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "asigma_full_local_hcomp")
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_full_local_hcomp", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_full_local_hcomp
 #endif
@@ -3248,7 +3270,7 @@ contains
 !       id == id2)
 !------------------------------------------------------------------------------
 #ifdef USE_MULTI
-      subroutine make_asigma_band_local(sigma, asigma, id)
+      subroutine make_asigma_band_local(sigma, asigma, id, ierr)
 
       integer, intent(in)         :: id
 #ifdef USE_COMPLEX
@@ -3261,6 +3283,7 @@ contains
       double precision sigmap, temp, cfactor
 #endif
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc, pos
+      integer, intent(out) :: ierr
 
       asigma = 0d0
       pos = dm(id)%kl + dm(id)%ku + 1
@@ -3403,7 +3426,7 @@ contains
       enddo
 
       if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "a_band_local")
+          call dump_asigma_matrix(asigma, "a_band_local", ierr)
 
       end subroutine make_asigma_band_local
 #endif
@@ -3779,7 +3802,7 @@ contains
 #endif
       end subroutine a_product_transpose
 !------------------------------------------------------------------------------
-      subroutine make_asigma_band(sigma, asigma)
+      subroutine make_asigma_band(sigma, asigma, ierr)
 
 #ifdef USE_COMPLEX
       double complex sigma
@@ -3792,6 +3815,7 @@ contains
 #endif
       integer n, i, j, ii, jj, l, c, power, der, eq, var, eqloc, varloc
       integer pos
+      integer, intent(out) :: ierr
 
       asigma = 0d0
 
@@ -3857,16 +3881,6 @@ contains
 
       pos = dm(1)%kl + dm(1)%ku + 1
 
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-0.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
-
       ! The equations:
       do n=1,dm(1)%nas
         power = dm(1)%asi(1,n)
@@ -3888,16 +3902,6 @@ contains
         enddo
       enddo
 
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-1.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
-
       do n=1,dm(1)%nart
         power = dm(1)%arti(1,n)
         der = dm(1)%arti(2,n)
@@ -3917,16 +3921,6 @@ contains
           enddo
         enddo
       enddo
-
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-2.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
 
       do n=1,dm(1)%nartt
         power = dm(1)%artti(1,n)
@@ -3950,16 +3944,6 @@ contains
         enddo
       enddo
 
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-3.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
-
       ! Boundary conditions:
       do n=1,idm(1, 1)%natbc
         power = idm(1, 1)%atbci(1,n)
@@ -3978,16 +3962,6 @@ contains
           enddo
         enddo
       enddo
-
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-4.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
 
       do n=1,idm(1, 1)%nattbc
         power = idm(1, 1)%attbci(1,n)
@@ -4010,18 +3984,11 @@ contains
       enddo
 
 #endif
-      ! if (dump_asigma) then
-      !     open(unit=42, file="asigma-5.txt")
-      !     do i=1, 2*dm(1)%kl+dm(1)%ku+1
-      !       do j=1, a_dim
-      !           if (abs(asigma(i, j)) > 1d-5) write(42, *), i, j, asigma(i, j)
-      !       enddo
-      !     enddo
-      !     close(42)
-      ! endif
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "asigma_band")
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_band", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_band
 !------------------------------------------------------------------------------
@@ -4254,31 +4221,31 @@ contains
 #else
           open(42, file="as.coef")
           do i=1, dm(1)%nas
-            write(42, *), dm(1)%as(i)
+            write(42, *) dm(1)%as(i)
           enddo
           close(42)
 
           open(42, file="art.coef")
           do i=1, dm(1)%nart
-            write(42, *), dm(1)%art(1:nr, 1:nt, i)
+            write(42, *) dm(1)%art(1:nr, 1:nt, i)
           enddo
           close(42)
 
           open(42, file="artt.coef")
           do i=1, dm(1)%nartt
-            write(42, *), "i=", i, dm(1)%artt(1:nr, 1:nt, 1:nt, i)
+            write(42, *) "i=", i, dm(1)%artt(1:nr, 1:nt, 1:nt, i)
           enddo
           close(42)
 
           open(42, file="atbc.coef")
           do i=1, idm(1, 1)%natbc
-            write(42, *), "i=", i, idm(1, 1)%atbc(:, i)
+            write(42, *) "i=", i, idm(1, 1)%atbc(:, i)
           enddo
           close(42)
 
           open(42, file="attbc.coef")
           do i=1, idm(1, 1)%nattbc
-            write(42, *), "i=", i, idm(1, 1)%attbc(:, :, i)
+            write(42, *) "i=", i, idm(1, 1)%attbc(:, :, i)
           enddo
           close(42)
 #endif

@@ -204,14 +204,15 @@ contains
 
     end subroutine init_arncheb
 
-    subroutine py_run_arncheb(shift)
+    subroutine py_run_arncheb(shift, ierr)
 #ifdef USE_COMPLEX
         complex(kind=8), intent(in) :: shift
 #else
         real(kind=8), intent(in) :: shift
 #endif
+        integer, intent(out) :: ierr
 
-        call run_arncheb(shift)
+        call run_arncheb(shift, ierr)
     end subroutine py_run_arncheb
 
     subroutine pywrite_output(dir)
@@ -327,10 +328,11 @@ contains
 
     end subroutine get_field
 
-    subroutine py_init_model(modelfile)
+    subroutine py_init_model(modelfile, ierr)
         character(len=*), intent(in) :: modelfile
+        integer, intent(out) :: ierr
 
-        call init_model(modelfile)
+        call init_model(modelfile, ierr)
     end subroutine
 
 end module modelpy

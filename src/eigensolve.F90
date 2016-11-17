@@ -54,7 +54,7 @@ contains
 ! sigma = eigenvalue shift
 !--------------------------------------------------------------
 
-      subroutine run_arncheb(sigma) bind(c)
+      subroutine run_arncheb(sigma, ierr) bind(c)
 
           implicit none
 
@@ -127,6 +127,7 @@ contains
 #endif
 
           integer iteration, i, j, var, id, d_dim
+          integer, intent(out) :: ierr
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -196,51 +197,6 @@ contains
           shift = sigma
           t_dim = a_dim * power_max
 
-          ! call dump_coef()
-#if 0
-          open(42, file="cesam1D-Gamma1.dat")
-          do i=1, nr
-            write(42, *), "i=", i, Gamma1(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-r.dat")
-          do i=1, nr
-            write(42, *), "i=", i, r(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-pm.dat")
-          do i=1, nr
-            write(42, *), "i=", i, pm(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-rhom.dat")
-          do i=1, nr
-            write(42, *), "i=", i, rhom(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-rhom_z.dat")
-          do i=1, nr
-            write(42, *), "i=", i, rhom_z(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-g_m.dat")
-          do i=1, nr
-            write(42, *), "i=", i, g_m(i)
-          enddo
-          close(42)
-
-          open(42, file="cesam1D-dg_m.dat")
-          do i=1, nr
-            write(42, *), "i=", i, dg_m(i)
-          enddo
-          close(42)
-#endif
-
 #ifdef USE_MPI
           if (iproc.eq.0) then
 #endif
@@ -290,7 +246,9 @@ contains
               endif
               call BLACS_ABORT(ictxt,1)
 #else
-              stop "wrong mattype"
+              print*, "wrong mattype"
+              ierr = 1
+              return
 #endif
           endif
           enddo
@@ -327,14 +285,18 @@ contains
 #endif
 #endif
 #ifdef USE_MULTI
-              call make_asigma_full_local(sigma,asigma(id)%mat, id, id)
-              if (id.gt.1) call correct_asigma_downward(id,sigma)
+              call make_asigma_full_local(sigma,asigma(id)%mat, id, id, ierr)
+              if (ierr /= 0) return
+              if (id.gt.1) call correct_asigma_downward(id,sigma, ierr)
+              if (ierr /= 0) return
 
 #else
 #ifdef USE_1D
-              call make_asigma_full(sigma,asigma(id)%mat)
+              call make_asigma_full(sigma,asigma(id)%mat, ierr)
+              if (ierr /= 0) return
 #else
-              call make_asigma_full_total(sigma,asigma(id)%mat)
+              call make_asigma_full_total(sigma,asigma(id)%mat, ierr)
+              if (ierr /= 0) return
 #endif
 #endif
 
@@ -346,32 +308,41 @@ contains
               if (info_lapack.ne.0) then
                   print*, info_lapack,' info'
                   print*, 'Factorisation (1) problem in domain ', id
-                  stop
+                  ierr = 1
+                  return
               endif
           elseif (grd(id)%mattype.eq.'BAND') then
               lda = 2*dm(id)%kl + dm(id)%ku + 1
               allocate(asigma(id)%mat(lda,d_dim))
 #ifdef USE_MULTI
-              call make_asigma_band_local(sigma,asigma(id)%mat,id)
-              if (id.gt.1) call correct_asigma_downward(id,sigma)
+              call make_asigma_band_local(sigma,asigma(id)%mat,id, ierr)
+              if (ierr /= 0) return
+              if (id.gt.1) call correct_asigma_downward(id,sigma, ierr)
+              if (ierr /= 0)return
 #else
-              call make_asigma_band(sigma,asigma(id)%mat)
+              call make_asigma_band(sigma,asigma(id)%mat, ierr)
+              if (ierr /= 0) return
 #endif
 
 #ifdef USE_COMPLEX
               ! call ZGETRF(d_dim,d_dim,asigma(id)%mat,d_dim,asigma(id)%ipiv,info_lapack)
               print*, "Sorry, complex valued band matrix are not yet implemented in TOP"
-              stop "not yet implemented"
+              print*, "not yet implemented"
+              ierr = 1
+              return
 #else
               call DGBTRF(d_dim,d_dim,dm(id)%kl,dm(id)%ku,asigma(id)%mat,lda,asigma(id)%ipiv,info_lapack)
 #endif
           else
               print*, "mattype:", grd(id)%mattype
-              stop 'faulty matrix type'
+              print*, 'faulty matrix type'
+              ierr = 1
+              return
               if (info_lapack.ne.0) then
                   print*, info_lapack,' info'
                   print*, 'Factorisation (2) problem in domain ', id
-                  stop
+                  ierr = 1
+                  return
               endif
 
 #if USE_MPI
@@ -403,7 +374,8 @@ contains
               if (info_lapack.ne.0) then
                   print*,info_lapack,' info'
                   print*,'Factorisation (5) problem in domain ',id
-                  stop
+                  ierr = 1
+                  return
               endif
 #endif
           endif
@@ -445,7 +417,7 @@ contains
               ! Compute col3 <-- B*col1
               call b_times(vrcom(1:t_dim,1), vrcom(1:t_dim,3))
               ! Compute col3 <-- inv(A-shift*B)*col3
-              call solve_amsigmab(sigma, vrcom(1:t_dim,3))
+              call solve_amsigmab(sigma, vrcom(1:t_dim,3), ierr)
           endif
 
           if (revcom.eq.2) then
@@ -513,7 +485,8 @@ contains
 !  Compute the corresponding eigenvectors
           if (info /= 0) then
               print*, "at iteration ", iteration
-              stop "Failure in the Arnoldi-Chebyshev process"
+              ierr = 1
+              return
           endif
 
 #ifdef USE_COMPLEX
@@ -674,7 +647,7 @@ contains
 ! sigma = the eigenvalue shift
 ! vect  = input and output vector
 !--------------------------------------------------------------
-      subroutine solve_amsigmab(sigma, vect)
+      subroutine solve_amsigmab(sigma, vect, ierr)
 
           implicit none
 #ifdef USE_COMPLEX
@@ -687,6 +660,7 @@ contains
           double precision :: zero = 0d0
 #endif
           integer i, info_lapack
+          integer, intent(out) :: ierr
 
           if (sigma.eq.zero) then
 #ifdef USE_MULTI
@@ -709,10 +683,15 @@ contains
                       vect(1:a_dim), a_dim, info_lapack)
 #endif
               else
-                  stop 'mattype has a faulty value in solve_amsigmb'
+                  print*, 'mattype has a faulty value in solve_amsigmb'
+                  ierr = 1
+                  return
               endif
-              if (info_lapack.ne.0) &
-                  stop 'Problem solving linear system, in arncheb'
+              if (info_lapack.ne.0) then
+                  print*, 'Problem solving linear system, in arncheb'
+                  ierr = 1
+                  return
+              endif
 #endif
           else
 #ifdef USE_MPI
@@ -772,10 +751,15 @@ contains
 #endif
                   vect(1:a_dim), a_dim, info_lapack)
           else
-              stop 'mattype has a faulty value in solve_amsigmb'
+              print*, 'mattype has a faulty value in solve_amsigmb'
+              ierr = 1
+              return
           endif
-          if (info_lapack.ne.0) &
-              stop 'Problem solving linear system, in arncheb'
+          if (info_lapack.ne.0) then
+              print*, 'Problem solving linear system, in arncheb'
+              ierr = 1
+              return
+          endif
 #endif
 #ifdef USE_MPI
           if (iproc.eq.0) then
@@ -881,10 +865,11 @@ contains
 ! sigma = eigenvalue shift
 !--------------------------------------------------------------
 #ifdef USE_MULTI
-      subroutine correct_asigma_downward(id,sigma)
+      subroutine correct_asigma_downward(id, sigma, ierr)
 
           implicit none
           integer, intent(in)         :: id
+          integer, intent(out) :: ierr
 #ifdef USE_COMPLEX
           double complex, intent(in)  :: sigma
           double complex, allocatable :: aiip(:,:)
@@ -905,7 +890,8 @@ contains
           n_h_bc = idm(id-1,id)%n_h_bc
 
           allocate(aiip(d_dim,n_h_bc))
-          call make_asigma_full_local_hcomp(sigma,aiip,id-1,id)
+          call make_asigma_full_local_hcomp(sigma,aiip,id-1,id, ierr)
+          if (ierr /= 0) return
           if (grd(id-1)%mattype.eq.'FULL') then
 #ifdef USE_COMPLEX
               call ZGETRS('N',d_dim,n_h_bc,asigma(id-1)%mat,d_dim,     &

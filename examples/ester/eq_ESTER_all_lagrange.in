@@ -8,9 +8,6 @@ input rota_avg 0pf4.2
 input nr_cesam I5
 input gridtype a2
 input freqlist a256
-input shift_start 0pf6.3
-input shift_end   0pf6.3
-input shift_incr  0pf6.3
 input m_start I3
 input m_end   I3
 input m_incr  I3
