@@ -191,14 +191,18 @@ contains
         call read_inputs(dati)
     end subroutine read_dati
 
-    subroutine init_arncheb()
+    subroutine init_arncheb(ierr)
 
         use cfg
 
         integer eq
+        integer, intent(out) :: ierr
 
         call init_a()
-        if (dump_terms) call dump_aterms()
+        if (dump_terms) then
+            call dump_aterms(ierr)
+            if (ierr /= 0) return
+        endif
         call init_order()
         call init_bc_flag()
 

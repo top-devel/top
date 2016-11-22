@@ -21,17 +21,17 @@ module model
     type STAR_DOMAIN
 
         ! outer surface of domain
-        real(kind=c_double), pointer, dimension(:)   :: Rs
+        double precision, pointer, dimension(:)   :: Rs
 
         ! raw variables (of dimension grd(id)%nr x nthm)
-        real(kind=c_double), pointer, dimension(:, :) ::    &
+        double precision, pointer, dimension(:, :) ::    &
             rr, p_raw, rho_raw, Gamma1_raw, Rota_raw,       &
             p_z_raw, rho_z_raw, Rota_z_raw, kappa_raw,      &
             xi_raw, enuc_raw, t_raw, t_z_raw, cv_raw,       &
             Gamma3m_raw, xiT_raw, xirho_raw
 
         ! final variables (of dimension grd(id)%nr x lres)
-        real(kind=c_double), pointer, dimension(:, :) ::    &
+        double precision, pointer, dimension(:, :) ::    &
             pm, rhom, Gamma1, pm_z, pm_t, rhom_z, rhom_t,   &
             c2, NNtoz, Rota, Rota_z, Rota_t, pm_zz,         &
             pm_zt, pm_tz, pm_tt, pm_ez, grd_pe_z,           &
@@ -42,26 +42,26 @@ module model
             Fttoz, Fztoz, Tzoz, Ttoz, Ttozz, Prho, Dad,     &
             Dad_z, Dad_t, cp
 
-        real(kind=c_double), pointer, dimension(:, :) :: r_t, r_z, r_map, &
+        double precision, pointer, dimension(:, :) :: r_t, r_z, r_map, &
             r_zz, r_zt, r_tt, zeta, cost, sint, cott, rrt, roz, rrtt
 
     end type STAR_DOMAIN
 
     integer, save :: nrm, nthm, ndom, nconv, npts_max
-    real(kind=c_double), save :: mass_input, radius, luminosity, rotation
-    real(kind=c_double), save :: X, Z, Xc, Req, Rp, T_c
-    real(kind=c_double), save :: rho_ref, p_ref, t_ref, Lum_ref, Temp_ref
-    real(kind=c_double), save :: xi_ref, F_ref, cv_ref, enuc_ref
-    real(kind=c_double), allocatable, save :: theta(:), zeta(:), sth(:), cth(:)
+    double precision, save :: mass_input, radius, luminosity, rotation
+    double precision, save :: X, Z, Xc, Req, Rp, T_c
+    double precision, save :: rho_ref, p_ref, t_ref, Lum_ref, Temp_ref
+    double precision, save :: xi_ref, F_ref, cv_ref, enuc_ref
+    double precision, allocatable, save :: theta(:), zeta(:), sth(:), cth(:)
     type(STAR_DOMAIN), allocatable, save :: s(:)
     logical, save :: first_model = .true.
 
     ! different physical constants
-    real(kind=c_double), parameter :: pi = 3.141592653589793d0
-    real(kind=c_double), parameter :: Lambda = 4d0*pi
-    real(kind=c_double), parameter :: solar_mass   = 1.9891d33  !g
-    real(kind=c_double), parameter :: solar_radius = 6.95508d10 !cm
-    real(kind=c_double), parameter :: G = 6.672d-8 !cm^3.g^-1.s^-2
+    double precision, parameter :: pi = 3.141592653589793d0
+    double precision, parameter :: Lambda = 4d0*pi
+    double precision, parameter :: solar_mass   = 1.9891d33  !g
+    double precision, parameter :: solar_radius = 6.95508d10 !cm
+    double precision, parameter :: G = 6.672d-8 !cm^3.g^-1.s^-2
 
 contains
 
@@ -109,6 +109,7 @@ contains
         integer, intent(out) :: ierr
 
         call read_model(filename, ierr)
+        if (ierr /= 0) return
         call make_mapping()
         call interpolate_model()
         call find_NNtoz()
@@ -134,8 +135,11 @@ contains
         call cpp_read_ester_model(filename, nrm, nthm, ndom)
 
         ndom = ndom+1
+        print*, "ndom: ", ndom
+        print*, "ndomains: ", ndomains
         if (ndomains /= ndom) then
             print*, "Incorrect number of domains"
+            ierr = 1
             return
         endif
 

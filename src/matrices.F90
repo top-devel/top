@@ -184,6 +184,7 @@ contains
       subroutine dump_asigma_matrix(asigma, filename, ierr)
 
           character(len=*), intent(in) :: filename
+          character(256) :: fname
           integer, intent(out) :: ierr
 #ifdef USE_COMPLEX
           double complex, intent(in) :: asigma(:, :)
@@ -192,8 +193,9 @@ contains
 #endif
           integer :: i, j
 
-          write(*, "(A, A)") "dump asigma to file: ", filename
-          open(unit=42, file=filename)
+          fname = filename // trim(tag)
+          write(*, "(A, A)") "dump asigma to file: ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(asigma, 1), ubound(asigma, 1)
               do j = lbound(asigma, 2), ubound(asigma, 2)
                   if (abs(asigma(i, j)) >= 1d-32) &
@@ -201,15 +203,19 @@ contains
               enddo
           enddo
           close(42)
+          if (stop_after_dump) ierr = 2
       end subroutine dump_asigma_matrix
 
-      subroutine dump_aterms()
-          integer :: i, j
+      subroutine dump_aterms(ierr)
+          integer, intent(out) :: ierr
 
 #ifdef USE_1D
+          integer :: i, j
+          character(256) :: fname
 
-          write(*, "(A)") "dump asi to asi.txt"
-          open(unit=42, file="asi.txt")
+          fname = "asi." // trim(tag)
+          write(*, "(A, A)") "dump asi to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asi, 1), ubound(dm(1)%asi, 1)
               do j = lbound(dm(1)%asi, 2), ubound(dm(1)%asi, 2)
                   write(42, *) i, j, dm(1)%asi(i, j)
@@ -217,15 +223,17 @@ contains
           enddo
           close(42)
 
-          write(*, "(A)") "dump as to as.txt"
-          open(unit=42, file="as.txt")
+          fname = "as." // trim(tag)
+          write(*, "(A, A)") "dump as to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%as, 1), ubound(dm(1)%as, 1)
               write(42, *) i, dm(1)%as(i)
           enddo
           close(42)
 
-          write(*, "(A)") "dump ari to ari.txt"
-          open(unit=42, file="ari.txt")
+          fname = "ari." // trim(tag)
+          write(*, "(A, A)") "dump ari to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%ari, 1), ubound(dm(1)%ari, 1)
               do j = lbound(dm(1)%ari, 2), ubound(dm(1)%ari, 2)
                   write(42, *) i, j, dm(1)%ari(i, j)
@@ -233,8 +241,9 @@ contains
           enddo
           close(42)
 
-          write(*, "(A)") "dump ar to ar.txt"
-          open(unit=42, file="ar.txt")
+          fname = "ar." // trim(tag)
+          write(*, "(A, A)") "dump ar to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do j = lbound(dm(1)%ar, 2), ubound(dm(1)%ar, 2)
               do i = lbound(dm(1)%ar, 1), ubound(dm(1)%ar, 1)
                   write(42, *) i, j, dm(1)%ar(i, j)
@@ -242,8 +251,9 @@ contains
           enddo
           close(42)
 
-          write(*, "(A)") "dump asbci to asbci.txt"
-          open(unit=42, file="asbci.txt")
+          fname = "asbci." // trim(tag)
+          write(*, "(A, A)") "dump asbci to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asbci, 1), ubound(dm(1)%asbci, 1)
               do j = lbound(dm(1)%asbci, 2), ubound(dm(1)%asbci, 2)
                   write(42, *) i, j, dm(1)%asbci(i, j)
@@ -251,15 +261,18 @@ contains
           enddo
           close(42)
 
-          write(*, "(A)") "dump asbc to asbc.txt"
-          open(unit=42, file="asbc.txt")
+          fname = "asbc." // trim(tag)
+          write(*, "(A, A)") "dump asbc to ", trim(fname)
+          open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asbc, 1), ubound(dm(1)%asbc, 1)
               write(42, *) i, dm(1)%asbc(i)
           enddo
           close(42)
 
+          if (stop_after_dump) ierr = 2
 #endif
 
+          if (stop_after_dump) ierr = 2
       end subroutine dump_aterms
 
 
@@ -3425,8 +3438,10 @@ contains
         enddo
       enddo
 
-      if (dump_asigma) &
-          call dump_asigma_matrix(asigma, "a_band_local", ierr)
+      if (dump_asigma) then
+          call dump_asigma_matrix(asigma, "asigma_band_local", ierr)
+          if (ierr /= 0) return
+      endif
 
       end subroutine make_asigma_band_local
 #endif

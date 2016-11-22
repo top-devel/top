@@ -305,8 +305,7 @@ class load:
         self.name = name
         self.dati = lib.inputs
         self.cfg = lib.cfg
-        self.cfg.dump_asigma = False
-        self.cfg.dump_terms = False
+        self.cfg.init_config()
 
     def get_version(self):
         """
@@ -345,11 +344,21 @@ class load:
         :return: the results of the Arnoldi-Chebyshev algorithm
         """
         if self.modelfile != '':
-            self.lib.init_arncheb()
+            ierr = self.lib.init_arncheb()
+            if ierr != 0:
+                if ierr == 2:
+                    print('stop after init_arncheb')
+                    return []
+                else:
+                    raise Exception("Error in init_arncheb")
             self.shift = shift
             ierr = self.lib.py_run_arncheb(shift)
             if ierr != 0:
-                raise Exception("Error running arncheb")
+                if ierr == 2:
+                    print('stop after init_arncheb')
+                    return []
+                else:
+                    raise Exception("Error running arncheb")
             return self.get_results()
         else:
             _error('model not initialized')

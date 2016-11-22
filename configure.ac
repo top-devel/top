@@ -19,6 +19,8 @@ AC_PREFIX_DEFAULT(${HOME}/local)
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([config.h.in])
 
+AC_CONFIG_SUBDIRS([parser])
+
 # MPI support?
 AC_ARG_ENABLE([mpi],
               AS_HELP_STRING([--enable-mpi],

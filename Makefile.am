@@ -1,4 +1,4 @@
-SUBDIRS = lib utils python examples
+SUBDIRS = parser lib utils python examples
 
 EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/order-default.inc \

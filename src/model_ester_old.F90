@@ -123,10 +123,11 @@ contains
 
       end subroutine ester_get_field
 !------------------------------------------------------------------------
-      subroutine init_ester_model(this, filename)
+      subroutine init_ester_model(this, filename, ierr)
 
           class(model_ester), target :: this
           character(len=*), intent(in) :: filename
+          integer, intent(out) :: ierr
 
           call read_model(filename)
           call interpolate_model()
@@ -143,15 +144,16 @@ contains
 ! This suboutine calls all of the relevant subroutines for initialising
 ! a model.
 !-------------------------------------------------------------------------
-      subroutine init_model(filename)
+      subroutine init_model(filename, ierr)
 
           implicit none
           character(len=*), intent(in) :: filename
           class(model_ester), allocatable :: model
+          integer, intent(out) :: ierr
 
           allocate(model)
 
-          call model%init(filename)
+          call model%init(filename, ierr)
 
       end subroutine init_model
 
