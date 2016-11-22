@@ -1,0 +1,17 @@
+Installing TOP
+
+1. Download top:
+git clone git@gitlab.com:top-dev/top.git
+# and its dependencies (parser):
+git submodule init
+git submodule update
+
+2. Bootstrap:
+# run the bootstrap script
+./bootstrap
+
+3. Configure TOP:
+./configure
+
+4. Build and install TOP:
+make install
