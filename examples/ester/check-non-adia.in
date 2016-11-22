@@ -1,0 +1,9 @@
+#!@PYTHON@
+
+import top
+
+if __name__ == '__main__':
+    l = top.load('eq_non_adiabatic')
+    l.read_dati('@builddir@/dati-non-adia')
+    l.init_model('@builddir@/rasalhague.h5')
+    res = l.run_arncheb(l.dati.shift_real + l.dati.shift_imag * 1j)

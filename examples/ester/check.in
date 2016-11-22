@@ -1,0 +1,9 @@
+#!@PYTHON@
+
+import top
+
+if __name__ == '__main__':
+    l = top.load('eq_ESTER_all_lagrange')
+    l.read_dati('@builddir@/dati')
+    l.init_model('@builddir@/star.h5')
+    res = l.run_arncheb(l.dati.shift)
