@@ -1,4 +1,10 @@
-SUBDIRS = parser lib utils python examples
+if PARSER
+PARSER_DIR = parser
+else
+PARSER_DIR =
+endif
+
+SUBDIRS = $(PARSER_DIR) lib utils python examples
 
 EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/order-default.inc \

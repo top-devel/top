@@ -19,7 +19,14 @@ AC_PREFIX_DEFAULT(${HOME}/local)
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([config.h.in])
 
-AC_CONFIG_SUBDIRS([parser])
+if test -f "$srcdir/parser/configure"; then
+    AC_CONFIG_SUBDIRS([parser])
+    enable_parser=yes
+else
+    enable_parser=no
+fi
+
+AM_CONDITIONAL([PARSER], [test x$enable_parser = xyes])
 
 # MPI support?
 AC_ARG_ENABLE([mpi],
@@ -192,6 +199,7 @@ FFLAGS:         $FFLAGS
 LDLFAGS:        $LDFLAGS
 LIBS:           $LIBS
 F2PY:           $F2PY
-ESTER lib:      $found_ester
+ESTER LIB:      $found_ester
+PARSER:         $enable_parser
 
 EOF

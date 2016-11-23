@@ -1,3 +1,4 @@
 #!/bin/sh
-cd parser && autoreconf ${autoreconf_args:-"-ivf"} || exit 1 ; cd -
+
+cd parser && autoreconf ${autoreconf_args:-"-ivf"} ; cd -
 autoreconf ${autoreconf_args:-"-ivf"}
