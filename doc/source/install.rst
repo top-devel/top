@@ -10,9 +10,21 @@ it using:
 
 .. code-block:: shell
 
-    ./configure
-    make
-    make install
+    # get the code:
+    git clone https://gitlab.com/top-dev/top.git
+
+    # enter the source code directory:
+    cd top
+
+    # download the optional dependencies:
+    git submodule init
+    git submodule update
+
+    # prepare the configure script:
+    ./bootstrap
+
+    # configure and install TOP:
+    ./configure && make install
 
 You can get more details and options reading the following sections:
 :ref:`getting the code<download>`, :ref:`configure<configure>`,
@@ -31,26 +43,37 @@ repository:
 
 .. code-block:: shell
 
-   # with ssh:
-   git clone git@gitlab.com:top-dev/top.git
+    # with ssh:
+    git clone git@gitlab.com:top-dev/top.git
 
-   # with https:
-   git clone https://gitlab.com/top-dev/top.git
+    # with https:
+    git clone https://gitlab.com/top-dev/top.git
 
-This will download the last version of the code in a directory named ``top``.
-Enter this directory and create the configure script by running the
-``bootstrap``
-script.
+This will download the latest version of the code in a directory named ``top``.
+Enter this directory:
 
 .. code-block:: shell
 
-   cd top
-   ./bootstrap
+    cd top
+
+You can optionally download the parser to write oscillation equations with the
+new equation format:
+
+.. code-block:: shell
+
+    git submodule init
+    git submodule update
+
+Run the ``bootstrap`` script that will create the configure script:
+
+.. code-block:: shell
+
+    ./bootstrap
 
 .. note::
 
-   In order to run the ``bootstrap`` script you will need to have ``autoconf``
-   (>=2.59), ``automake`` (>=1.9) and ``libtool`` installed.
+    In order to run the ``bootstrap`` script you will need to have ``autoconf``
+    (>=2.59), ``automake`` (>=1.9) and ``libtool`` installed.
 
 
 You can then proceed to the :ref:`configure<configure>` steps.
@@ -76,7 +99,7 @@ Configure
 **Prerequisites:**
 
 The configure script allows you to configure the build environment of TOP.
-In order to intall TOP, you will need:
+In order to install TOP, you will need:
 
 * a Fortran compiler supporting procedure interface (``gfortran (>=4.9)``)
 * a recent version of Python (``python (>=2.7)``)
@@ -137,4 +160,3 @@ As few examples are also availiable in ``$prefix/share/top/models``
 Check you Install
 =================
 See :ref:`usage<usage>`.
-
