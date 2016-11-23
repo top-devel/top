@@ -443,6 +443,7 @@ contains
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for g-modes:
     !--------------------------------------------------------------------------
+#ifndef USE_1D
     subroutine init_radial_grid_g_modes(ierr)
 
         use inputs, C0_dati => C0, C1_dati => C1, C2_dati => C2, C3_dati => C3
@@ -541,6 +542,7 @@ contains
 
         ! print*, NN1D(1)
     end subroutine init_radial_grid_g_modes
+#endif
 
     !--------------------------------------------------------------------------
     ! This subroutine calculates a radial grid appropriate for p-modes:

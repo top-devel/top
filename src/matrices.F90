@@ -191,15 +191,27 @@ contains
 #else
           double precision, intent(in) :: asigma(:, :)
 #endif
-          integer :: i, j
+          integer :: i, j, eq
 
           fname = filename // trim(tag)
           write(*, "(A, A)") "dump asigma to file: ", trim(fname)
           open(unit=42, file=trim(fname))
+
           do i = lbound(asigma, 1), ubound(asigma, 1)
               do j = lbound(asigma, 2), ubound(asigma, 2)
-                  if (abs(asigma(i, j)) >= 1d-32) &
-                      & write(42, *) i, j, asigma(i, j)
+                  if (abs(asigma(i, j)) >= 1d-32) then
+                      if (grd(1)%mattype == 'BAND') then
+                          write(42, *)                              &
+                              i+j-dm(1)%nvar+dm(1)%kl-dm(1)%ku-1,   &
+                              j,                                    &
+                              asigma(i, j)
+                      else
+                          write(42, *)      &
+                              i,            &
+                              j,            &
+                              asigma(i, j)
+                      endif
+                  endif
               enddo
           enddo
           close(42)
