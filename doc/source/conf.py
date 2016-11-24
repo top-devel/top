@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'TOP'
-copyright = u'2015, D. Reese, J. Ballot, B. Putigny'
+copyright = u'2016, D. Reese, J. Ballot, B. Putigny'
 author = u'D. Resse, J. Ballot, B. Putigny'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -113,14 +113,22 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
+# html_theme = 'nature'
+html_theme = 'alabaster'
+# html_theme = 'sphinxdoc'
+# html_theme = 'pyramid'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {
-#         'stickysidebar' : True
-#         }
+html_theme_options = {
+        'logo_name'     : True,
+        'fixed_sidebar' : True,
+        'font_size'     : '14px',
+        # 'sidebar_width' : '300px',
+        # 'page_width'    : '800px',
+        }
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -274,7 +282,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   (master_doc, 'TOP', u'TOP Documentation',
-   author, 'TOP', 'One line description of project.',
+   author, 'TOP', 'Two Dimensional Oscillation Program.',
    'Miscellaneous'),
 ]
 
