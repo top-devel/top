@@ -19,10 +19,11 @@ module model
         mass1D(:), NN1D(:)
 
     ! stellar parameters:
-    double precision, save :: radius ! in cm
+    double precision, save :: radius         ! in cm
     double precision, save :: p_ref          ! in g.cm^-1.s^-2
     double precision, save :: rho_ref        ! in g.cm^-3
     double precision, save :: phi_ref        ! in cm.s^-2
+    double precision, save :: mass_ref       ! in g
 
     ! workspace:
     double precision, allocatable, save :: ws1(:), ws2(:)
@@ -115,6 +116,32 @@ contains
         class(cesam_model) :: this
         character(len=*), intent(in) :: fname
         real(kind=8), allocatable, intent(out) :: field(:, :)
+
+        if (fname == 'r_ref') then
+            allocate(field(1, 1))
+            field(1, 1) = radius
+            return
+        endif
+        if (fname == 'p_ref') then
+            allocate(field(1, 1))
+            field(1, 1) = p_ref
+            return
+        endif
+        if (fname == 'rho_ref') then
+            allocate(field(1, 1))
+            field(1, 1) = rho_ref
+            return
+        endif
+        if (fname == 'phi_ref') then
+            allocate(field(1, 1))
+            field(1, 1) = phi_ref
+            return
+        endif
+        if (fname == 'mass_ref') then
+            allocate(field(1, 1))
+            field(1, 1) = mass_ref
+            return
+        endif
 
 #ifdef USE_1D
         if (fname == 'rhom') then
@@ -237,6 +264,7 @@ contains
             allocate(field(nr, lres))
             field = grd_pe_tt
         else
+            print*, "no such field: ", fname
             allocate(field(1, 1))
             field = 0.d0
         endif
@@ -331,6 +359,7 @@ contains
 !        mass    = glob(1)*dexp(var(2, nrmod)) ! in g
 !        radius  = var(1, nrmod) ! in cm
          mass    = glob(1) ! in g
+         mass_ref= glob(1) ! in g
          radius  = glob(2) ! in cm
         ! age     = glob(13) ! in some unknown unit
         p_ref   = G * mass**2 / radius**4
