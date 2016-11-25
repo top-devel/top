@@ -368,7 +368,12 @@ contains
 ! This subroutine clears dm, idm and dmat so as to avoid memory leaks.
 !------------------------------------------------------------------------------
       subroutine clear_all()
-#ifndef USE_1D
+#ifdef USE_1D
+
+          if (allocated(dmat)) deallocate(dmat)
+          if (allocated(idm)) deallocate(idm)
+          if (allocated(dm)) deallocate(dm)
+#else
 
       use derivative
       integer id, id2
