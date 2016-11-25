@@ -225,7 +225,7 @@ contains
           integer :: i, j
           character(256) :: fname
 
-          fname = "asi." // trim(tag)
+          fname = "asi" // trim(tag)
           write(*, "(A, A)") "dump asi to ", trim(fname)
           open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asi, 1), ubound(dm(1)%asi, 1)
@@ -235,7 +235,7 @@ contains
           enddo
           close(42)
 
-          fname = "as." // trim(tag)
+          fname = "as" // trim(tag)
           write(*, "(A, A)") "dump as to ", trim(fname)
           open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%as, 1), ubound(dm(1)%as, 1)
@@ -243,7 +243,7 @@ contains
           enddo
           close(42)
 
-          fname = "ari." // trim(tag)
+          fname = "ari" // trim(tag)
           write(*, "(A, A)") "dump ari to ", trim(fname)
           open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%ari, 1), ubound(dm(1)%ari, 1)
@@ -253,7 +253,7 @@ contains
           enddo
           close(42)
 
-          fname = "ar." // trim(tag)
+          fname = "ar" // trim(tag)
           write(*, "(A, A)") "dump ar to ", trim(fname)
           open(unit=42, file=trim(fname))
           do j = lbound(dm(1)%ar, 2), ubound(dm(1)%ar, 2)
@@ -263,7 +263,7 @@ contains
           enddo
           close(42)
 
-          fname = "asbci." // trim(tag)
+          fname = "asbci" // trim(tag)
           write(*, "(A, A)") "dump asbci to ", trim(fname)
           open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asbci, 1), ubound(dm(1)%asbci, 1)
@@ -273,7 +273,7 @@ contains
           enddo
           close(42)
 
-          fname = "asbc." // trim(tag)
+          fname = "asbc" // trim(tag)
           write(*, "(A, A)") "dump asbc to ", trim(fname)
           open(unit=42, file=trim(fname))
           do i = lbound(dm(1)%asbc, 1), ubound(dm(1)%asbc, 1)
