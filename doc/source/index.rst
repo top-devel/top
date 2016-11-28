@@ -3,9 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-###################
-TOP's documentation
-###################
+####################
+TOP's documentation:
+####################
+
+Overview
+########
+
+.. todo
 
 .. toctree::
    :maxdepth: 2
@@ -17,16 +22,3 @@ TOP's documentation
    api
    examples
    hacking
-
-Overview
-========
-
-TOP (Two dimensional Oscillation Program)
-
-.. Indices and tables
-    ==================
-    
-    * :ref:`genindex`
-    * :ref:`modindex`
-    * :ref:`search`
-
