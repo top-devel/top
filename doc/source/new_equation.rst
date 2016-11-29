@@ -1,3 +1,5 @@
+.. _new_equation:
+
 ###################
 New Equation Format
 ###################
@@ -154,40 +156,60 @@ Internal variables, and Functions
 A few functions and variables are already defined with TOP and can be used
 without prior declarations, here is a list of such symbols:
 
-dr
---
+:``dr``:
 
-:Syntax: ``dr(var, order)``
+    :Syntax: ``dr(var, order)``
 
-:Semantics: derivative of ``var`` of order ``order``:
+    :Semantics: derivative of ``var`` of order ``order``:
+
+    :Example:
+        ``dr(Phi, 2)``
+
+
+        stands for :math:`\frac{\partial^2\Phi}{\partial r^2}`
+
+
+    .. note::
+
+        Radial derivatives can also be expressed with the ``'`` (apostrophe)
+        post-fixed operator: ``dr(Phi, 2)`` and ``Phi''`` are two notations strictly
+        equivalent.
+
+--------------------------------------------------------------------------------
+
+:``fp``:
+
+    :Syntax: ``fp``
+
+    :Semantics: ``fp`` is the eigenvalue of the problem. It should appear in
+        equation definition
+
+    :Example: ``fp^2 * r * Et - pm/rhom * dP_P - Phi - g_m = 0``
+
+--------------------------------------------------------------------------------
+
+:``avg``:
+
+    :Syntax: ``avg(expr)``
+
+    :Semantics: average of expression ``expr`` on the point of the grid used for for
+                derivation or interpolation (therefore it depends on the numerical
+                scheme used).
+
+    :Example: ``avg(r/Gamma1) * dP_P``
+
+Comments
+========
+
+Comments can be added in equation file using a pound sign (``#``), the remaining
+of the line will be ignored.
 
 :Example:
-    ``dr(Phi, 2)``
 
+    .. code::
 
-    stands for :math:`\frac{\partial^2\Phi}{\partial r^2}`
-
-
-.. note::
-
-    Radial derivatives can also be expressed with the ``'`` (apostrophe)
-    post-fixed operator: ``dr(Phi, 2)`` and ``Phi''`` are two notations strictly
-    identical.
-
-fp
---
-
-``fp`` is the eigenvalue of the problem. It should appear in equation
-definition.
-
-:Example: ``fp^2 * r * Et - pm/rhom * dP_P - Phi - g_m = 0``
-
-
-avg
----
-
-:Syntax: ``avg(expr)``
-
-:Semantics: average of expression ``expr`` on the point of the grid used for for
-            derivation or interpolation (therefore it depends on the numerical
-            scheme used).
+        # define the first equation
+        equation eqdP_P:
+        lh*(lh+1) * Et =            # this is the LHS of the equation
+            avg(r/Gamma1) * dP_P +  # this the RHS
+            avg(r) * Er'

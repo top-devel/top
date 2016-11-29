@@ -160,3 +160,21 @@ As few examples are also availiable in ``$prefix/share/top/models``
 Check you Install
 =================
 See :ref:`usage<usage>`.
+
+Using ``libester``
+==================
+
+.. _ESTER: http://ester-project.github.io/ester/
+
+In order to use ESTER_ stellar models, TOP needs to find where ESTER was
+installed on your system.
+In order to tell TOP's configure script where to find ``libester``, you need to
+provide it with the options:
+``LDFLAGS=-L$PATH_TO_ESTER/lib`` and ``CPPFLAGS=-I$PATH_TO_ESTER/include``.
+
+For instance if ESTER was installed in ``$HOME/local``, TOP should be able to
+find it if you configure with:
+
+.. code-block:: shell
+
+    ./configure LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include

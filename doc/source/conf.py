@@ -115,12 +115,12 @@ html_theme_path = ['_themes']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 # html_theme = 'sphinx_rtd_theme'
-# html_theme = 'nature'
-html_theme = 'alabaster'
+html_theme = 'nature'
+# html_theme = 'alabaster'
 # html_theme = 'haiku'
 # html_theme = 'sphinxdoc'
 # html_theme = 'pyramid'
-html_theme = 'agogo'
+# html_theme = 'agogo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -171,7 +171,7 @@ html_static_path = ['_static']
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
         # '**' : ['globaltoc.html'],
-        # '**' : ['localtoc.html'],
+        '**' : ['localtoc.html'],
         # 'index' : ['localtoc.html'],
         }
 

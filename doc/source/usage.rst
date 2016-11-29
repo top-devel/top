@@ -16,12 +16,23 @@ Equation files are attached to a given star model, you have to provide
 ``top-build`` with the model corresponding to the equation file with the
 ``--model=`` option.
 
-**Example: poly_ester**
+:Example:
+       ``top-build --model=poly_ester eq_poly_ester``
 
-.. code-block:: shell
+Options
+-------
 
-   top-build --model=poly_ester eq_poly_ester
+The options you can pass to ``top-build`` are:
 
+--parser        use the parser for the new language (see :ref:`new_equation`).
+
+--order=FILE    use the file named ``FILE`` instead of the default one to manage the order of variable and equation.
+
+--model=NAME    this option is mandatory, it tells TOP which stellar model to use.
+
+--cplx          forces TOP to compile with the complex version.
+
+--debug         enable debug mode for the file compiled.
 
 Running TOP
 ===========

@@ -21,4 +21,6 @@ Overview
    equation
    api
    examples
-   hacking
+
+
+..   hacking
