@@ -1,1 +1,1 @@
-SUBDIRS = ester poly_ester cesam
+SUBDIRS = poly_ester cesam

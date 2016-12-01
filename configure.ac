@@ -169,18 +169,11 @@ AC_CONFIG_FILES([Makefile
                  utils/Makefile
                  python/Makefile
                  examples/Makefile
-                 examples/ester/Makefile
                  examples/poly_ester/Makefile
                  examples/poly_ester/model/Makefile
                  examples/cesam/Makefile
-                 utils/readeq-real-2D-mono
-                 utils/readeq-cplx-2D-mono
                  utils/readeq-real-1D-mono
                  utils/readeq-cplx-1D-mono
-                 utils/readeq-real-2D-multi
-                 utils/readeq-cplx-2D-multi-mpi
-                 utils/readeq-real-2D-multi-mpi
-                 utils/readeq-cplx-2D-multi
                  src/Makefile])
 
 AC_OUTPUT

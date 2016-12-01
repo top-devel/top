@@ -1,26 +1,26 @@
 do_subst = sed -e 's,[@]builddir[@],$(abs_builddir),g' \
                -e 's,[@]PYTHON[@],$(PYTHON),g'
 
-noinst_SCRIPTS = check1D.py test.py check.py
+noinst_SCRIPTS = check1D.py
 
-noinst_DATA = dati dati1D \
-			  eq_cesam_all_lagrange_avg_1D eq_cesam_all_lagrange_avg \
+noinst_DATA = dati1D \
+			  eq_cesam_all_lagrange_avg_1D \
 			  0000-m18a05-ad.osc sunmlt-fin-nad.osc \
 			  sismique_ultime_2099couches_tronc.osc order-cesam.inc \
 			  order-cesam-1D.inc
 
-EXTRA_DIST = dati.in dati1D.in \
-			 eq_cesam_all_lagrange_avg_1D.in eq_cesam_all_lagrange_avg.in \
+EXTRA_DIST = dati1D.in \
+			 eq_cesam_all_lagrange_avg_1D.in \
 			 0000-m18a05-ad.osc.in sunmlt-fin-nad.osc.in \
 			 sismique_ultime_2099couches_tronc.osc.in order-cesam.inc \
 			 test.in check.in check1D.in \
 			 order-cesam-1D.inc.in
 
-BUILT_SOURCES = dati dati1D \
-				eq_cesam_all_lagrange_avg eq_cesam_all_lagrange_avg_1D \
+BUILT_SOURCES = dati1D \
+				eq_cesam_all_lagrange_avg_1D \
 				0000-m18a05-ad.osc sunmlt-fin-nad.osc \
 				sismique_ultime_2099couches_tronc.osc order-cesam.inc \
-				check1D.py test.py check.py \
+				check1D.py \
 				order-cesam-1D.inc
 
 .in.py: Makefile
