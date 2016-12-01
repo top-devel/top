@@ -16,6 +16,8 @@ import sys
 import os
 import shlex
 
+import sphinx_bootstrap_theme
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -33,6 +35,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -107,29 +110,38 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
+todo_include_todos = True
 
 
 # -- Options for HTML output ----------------------------------------------
-html_theme_path = ['_themes']
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 # html_theme = 'sphinx_rtd_theme'
-html_theme = 'nature'
+# html_theme = 'nature'
 # html_theme = 'alabaster'
 # html_theme = 'haiku'
 # html_theme = 'sphinxdoc'
 # html_theme = 'pyramid'
 # html_theme = 'agogo'
 
+html_theme = 'top'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_path.append('_themes')
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {
-#         'fixed_sidebar'     : True,
-#         'font_size'         : '14px',
-#         'show_related'      : True,
-#         }
+html_theme_options = {
+        'navbar_sidebarrel' : False,
+        'navbar_pagenav'    : False,
+        'navbar_site_name'  : 'Navigation',
+        'globaltoc_depth'   : 2,
+        # 'navbar_class'      : 'navbar navbar-inverse',
+        # 'navbar_links'      : [
+        #     ('Home', 'index'),
+        #     ('Install', 'install'),],
+        }
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -172,7 +184,7 @@ html_static_path = ['_static']
 html_sidebars = {
         # '**' : ['globaltoc.html'],
         '**' : ['localtoc.html'],
-        # 'index' : ['localtoc.html'],
+        'index' : [],
         }
 
 # Additional templates that should be rendered to pages, maps page names to

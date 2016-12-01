@@ -55,7 +55,7 @@ The type of terms currently supported by TOP are:
 .. _preprocessing:
 
 String pre-processing 
-=====================
+---------------------
 
 :``$a``:
     stands for the current coupling matrix. This variable can only be used in a
@@ -170,7 +170,7 @@ Defines variables of the equation set.
     defines 4 variables named Er, dP, Phi and PhiP
 
 leq
-...
+---
 In TOP equation are projected into the spherical harmonic basis. This command is
 use to define the starting :math:`l` for this projection.
 
@@ -208,7 +208,7 @@ command in the equation file will apply to the *current* equation.
     ``equation eqEr``
 
 sub
-...
+---
 This is use to insert a term in the *current* equation: this term will be
 computed by calling a FORTRAN subroutine.
 

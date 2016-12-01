@@ -156,26 +156,8 @@ Internal variables, and Functions
 A few functions and variables are already defined with TOP and can be used
 without prior declarations, here is a list of such symbols:
 
-:``dr``:
-
-    :Syntax: ``dr(var, order)``
-
-    :Semantics: derivative of ``var`` of order ``order``:
-
-    :Example:
-        ``dr(Phi, 2)``
-
-
-        stands for :math:`\frac{\partial^2\Phi}{\partial r^2}`
-
-
-    .. note::
-
-        Radial derivatives can also be expressed with the ``'`` (apostrophe)
-        post-fixed operator: ``dr(Phi, 2)`` and ``Phi''`` are two notations strictly
-        equivalent.
-
---------------------------------------------------------------------------------
+Internal Variables
+------------------
 
 :``fp``:
 
@@ -186,7 +168,24 @@ without prior declarations, here is a list of such symbols:
 
     :Example: ``fp^2 * r * Et - pm/rhom * dP_P - Phi - g_m = 0``
 
---------------------------------------------------------------------------------
+Internal Functions
+------------------
+
+:``dr``:
+
+    :Syntax: ``dr(var, order)``
+
+    :Semantics: derivative of ``var`` of order ``order``
+
+    :Example:
+        ``dr(Phi, 2)`` stands for :math:`\frac{\partial^2\Phi}{\partial r^2}`
+
+
+    .. note::
+
+        Radial derivatives can also be expressed with the ``'`` (apostrophe)
+        post-fixed operator: ``dr(Phi, 2)`` and ``Phi''`` are two notations strictly
+        equivalent.
 
 :``avg``:
 
@@ -198,6 +197,39 @@ without prior declarations, here is a list of such symbols:
 
     :Example: ``avg(r/Gamma1) * dP_P``
 
+Coupling Integrals
+------------------
+
+.. note::
+
+    In the following, :math:`x^*` stands for the complex conjugate of :math:`x`.
+
+:``Illm``:
+
+    :Syntax: ``Illm(expr)``
+
+    :Semantics: :math:`\iint_{4\pi} expr Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+
+    :Example: ``Illm(zeta^2*r_z*hh/r_map^2)`` computes :math:`\iint_{4\pi} \zeta^2 r_\zeta \frac{hh}{r_{map}^2} Y_{l'}^m \{Y_l^m\}^* d\Omega`
+
+:``Jllm``:
+
+    :Syntax: ``Jllm(expr)``
+
+    :Semantics: :math:`\iint_{4\pi} expr\ \partial_{\theta} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+
+:``Kllm``:
+
+    :Syntax: ``Kllm(expr)``
+
+    :Semantics: :math:`\iint_{4\pi} expr\ D_{\phi} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+
+:``Jllmc``:
+
+    :Syntax: ``Jllmc(expr)``
+
+    :Semantics: :math:`\iint_{4\pi} expr\ Y_{l'}^m \partial_{\theta} \{Y_l^m\}^* d\Omega`.
+
 Comments
 ========
 
@@ -206,10 +238,10 @@ of the line will be ignored.
 
 :Example:
 
-    .. code::
+.. code::
 
-        # define the first equation
-        equation eqdP_P:
-        lh*(lh+1) * Et =            # this is the LHS of the equation
-            avg(r/Gamma1) * dP_P +  # this the RHS
-            avg(r) * Er'
+    # define the first equation
+    equation eqdP_P:
+    lh*(lh+1) * Et =            # this is the LHS of the equation
+        avg(r/Gamma1) * dP_P +  # this the RHS
+        avg(r) * Er'

@@ -5,8 +5,11 @@ Install
 Quick Install Guide
 ===================
 
-Top uses the standard autotools install procedure, you should be able to install
-it using:
+TOP uses the standard ``autotools`` (autoconf_, automake_) install procedure,
+you should be able to install it using:
+
+.. _autoconf: https://www.gnu.org/software/autoconf/
+.. _automake: https://www.gnu.org/software/automake/
 
 .. code-block:: shell
 
@@ -27,8 +30,8 @@ it using:
     ./configure && make install
 
 You can get more details and options reading the following sections:
-:ref:`getting the code<download>`, :ref:`configure<configure>`,
-:ref:`compile and install<build>`,
+:ref:`getting the code<download>`, :ref:`configure<configure>` and
+:ref:`compile and install<build>`.
 
 
 .. _download:
@@ -164,8 +167,6 @@ See :ref:`usage<usage>`.
 Using ``libester``
 ==================
 
-.. _ESTER: http://ester-project.github.io/ester/
-
 In order to use ESTER_ stellar models, TOP needs to find where ESTER was
 installed on your system.
 In order to tell TOP's configure script where to find ``libester``, you need to
@@ -178,3 +179,5 @@ find it if you configure with:
 .. code-block:: shell
 
     ./configure LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
+
+.. _ESTER: http://ester-project.github.io/ester/

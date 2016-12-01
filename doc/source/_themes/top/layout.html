@@ -1,0 +1,16 @@
+{#
+    top/layout.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Sphinx layout template for the topdoc theme.
+
+    :copyright: Copyright 2007-2015 by the Sphinx team, see AUTHORS.
+    :license: BSD, see LICENSE for details.
+#}
+
+{% set bootswatch_css_custom = ['_static/top.css'] %}
+
+{%- extends "bootstrap/layout.html" %}
+
+{% block sidebar1 %} {# possible location for sidebar #} {% endblock %}
+{% block sidebar2 %} {{ bsidebar() }} {% endblock %}
