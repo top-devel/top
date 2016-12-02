@@ -1,7 +1,7 @@
 Installing TOP
 
 1. Download top:
-git clone git@gitlab.com:top-dev/top.git
+git clone https://github.com/top-devel/top.git
 # and its dependencies (parser):
 git submodule init
 git submodule update
