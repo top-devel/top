@@ -1,0 +1,634 @@
+
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Legacy Equation Format &#8212; TOP 1.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/top.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/top.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
+    <link rel="up" title="Equation Files" href="equation.html" />
+    <link rel="next" title="New Equation Format" href="new_equation.html" />
+    <link rel="prev" title="Equation Files" href="equation.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          TOP</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.0-rc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Navigation <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#quick-install-guide">Quick Install Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#getting-the-code">Getting the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#compiling-an-equation-file">Compiling an Equation File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#running-top">Running TOP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Stellar Models in TOP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model.html#polytropic-model">Polytropic Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#ester-model">ESTER Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#cesam-model">CESAM Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="equation.html">Equation Files</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Legacy Equation Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="new_equation.html">New Equation Format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#equation">Equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#results-objects">Results Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#star-models">Star Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">  
+    <div class="col-md-9 content">
+      
+  <div class="section" id="legacy-equation-format">
+<h1>Legacy Equation Format<a class="headerlink" href="#legacy-equation-format" title="Permalink to this headline">¶</a></h1>
+<p>In this format, equations consists of series of commands that build the
+numerical system.</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>In order to write oscillation equations with this format, one need to write them
+projected onto the spherical harmonics basis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Equation example:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="math">
+\[\lambda b_m^l = \sum_{l'=|m|}^{\infty}
+- \iint_{4\pi} \{Y_l^m\}^*Y_{l'}^m d\Omega \partial_\zeta u_m^{l'}
+- \iint_{4\pi} \frac{2 \zeta H + \zeta^2 N H_\zeta}{r^2 r_\zeta} \{Y_l^m\}^*Y_{l'}^m d\Omega u_m^{l'}
++ ...\]</div>
+<p>In order to write such an equation in TOP, one need to split it into terms and
+add them incrementally in the numerical system. The purpose of TOP, in
+particular <code class="docutils literal"><span class="pre">top-build</span></code> is to ease writing such equations.
+Several commands can help inserting such terms in the numerical system, see
+section <a class="reference internal" href="#commands"><span class="std std-ref">Commands</span></a> for a list of commands available in TOP&#8217;s language.</p>
+<p>Few other features can help understanding how to write equations in TOP: for a
+description of the type of terms TOP can handle, see section <a class="reference internal" href="#terms"><span class="std std-ref">Type of Terms</span></a>. And
+see section <a class="reference internal" href="#preprocessing"><span class="std std-ref">String pre-processing</span></a> for a description of string pre-processing and
+special variables.</p>
+<div class="section" id="type-of-terms">
+<span id="terms"></span><h3>Type of Terms<a class="headerlink" href="#type-of-terms" title="Permalink to this headline">¶</a></h3>
+<p>For each term to be added in the numerical system, one need to provide TOP with
+its type. The type of a term specify whether it depends on nothing (scalar), the
+radial coordinate <span class="math">\(r\)</span>, <span class="math">\(l\)</span> or <span class="math">\(l'\)</span>.</p>
+<p>The type of terms currently supported by TOP are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">s</span></code>:</th><td class="field-body">scalar term</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r</span></code>:</th><td class="field-body">term only depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) (only available for
+1D equations)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">tt</span></code>:</th><td class="field-body">term depending on <span class="math">\(l\)</span> and <span class="math">\(l'\)</span> (only available in 2D
+equations)</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">rt</span></code>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) and <span class="math">\(l\)</span> (only in
+2D equations)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">rtt</span></code>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>), <span class="math">\(l\)</span> and
+<span class="math">\(l'\)</span> (only available in 2D equations)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="string-pre-processing">
+<span id="preprocessing"></span><h3>String pre-processing<a class="headerlink" href="#string-pre-processing" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$a</span></code>:</th><td class="field-body">stands for the current coupling matrix. This variable can only be used in a
+term definition</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$prev</span></code>:</th><td class="field-body">the previous coupling matrix. It correspond to variable <code class="docutils literal"><span class="pre">$a</span></code> of the last
+term definition.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$leq</span></code>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current equation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$lvar</span></code>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current variable.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$leq(x)</span></code>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current equation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$lvar(x)</span></code>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current variable.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$eq</span></code>:</th><td class="field-body">index of the current equation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$var</span></code>:</th><td class="field-body">index of the current variable.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$nr</span></code>:</th><td class="field-body">radial resolution of the problem.</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$i</span></code>:</th><td class="field-body">indices of the radial coordinate (this will result in the generation of a
+FORTRAN loop over all radial points).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$j1</span></code>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l\)</span> (this will result in the
+generation of a FORTRAN loop over all values of <span class="math">\(l\)</span>).</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$j2</span></code>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l'\)</span> (this will result in the
+generation of a FORTRAN loop over all values of <span class="math">\(l'\)</span>).</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="commands">
+<span id="id1"></span><h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="input">
+<h3>input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h3>
+<p>This command allow the user to define a parameter for the set of equation to be
+written.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">input</span> <span class="pre">parameter</span> <span class="pre">format</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">parameter</span></code>: name of the parameter.</li>
+<li><code class="docutils literal"><span class="pre">format</span></code>: FORTRAN format specifier. This is used to read the
+parameter input file.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">input</span> <span class="pre">mass</span> <span class="pre">0pf5.2</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="stamp">
+<h3>stamp<a class="headerlink" href="#stamp" title="Permalink to this headline">¶</a></h3>
+<p>Used to define a string to appear in the output files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">stamp</span> <span class="pre">string</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">string</span></code>: string to appear in output files.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">stamp</span> <span class="pre">eq_ESTER_all_lagrange</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="definition">
+<h3>definition<a class="headerlink" href="#definition" title="Permalink to this headline">¶</a></h3>
+<p>Used to define named constants.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">definition</span> <span class="pre">type</span> <span class="pre">name</span> <span class="pre">value</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">type</span></code>: type of the constant (<code class="docutils literal"><span class="pre">integer</span></code>, <code class="docutils literal"><span class="pre">double_precision</span></code>,
+<code class="docutils literal"><span class="pre">complex</span></code>)</li>
+<li><code class="docutils literal"><span class="pre">name</span></code>: name of the constant</li>
+<li><code class="docutils literal"><span class="pre">value</span></code>: value of the constant</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">definition</span> <span class="pre">double_precision</span> <span class="pre">gamma_p</span> <span class="pre">1d0</span> <span class="pre">+</span> <span class="pre">1d0/pindex</span></code>
+will define <code class="docutils literal"><span class="pre">gamma_p</span></code> with a value of <span class="math">\(1+\frac{1}{pindex}\)</span>
+(where <span class="math">\(pindex\)</span> has to be another variable (<code class="docutils literal"><span class="pre">definition</span></code> or
+<code class="docutils literal"><span class="pre">input</span></code>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="eqlist">
+<h3>eqlist<a class="headerlink" href="#eqlist" title="Permalink to this headline">¶</a></h3>
+<p>Defines the name of equation to be defined in the equation file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eq1</span> <span class="pre">eq2</span> <span class="pre">eq3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">eq1</span></code>: name of the equation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eqEr</span> <span class="pre">eqdP</span> <span class="pre">eqPhi</span> <span class="pre">eqPhiP</span></code>
+defines 4 equations named eqEr, eqdP, eqPhi and epPhiP</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="varlist">
+<h3>varlist<a class="headerlink" href="#varlist" title="Permalink to this headline">¶</a></h3>
+<p>Defines variables of the equation set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">varlist</span> <span class="pre">var1</span> <span class="pre">var2</span> <span class="pre">var3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">var1</span></code>: name of the variable</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">varlist</span> <span class="pre">Er</span> <span class="pre">dP</span> <span class="pre">Phi</span> <span class="pre">PhiP</span></code>
+defines 4 variables named Er, dP, Phi and PhiP</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="leq">
+<h3>leq<a class="headerlink" href="#leq" title="Permalink to this headline">¶</a></h3>
+<p>In TOP equation are projected into the spherical harmonic basis. This command is
+use to define the starting <span class="math">\(l\)</span> for this projection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">leq</span> <span class="pre">eqName</span> <span class="pre">value</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">eqName</span></code>: name of the equation</li>
+<li><code class="docutils literal"><span class="pre">value</span></code>: starting value of <span class="math">\(l\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">leq</span> <span class="pre">eqEr</span> <span class="pre">abs(m)+iparity</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="lvar">
+<h3>lvar<a class="headerlink" href="#lvar" title="Permalink to this headline">¶</a></h3>
+<p>In TOP variables are projected into the spherical harmonic basis. This command is
+use to define the starting <span class="math">\(l\)</span> for this projection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">lvar</span> <span class="pre">varName</span> <span class="pre">value</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">varName</span></code>: name of the variable</li>
+<li><code class="docutils literal"><span class="pre">value</span></code>: starting value of <span class="math">\(l\)</span></li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">lvar</span> <span class="pre">Er</span> <span class="pre">abs(m)+iparity</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="equation">
+<h3>equation<a class="headerlink" href="#equation" title="Permalink to this headline">¶</a></h3>
+<p>This command is used to start defining an equation. This means that further
+command in the equation file will apply to the <em>current</em> equation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">equation</span> <span class="pre">eqName</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">eqName</span></code>: name of the equation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">equation</span> <span class="pre">eqEr</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="sub">
+<h3>sub<a class="headerlink" href="#sub" title="Permalink to this headline">¶</a></h3>
+<p>This is use to insert a term in the <em>current</em> equation: this term will be
+computed by calling a FORTRAN subroutine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">sub</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
+<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">routine</span></code>: name of the FORTRAN subroutine to be called to compute the
+coupling coefficient.</li>
+<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+characters can be used indicate radial derives. For instance,
+<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
+<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
+to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">sub</span> <span class="pre">rtt</span> <span class="pre">w1</span> <span class="pre">Illm(sint/roz,</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">u</span></code>: this basically add the
+term <span class="math">\(\omega \iint(\frac{sin(\theta)}{roz}) * u\)</span> in the current
+equation, where <span class="math">\(\omega\)</span> is the eigenvalue.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="subbc">
+<h3>subbc<a class="headerlink" href="#subbc" title="Permalink to this headline">¶</a></h3>
+<p>This is use to insert a boundary condition term in the <em>current</em> equation: this
+term will be computed by calling a FORTRAN subroutine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">subbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable(index)</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
+<li><code class="docutils literal"><span class="pre">location</span></code>: the location where the boundary condition should be inserted
+in the <strong>numerical</strong> system. This is basically tells the line in the
+matrix to be replaced with the boundary condition.</li>
+<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">routine</span></code>: name of the FORTRAN subroutine to be called to compute the
+coupling coefficient.</li>
+<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+characters can be used indicate radial derives. For instance,
+<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
+<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
+to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">index'</span></code> radial coordinate of the boundary condition.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">subbc</span> <span class="pre">tt</span> <span class="pre">nr</span> <span class="pre">w0</span> <span class="pre">Illmbc(hhz(1,</span> <span class="pre">:),</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">v(1)</span></code>, here we can see
+that <code class="docutils literal"><span class="pre">location</span></code> and <code class="docutils literal"><span class="pre">index</span></code> are different: the boundary condition is
+imposed at the center (<code class="docutils literal"><span class="pre">v(1)</span></code> stands for <span class="math">\(v\)</span> at <span class="math">\(r=0\)</span>), but in
+the <strong>numerical</strong> system, the condition is imposed on the last line of the
+matrix.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="term">
+<h3>term<a class="headerlink" href="#term" title="Permalink to this headline">¶</a></h3>
+<p>Used to insert a term in the equation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">term</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">expression</span>&#160; <span class="pre">variable</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
+<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">expression</span></code>: the mathematical expression of the term to be inserted.</li>
+<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+characters can be used indicate radial derives. For instance,
+<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
+<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
+to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">term</span> <span class="pre">s</span> <span class="pre">w0</span> <span class="pre">-2d0</span> <span class="pre">Pi''</span></code>: this would insert the term
+<span class="math">\(-2\frac{\partial^2 Pi}{\partial r^2}\)</span> in the current equation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="termbc">
+<h3>termbc<a class="headerlink" href="#termbc" title="Permalink to this headline">¶</a></h3>
+<p>Used to insert a term in a boundary condition of the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">termbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">expression</span>&#160; <span class="pre">variable(index)</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
+<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">location</span></code>: the location where the boundary condition should be inserted
+in the <strong>numerical</strong> system. This is basically tells the line in the
+matrix to be replaced with the boundary condition.</li>
+<li><code class="docutils literal"><span class="pre">expression</span></code>: the mathematical expression of the term to be inserted.</li>
+<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+characters can be used indicate radial derives. For instance,
+<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
+<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
+to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">index'</span></code> radial coordinate of the boundary condition.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">termbc</span> <span class="pre">t</span> <span class="pre">$nr</span> <span class="pre">w0</span> <span class="pre">1d0</span> <span class="pre">Phi($nr)'</span></code>: this would insert the term
+<span class="math">\(\Phi(r=surf)\)</span> in the boundary condition. (The last line of the
+matrix would be replaced with this boundary condition).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="instruction">
+<h3>instruction<a class="headerlink" href="#instruction" title="Permalink to this headline">¶</a></h3>
+<p>Used to add ad-hoc FORTRAN instruction in the module responsible for computing
+coupling integrals.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">instruction</span> <span class="pre">fortran</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><code class="docutils literal"><span class="pre">fortran</span></code>: the FORTRAN instruction to be inserted.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">instruction</span> <span class="pre">call</span> <span class="pre">modify_l0($prev,</span> <span class="pre">$nr,</span> <span class="pre">abs(m)+iparity)</span></code>: will insert the
+code <code class="docutils literal"><span class="pre">call</span> <span class="pre">modify_l0(dm(1)%artt(:,</span> <span class="pre">:,</span> <span class="pre">:),</span> <span class="pre">grd(1)%nr,</span> <span class="pre">abs(m)+iparity)</span></code>.
+See <a class="reference internal" href="#preprocessing"><span class="std std-ref">String pre-processing</span></a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+    </div>
+     
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Legacy Equation Format</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#type-of-terms">Type of Terms</a></li>
+<li><a class="reference internal" href="#string-pre-processing">String pre-processing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#commands">Commands</a><ul>
+<li><a class="reference internal" href="#input">input</a></li>
+<li><a class="reference internal" href="#stamp">stamp</a></li>
+<li><a class="reference internal" href="#definition">definition</a></li>
+<li><a class="reference internal" href="#eqlist">eqlist</a></li>
+<li><a class="reference internal" href="#varlist">varlist</a></li>
+<li><a class="reference internal" href="#leq">leq</a></li>
+<li><a class="reference internal" href="#lvar">lvar</a></li>
+<li><a class="reference internal" href="#equation">equation</a></li>
+<li><a class="reference internal" href="#sub">sub</a></li>
+<li><a class="reference internal" href="#subbc">subbc</a></li>
+<li><a class="reference internal" href="#term">term</a></li>
+<li><a class="reference internal" href="#termbc">termbc</a></li>
+<li><a class="reference internal" href="#instruction">instruction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div> 
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

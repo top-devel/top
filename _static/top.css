@@ -1,0 +1,11 @@
+@import url("bootstrap.css");
+
+.bs-sidenav {
+    background-color: #fff;
+    border-left: 1px solid #f7f5fa;
+    border-radius: 0px;
+}
+
+.navbar-version {
+    display: none;
+}

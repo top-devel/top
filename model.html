@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Stellar Models in TOP &#8212; TOP 1.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/top.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/top.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Equation Files" href="equation.html" />
+    <link rel="prev" title="Usage" href="usage.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          TOP</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.0-rc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Navigation <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#quick-install-guide">Quick Install Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#getting-the-code">Getting the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#compiling-an-equation-file">Compiling an Equation File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#running-top">Running TOP</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stellar Models in TOP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#polytropic-model">Polytropic Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ester-model">ESTER Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cesam-model">CESAM Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="equation.html">Equation Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="legacy_equation.html">Legacy Equation Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="new_equation.html">New Equation Format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#equation">Equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#results-objects">Results Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#star-models">Star Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">  
+    <div class="col-md-9 content">
+      
+  <div class="section" id="stellar-models-in-top">
+<span id="models"></span><h1>Stellar Models in TOP<a class="headerlink" href="#stellar-models-in-top" title="Permalink to this headline">¶</a></h1>
+<p>This page describes the star models supported by TOP as well as the fields
+defined in the model.</p>
+<div class="section" id="polytropic-model">
+<h2>Polytropic Model<a class="headerlink" href="#polytropic-model" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Name:</th><td class="field-body"><code class="docutils literal"><span class="pre">poly_ester</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="fields">
+<h3>Fields:<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">hh</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">hht</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">hhz</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">hhzz</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">hhzt</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">lnhht</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">lambda</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">alpha</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">aplat</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">omega_K</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">omga</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r_t</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">r_z</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r_map</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">re_t</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">re_z</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">re_map</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r_zz</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">r_zt</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r_tt</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">re_zz</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">re_zt</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">re_tt</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">zeta</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">cost</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">sint</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">cott</span></code>:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ester-model">
+<h2>ESTER Model<a class="headerlink" href="#ester-model" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Name:</th><td class="field-body"><code class="docutils literal"><span class="pre">ester</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="id1">
+<h3>Fields:<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">zeta</span></code>:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">theta</span></code>:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="cesam-model">
+<h2>CESAM Model<a class="headerlink" href="#cesam-model" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Name:</th><td class="field-body"><code class="docutils literal"><span class="pre">cesam</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="id2">
+<h3>Fields:<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">rhom</span></code>:</th><td class="field-body">density <span class="math">\(\rho\)</span></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">rhom_z</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{\rho}}{\partial{\zeta}}\)</span></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">rhom_t</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{\rho}}{\partial{\theta}}\)</span></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">pm</span></code>:</th><td class="field-body">pressure <span class="math">\(p\)</span></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">pm_z</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{p}}{\partial{\zeta}}\)</span></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">pm_t</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{p}}{\partial{\theta}}\)</span></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">Gamma1</span></code>:</th><td class="field-body">first adiabatic exponent</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">NN</span></code>:</th><td class="field-body">Brunt-Vaisala frequency (not perturbated)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">NNr</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{NN}}{\partial{\zeta}}\)</span></td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">NNt</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{NN}}{\partial{\theta}}\)</span></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">pe</span></code>:</th><td class="field-body">pressure potential</td>
+</tr>
+<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">pe_z</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{pe}}{\partial{\zeta}}\)</span></td>
+</tr>
+<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">pe_t</span></code>:</th><td class="field-body"><span class="math">\(\frac{\partial{pe}}{\partial{\theta}}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+    </div>
+     
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Stellar Models in TOP</a><ul>
+<li><a class="reference internal" href="#polytropic-model">Polytropic Model</a><ul>
+<li><a class="reference internal" href="#fields">Fields:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ester-model">ESTER Model</a><ul>
+<li><a class="reference internal" href="#id1">Fields:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cesam-model">CESAM Model</a><ul>
+<li><a class="reference internal" href="#id2">Fields:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div> 
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
