@@ -1,6 +1,6 @@
 before_install:
     - sudo apt-get -qq update
-    - sudo apt-get install -y gfortran
+    - sudo apt-get install -y gfortran libopenblas-dev
     - ./bootstrap
 
 install:
