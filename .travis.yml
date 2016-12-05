@@ -1,7 +1,34 @@
-before_install:
-    - sudo apt-get -qq update
-    - sudo apt-get install -y gfortran libopenblas-dev liblapack-dev
-    - ./bootstrap
+language: cpp
 
-install:
-    - ./configure && make && make test
+addons:
+    apt:
+        sources:
+            # add PPAs with more up-to-date toolchains
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+            - llvm-toolchain-precise-3.7
+        packages:
+            - gfortran-4.8
+            - clang-3.6
+            - clang-3.7
+            - libopenblas-dev
+            - liblapack-dev
+            - gcc-5
+            - g++-5
+            - python-numpy
+            - python-h5py
+            - python-matplotlib
+            - python-tk
+
+env:
+    - COMPILER=g++-5
+    - COMPILER=clang++-3.6
+
+script:
+    - ./bootstrap
+    - mkdir BUILD
+    - cd BUILD
+    - ../configure PYTHON=$PYTHON CXX=$COMPILER FC=gfortran-4.8 || exit 1
+    - make install || exit 1
+    - source activate-top.sh
+    - make test || exit 1
