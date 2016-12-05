@@ -1,7 +1,6 @@
 #!@PYTHON@
 
 if __name__ == '__main__':
-    import top
     import sys
     import os.path
     import subprocess as sp
