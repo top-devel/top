@@ -197,38 +197,39 @@ Internal Functions
 
     :Example: ``avg(r/Gamma1) * dP_P``
 
-Coupling Integrals
-------------------
 
-.. note::
+..  Coupling Integrals
+    ------------------
 
-    In the following, :math:`x^*` stands for the complex conjugate of :math:`x`.
+    .. note::
 
-:``Illm``:
+        In the following, :math:`x^*` stands for the complex conjugate of :math:`x`.
 
-    :Syntax: ``Illm(expr)``
+    :``Illm``:
 
-    :Semantics: :math:`\iint_{4\pi} expr Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+        :Syntax: ``Illm(expr)``
 
-    :Example: ``Illm(zeta^2*r_z*hh/r_map^2)`` computes :math:`\iint_{4\pi} \zeta^2 r_\zeta \frac{hh}{r_{map}^2} Y_{l'}^m \{Y_l^m\}^* d\Omega`
+        :Semantics: :math:`\iint_{4\pi} expr Y_{l'}^m \{Y_l^m\}^* d\Omega`.
 
-:``Jllm``:
+        :Example: ``Illm(zeta^2*r_z*hh/r_map^2)`` computes :math:`\iint_{4\pi} \zeta^2 r_\zeta \frac{hh}{r_{map}^2} Y_{l'}^m \{Y_l^m\}^* d\Omega`
 
-    :Syntax: ``Jllm(expr)``
+    :``Jllm``:
 
-    :Semantics: :math:`\iint_{4\pi} expr\ \partial_{\theta} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+        :Syntax: ``Jllm(expr)``
 
-:``Kllm``:
+        :Semantics: :math:`\iint_{4\pi} expr\ \partial_{\theta} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
 
-    :Syntax: ``Kllm(expr)``
+    :``Kllm``:
 
-    :Semantics: :math:`\iint_{4\pi} expr\ D_{\phi} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
+        :Syntax: ``Kllm(expr)``
 
-:``Jllmc``:
+        :Semantics: :math:`\iint_{4\pi} expr\ D_{\phi} Y_{l'}^m \{Y_l^m\}^* d\Omega`.
 
-    :Syntax: ``Jllmc(expr)``
+    :``Jllmc``:
 
-    :Semantics: :math:`\iint_{4\pi} expr\ Y_{l'}^m \partial_{\theta} \{Y_l^m\}^* d\Omega`.
+        :Syntax: ``Jllmc(expr)``
+
+        :Semantics: :math:`\iint_{4\pi} expr\ Y_{l'}^m \partial_{\theta} \{Y_l^m\}^* d\Omega`.
 
 Comments
 ========
