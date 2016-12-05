@@ -19,16 +19,21 @@ addons:
             - python-h5py
             - python-matplotlib
             - python-tk
+            - python3-numpy
+            - python3-h5py
+            - python3-matplotlib
+            - python3-tk
 
 env:
     - COMPILER=g++-5
     - COMPILER=clang++-3.6
+    - COMPILER=g++-5 PYTHON=python3 F2PY=f2py3
 
 script:
     - ./bootstrap
     - mkdir BUILD
     - cd BUILD
-    - ../configure PYTHON=$PYTHON CXX=$COMPILER FC=gfortran-4.8 || exit 1
+    - ../configure PYTHON=$PYTHON CXX=$COMPILER FC=gfortran-4.8 F2PY=$F2PY || exit 1
     - make install || exit 1
     - source activate-top.sh
     - make test || exit 1
