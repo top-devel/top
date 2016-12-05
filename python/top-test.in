@@ -20,31 +20,31 @@ if __name__ == '__main__':
 
 
     tests = [ # name, model, equation_file, order, test_file
-            ('poly (real 2D mono)',
-                'poly_ester',
-                'eq_poly_ester',
-                None,
-                'check'),
-            ('cesam (real 2D mono)',
-                'cesam',
-                'eq_cesam_all_lagrange_avg',
-                'order-cesam.inc',
-                'check'),
+            # ('poly (real 2D mono)',
+            #     'poly_ester',
+            #     'eq_poly_ester',
+            #     None,
+            #     'check'),
+            # ('cesam (real 2D mono)',
+            #     'cesam',
+            #     'eq_cesam_all_lagrange_avg',
+            #     'order-cesam.inc',
+            #     'check'),
             ('cesam1D (real 1D mono)',
                 'cesam',
                 'eq_cesam_all_lagrange_avg_1D',
                 'order-cesam-1D.inc',
                 'check1D'),
-            ('ester (real 2D multi)',
-                'ester',
-                'eq_ESTER_all_lagrange',
-                None,
-                'check'),
-            ('ester non adiabatic (cplx 2D multi)',
-                'ester',
-                'eq_non_adiabatic',
-                None,
-                'check-non-adia')
+            # ('ester (real 2D multi)',
+            #     'ester',
+            #     'eq_ESTER_all_lagrange',
+            #     None,
+            #     'check'),
+            # ('ester non adiabatic (cplx 2D multi)',
+            #     'ester',
+            #     'eq_non_adiabatic',
+            #     None,
+            #     'check-non-adia')
             ]
 
     fnull = open(os.devnull, 'w')
@@ -88,4 +88,3 @@ if __name__ == '__main__':
         except sp.CalledProcessError as e:
             print(red + bold + '[Failed]'),
             print(reset)
-            # print(e)

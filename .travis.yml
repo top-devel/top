@@ -4,4 +4,4 @@ before_install:
     - ./bootstrap
 
 install:
-    - ./configure && make
+    - ./configure && make && make test
