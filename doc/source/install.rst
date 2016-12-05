@@ -14,7 +14,7 @@ you should be able to install it using:
 .. code-block:: shell
 
     # get the code:
-    git clone https://gitlab.com/top-dev/top.git
+    git clone https://github.com/top-devel/top.git
 
     # enter the source code directory:
     cd top
