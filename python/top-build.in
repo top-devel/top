@@ -231,9 +231,15 @@ try:
         "@abs_top_builddir@/src/inputs.F90"],
         stderr=subprocess.STDOUT)
 
-    shutil.copy(libname + '.so',
-            '@abs_top_builddir@/src/lib/' + libname + '.so')
-    os.remove(libname + '.so')
+    files=subprocess.check_output(['ls']).decode().split()
+    for f in files:
+        if libname in f:
+            outlibname = f
+    cmd = 'mv ' + outlibname + ' @abs_top_builddir@/src/lib/' + libname + '.so'
+    subprocess.check_output(cmd.split())
+
+    # cmd = 'rm ' + libname + '*.so'
+    # subprocess.check_output(cmd.split())
 
     # if args.debug == False:
     #     subprocess.check_output(["make",
@@ -261,5 +267,4 @@ except subprocess.CalledProcessError as e:
 
 except Exception as e:
     print("[Failed]")
-    print(e)
     sys.exit(1)
