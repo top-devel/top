@@ -371,69 +371,6 @@ scheme used).</td>
 </tbody>
 </table>
 </div>
-<div class="section" id="coupling-integrals">
-<h4>Coupling Integrals<a class="headerlink" href="#coupling-integrals" title="Permalink to this headline">¶</a></h4>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In the following, <span class="math">\(x^*\)</span> stands for the complex conjugate of <span class="math">\(x\)</span>.</p>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">Illm</span></code>:</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">Illm(expr)</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><span class="math">\(\iint_{4\pi} expr Y_{l'}^m \{Y_l^m\}^* d\Omega\)</span>.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><code class="docutils literal"><span class="pre">Illm(zeta^2*r_z*hh/r_map^2)</span></code> computes <span class="math">\(\iint_{4\pi} \zeta^2 r_\zeta \frac{hh}{r_{map}^2} Y_{l'}^m \{Y_l^m\}^* d\Omega\)</span></td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">Jllm</span></code>:</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">Jllm(expr)</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><span class="math">\(\iint_{4\pi} expr\ \partial_{\theta} Y_{l'}^m \{Y_l^m\}^* d\Omega\)</span>.</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">Kllm</span></code>:</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">Kllm(expr)</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><span class="math">\(\iint_{4\pi} expr\ D_{\phi} Y_{l'}^m \{Y_l^m\}^* d\Omega\)</span>.</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">Jllmc</span></code>:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">Jllmc(expr)</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><span class="math">\(\iint_{4\pi} expr\ Y_{l'}^m \partial_{\theta} \{Y_l^m\}^* d\Omega\)</span>.</td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 <div class="section" id="comments">
 <h3>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h3>
@@ -480,7 +417,6 @@ of the line will be ignored.</p>
 <li><a class="reference internal" href="#internal-variables-and-functions">Internal variables, and Functions</a><ul>
 <li><a class="reference internal" href="#internal-variables">Internal Variables</a></li>
 <li><a class="reference internal" href="#internal-functions">Internal Functions</a></li>
-<li><a class="reference internal" href="#coupling-integrals">Coupling Integrals</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#comments">Comments</a></li>
