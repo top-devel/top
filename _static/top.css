@@ -6,6 +6,10 @@
     border-radius: 0px;
 }
 
-.navbar-version {
-    display: none;
+a.headerlink {
+    color: #fff;
+}
+
+a.headerlink:hover {
+    color: #337ab7;
 }
