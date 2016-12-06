@@ -31,5 +31,5 @@ script:
     - ../configure CXX=$COMPILER F2PY=f2py FC=gfortran-4.8
     - make install
     - source activate-top.sh
-    - top-build --model=cesam examples/cesam/eq_cesam_all_lagrange_avg_1D || cat top-build.err
+    - top-build --model=cesam --order=examples/cesam/order-cesam-1D.inc examples/cesam/eq_cesam_all_lagrange_avg_1D || cat top-build.err
     - python examples/cesam/check1D.py
