@@ -28,6 +28,7 @@ Documentation
    equation
    api
    examples
+   download
 
 
 ..   hacking
