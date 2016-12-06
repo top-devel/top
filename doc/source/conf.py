@@ -139,8 +139,7 @@ html_theme_options = {
         'globaltoc_depth'   : 2,
         # 'navbar_class'      : 'navbar navbar-inverse',
         # 'navbar_links'      : [
-        #     ('Home', 'index'),
-        #     ('Install', 'install'),],
+        #     ('Download', 'download', True),],
         }
 
 # Add any paths that contain custom themes here, relative to this directory.
