@@ -440,7 +440,7 @@ class load:
         res.lres = self.dati.lres
         res.libname = self.name
         res.dati = {}
-        d = vars(self.dati).items()
+        d = list(vars(self.dati).items())
         for i in range(len(d)):
             k, v = d[i]
             if type(v) == _np.ndarray:
