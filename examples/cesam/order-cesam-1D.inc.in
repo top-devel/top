@@ -6,8 +6,8 @@
       subroutine init_order()
       implicit none
       integer i,var,eq,eqn
-      integer, parameter :: eq_straight(3) = (/1,3,4/)
-      integer, parameter :: eq_shifted(2) = (/2,5/)
+      integer, parameter :: eq_straight(3) = (/2, 3, 5/)
+      integer, parameter :: eq_shifted(2) = (/1, 4/)
 
       if (allocated(dm(1)%ivar)) deallocate(dm(1)%ivar)
       if (allocated(dm(1)%ieq)) deallocate(dm(1)%ieq)
