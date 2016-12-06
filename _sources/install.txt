@@ -83,6 +83,9 @@ You can then proceed to the :ref:`configure<configure>` steps.
 
 From a source archive
 ---------------------
+
+Download a source archive from the :ref:`download page<download_page>`.
+
 If you don't need the latest version of TOP, you can use a source archive.
 Extract your source archive and enter to source directory:
 
