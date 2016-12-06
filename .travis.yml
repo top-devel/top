@@ -1,39 +1,35 @@
-language: cpp
+language: python
 
 addons:
     apt:
         sources:
             # add PPAs with more up-to-date toolchains
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-            - llvm-toolchain-precise-3.7
         packages:
+            # install toolchains
             - gfortran-4.8
-            - clang-3.6
-            - clang-3.7
-            - libopenblas-dev
-            - liblapack-dev
             - gcc-5
             - g++-5
-            - python-numpy
-            - python-h5py
-            - python-matplotlib
-            - python-tk
-            - python3-numpy
-            - python3-h5py
-            - python3-matplotlib
-            - python3-tk
+            - libopenblas-dev
+            - liblapack-dev
+            - libhdf5-serial-dev
 
-env:
-    - COMPILER=g++-5
-    - COMPILER=clang++-3.6
-    - COMPILER=g++-5 PYTHON=python3 F2PY=f2py3
+matrix:
+    include:
+        - python: "2.7"
+          env: COMPILER=g++-5
+        - python: "3.5"
+          env: COMPILER=g++-5
+
+before_install:
+    - pip install numpy matplotlib h5py
 
 script:
     - ./bootstrap
     - mkdir BUILD
     - cd BUILD
-    - ../configure PYTHON=$PYTHON CXX=$COMPILER FC=gfortran-4.8 F2PY=$F2PY || exit 1
-    - make install || exit 1
+    - ../configure CXX=$COMPILER F2PY=f2py FC=gfortran-4.8
+    - make install
     - source activate-top.sh
-    - make test || exit 1
+    - top-build --model=cesam examples/cesam/eq_cesam_all_lagrange_avg_1D || cat top-build.err
+    - python examples/cesam/check1D.py
