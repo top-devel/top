@@ -143,10 +143,24 @@
 <h1>TOP&#8217;s documentation<a class="headerlink" href="#top-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p>Write an overview of TOP: description...</p>
-<p class="last">Also make a diagram showing models, equations, top-build etc...</p>
+<p>TOP consists of a python module, a compiler and several <em>templates</em> (see
+<a class="reference internal" href="model.html#models"><span class="std std-ref">Stellar Models in TOP</span></a>) to read stellar models.
+This allows users to write their own set of equations in a flexible way.</p>
+<p>The basic workflow with TOP is the following:</p>
+<ol class="arabic simple">
+<li>write an equation file (see <a class="reference internal" href="equation.html#equation"><span class="std std-ref">Equation Files</span></a>)</li>
+<li>compile this file with <code class="docutils literal"><span class="pre">top-build</span></code></li>
+<li>compute oscillations modes and frequencies with <code class="docutils literal"><span class="pre">top</span></code> python module (see
+<a class="reference internal" href="api.html#api"><span class="std std-ref">Python API</span></a>):<ul>
+<li>read input parameters</li>
+<li>read a stellar model</li>
+<li>run the Arnoldi-Chebyshev method</li>
+</ul>
+</li>
+</ol>
+<div class="figure align-center" id="id1" style="width: 500px">
+<a class="reference internal image-reference" href="_images/overview.png"><img alt="_images/overview.png" src="_images/overview.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text">TOP&#8217;s Software Architecture</span></p>
 </div>
 </div>
 <div class="section" id="documentation">
