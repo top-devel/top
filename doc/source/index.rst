@@ -1,8 +1,3 @@
-.. TOP documentation master file, created by
-   sphinx-quickstart on Tue Oct  6 18:04:24 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ###################
 TOP's documentation
 ###################
@@ -10,11 +5,28 @@ TOP's documentation
 Overview
 ########
 
-.. todo::
+TOP consists of a python module, a compiler and several *templates* (see
+:ref:`models`) to read stellar models.
+This allows users to write their own set of equations in a flexible way.
 
-    Write an overview of TOP: description...
+The basic workflow with TOP is the following:
 
-    Also make a diagram showing models, equations, top-build etc...
+1. write an equation file (see :ref:`equation`)
+2. compile this file with ``top-build``
+3. compute oscillations modes and frequencies with ``top`` python module (see
+   :ref:`api`):
+
+   - read input parameters
+   - read a stellar model
+   - run the Arnoldi-Chebyshev method
+
+.. figure:: overview.png
+    :width: 400px
+    :align: center
+    :figwidth: 500px
+
+    TOP's Software Architecture
+
 
 Documentation
 #############
@@ -29,6 +41,5 @@ Documentation
    api
    examples
    download
-
 
 ..   hacking
