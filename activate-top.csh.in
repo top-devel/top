@@ -1,0 +1,13 @@
+setenv PATH "@bindir@:${PATH}"
+
+if ($?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH "@libdir@:@libexecdir@:${LD_LIBRARY_PATH}"
+else
+    setenv LD_LIBRARY_PATH "@libdir@:@libexecdir@"
+endif
+
+if ($?PYTHONPATH) then
+    setenv PYTHONPATH "@pythondir@:@pyexecdir@/top:${LD_LIBRARY_PATH}"
+else
+    setenv PYTHONPATH "@pythondir@:@pyexecdir@/top"
+endif

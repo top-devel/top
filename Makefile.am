@@ -24,7 +24,8 @@ EXTRA_DIST = src/Makefile.am src/Makefile.in \
 			 src/postproc.F90 \
 			 src/legpy.F90 \
 			 src/config.F90 \
-			 sourceme.in
+			 activate-top.sh.in \
+			 activate-top.csh.in
 
 
 docs:
@@ -41,9 +42,12 @@ do_subst = sed -e 's,[@]SHELL[@],$(SHELL),g'	\
                -e 's,[@]pyexecdir[@],$(pyexecdir),g'	\
                -e 's,[@]pythondir[@],$(pythondir),g'
 
-noinst_SCRIPTS = activate-top.sh
+noinst_SCRIPTS = activate-top.sh activate-top.csh
 
-activate-top.sh: sourceme.in Makefile
+activate-top.csh: activate-top.csh.in Makefile
+	$(do_subst) < $< > $@
+
+activate-top.sh: activate-top.sh.in Makefile
 	$(do_subst) < $< > $@
 
 CLEANFILES = $(noinst_SCRIPTS)

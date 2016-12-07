@@ -1,5 +1,5 @@
 do_subst = sed -e 's,[@]builddir[@],$(abs_builddir),g' \
-               -e 's,[@]PYTHON[@],$(PYTHON),g'
+		   -e 's,[@]PYTHON[@],$(PYTHON),g'
 
 noinst_SCRIPTS = check1D.py
 
@@ -24,7 +24,7 @@ BUILT_SOURCES = dati1D \
 				sismique_ultime_2099couches_tronc.osc order-cesam.inc \
 				check1D.py \
 				order-cesam-1D.inc \
-			 cesam1D.eq cesam1D_euler_l0.eq
+				cesam1D.eq cesam1D_euler_l0.eq
 
 .in.py: Makefile
 	$(do_subst) < $< > $@
