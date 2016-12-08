@@ -45,12 +45,11 @@ AC_PROG_LIBTOOL(disable-shared)
 AC_PATH_PROG(PERL, perl)
 
 AM_PATH_PYTHON([2.7])
-AS_IF([test "x$F2PY" == "x"],
-      [AC_PATH_PROG(F2PY, f2py-$PYTHON_VERSION, f2py$PYTHON_VERSION, f2py)])
-
-AC_CHECK_PROG(F2PY_works, $F2PY, yes, no)
-AS_IF([test "x$F2PY_works" == "xno"],
-      [AC_ERROR($F2PY not found)])
+AC_CHECK_PROGS(F2PY,
+               [f2py-$PYTHON_VERSION f2py$PYTHON_VERSION f2py],
+               [no])
+AS_IF([test "x$F2PY" == "xno"],
+      [AC_ERROR(f2py is missing)])
 
 # Checks for libraries.
 
