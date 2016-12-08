@@ -138,8 +138,8 @@ html_theme_options = {
         'navbar_site_name'  : 'Navigation',
         'globaltoc_depth'   : 2,
         # 'navbar_class'      : 'navbar navbar-inverse',
-        # 'navbar_links'      : [
-        #     ('Download', 'download', True),],
+        'navbar_links'      : [
+            ('GitHub Repository', 'https://github.com/top-devel/top', True),],
         }
 
 # Add any paths that contain custom themes here, relative to this directory.
