@@ -28,6 +28,8 @@ fi
 
 AM_CONDITIONAL([PARSER], [test x$enable_parser = xyes])
 
+AC_SUBST(enable_parser)
+
 # MPI support?
 AC_ARG_ENABLE([mpi],
               AS_HELP_STRING([--enable-mpi],

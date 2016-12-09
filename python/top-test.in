@@ -19,37 +19,20 @@ if __name__ == '__main__':
 
 
     tests = [ # name, model, equation_file, order, test_file
-            # ('poly (real 2D mono)',
-            #     'poly_ester',
-            #     'eq_poly_ester',
-            #     None,
-            #     'check'),
-            # ('cesam (real 2D mono)',
-            #     'cesam',
-            #     'eq_cesam_all_lagrange_avg',
-            #     'order-cesam.inc',
-            #     'check'),
             ('eq_cesam_all_lagrange_avg_1D (real 1D mono)',
                 'cesam',
                 'eq_cesam_all_lagrange_avg_1D',
                 'order-cesam-1D.inc',
                 'check1D'),
+            ]
+    enable_parser = '@enable_parser@'
+    if enable_parser == 'yes':
+        tests.append(
             ('cesam1D.eq (real 1D mono)',
                 'cesam',
                 'cesam1D.eq',
                 'order-cesam-1D.inc',
-                'check-parser-1D'),
-            # ('ester (real 2D multi)',
-            #     'ester',
-            #     'eq_ESTER_all_lagrange',
-            #     None,
-            #     'check'),
-            # ('ester non adiabatic (cplx 2D multi)',
-            #     'ester',
-            #     'eq_non_adiabatic',
-            #     None,
-            #     'check-non-adia')
-            ]
+                'check-parser-1D'))
 
     fnull = open(os.devnull, 'w')
 

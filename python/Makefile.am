@@ -4,6 +4,7 @@ do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]libs[@],$(LIBS),g'   \
                -e 's,[@]abs_top_builddir[@],$(abs_top_builddir),g'   \
                -e 's,[@]abs_top_srcdir[@],$(abs_top_srcdir),g'   \
+               -e 's,[@]enable_parser[@],$(enable_parser),g'	\
                -e 's,[@]VERSION[@],$(VERSION),g' \
                -e 's,[@]PERL[@],$(PERL),g' \
                -e 's,[@]F2PY[@],$(F2PY),g' \
