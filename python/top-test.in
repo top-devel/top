@@ -29,11 +29,16 @@ if __name__ == '__main__':
             #     'eq_cesam_all_lagrange_avg',
             #     'order-cesam.inc',
             #     'check'),
-            ('cesam1D (real 1D mono)',
+            ('eq_cesam_all_lagrange_avg_1D (real 1D mono)',
                 'cesam',
                 'eq_cesam_all_lagrange_avg_1D',
                 'order-cesam-1D.inc',
                 'check1D'),
+            ('cesam1D.eq (real 1D mono)',
+                'cesam',
+                'cesam1D.eq',
+                'order-cesam-1D.inc',
+                'check-parser-1D'),
             # ('ester (real 2D multi)',
             #     'ester',
             #     'eq_ESTER_all_lagrange',
@@ -53,17 +58,16 @@ if __name__ == '__main__':
             print('Checking %s: ' % name)
             print('  Build: '),
             sys.stdout.flush()
-            if order == None:
-                sp.check_call(['@prefix@/bin/top-build',
-                    '--model=%s' % model,
-                    '@abs_top_builddir@/examples/%s/%s' % (model, eq_file)],
-                    stdout=fnull,
-                    stderr=fnull)
-            else:
-                sp.check_call(['@prefix@/bin/top-build',
-                    '--model=%s' % model,
-                    '--order=@abs_top_builddir@/examples/%s/%s' % (model, order),
-                    '@abs_top_builddir@/examples/%s/%s' % (model, eq_file)],
+            cmd = '@prefix@/bin/top-build'
+            if eq_file.endswith(".eq"):
+                cmd += ' --parser'
+            if order != None:
+                cmd += ' --order=@abs_top_builddir@/examples/%s/%s' % \
+                    (model, order)
+            cmd += ' --model=%s' % model
+            cmd += ' @abs_top_builddir@/examples/%s/%s' % (model, eq_file)
+
+            sp.check_call(cmd.split(),
                     stdout=fnull,
                     stderr=fnull)
 

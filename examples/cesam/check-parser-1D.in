@@ -1,0 +1,11 @@
+#!@PYTHON@
+
+import top
+import matplotlib.pyplot as plt
+
+if __name__ == '__main__':
+    cesam = top.load('cesam1D')
+    cesam.read_dati('@builddir@/dati1D')
+    m = cesam.init_model('@builddir@/sunmlt-fin-nad.osc')
+
+    r = cesam.run_arncheb(cesam.dati.shift)
