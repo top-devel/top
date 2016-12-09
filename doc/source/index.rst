@@ -43,3 +43,32 @@ Documentation
    download
 
 ..   hacking
+
+Credits
+#######
+This public version of the TOP code is part of the SPACEInn_ Project (Exploitation of Space Data for Innovative Helio- and Asteroseismology), initiated by the European Helio- and Asteroseismology Network (HELAS_) and financed by the European Union under the Seventh Framework Programme (FP7 project n° 312844).
+
+.. image:: spaceinn_logo.jpg
+   :alt: SPACEInn
+   :height: 100px
+   :target: http://www.spaceinn.eu/
+   :align: left
+.. image:: logo-irap.png
+   :alt: IRAP
+   :height: 100px
+   :target: http://www.irap.omp.eu/
+   :align: left
+.. image:: Logo-UPS.jpg
+   :alt: UPS Toulouse
+   :height: 100px
+   :target: http://www.univ-tlse3.fr/
+   :align: left
+.. image:: logo_cnrs.png
+   :alt: CNRS
+   :height: 100px
+   :target: http://www.cnrs.fr/
+   :align: left
+
+.. _SPACEInn: http://www.spaceinn.eu/
+.. _HELAS: https://www.helas-project.eu/
+
