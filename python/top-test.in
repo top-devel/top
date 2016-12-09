@@ -1,5 +1,7 @@
 #!@PYTHON@
 
+from __future__ import print_function
+
 if __name__ == '__main__':
     import sys
     import os.path
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     for name, model, eq_file, order, test in tests:
         try:
             print('Checking %s: ' % name)
-            print('  Build: '),
+            print('  Build: ', end='')
             sys.stdout.flush()
             cmd = '@prefix@/bin/top-build'
             if eq_file.endswith(".eq"):
@@ -54,10 +56,10 @@ if __name__ == '__main__':
                     stdout=fnull,
                     stderr=fnull)
 
-            print(green + '[Ok]'),
+            print(green + '[Ok]', end='')
             print(reset)
 
-            print('  Run:   '),
+            print('  Run:   ', end='')
             sys.stdout.flush()
             test_file = '@abs_top_builddir@/examples/%s/%s.py' % (model, test)
             if os.path.exists(test_file):
@@ -65,12 +67,12 @@ if __name__ == '__main__':
                     test_file],
                     stdout=fnull,
                     stderr=fnull)
-                print(green + '[Ok]'),
+                print(green + '[Ok]', end='')
                 print(reset)
             else:
-                print(red + 'no test provided'),
+                print(red + 'no test provided', end='')
                 print(reset)
 
         except sp.CalledProcessError as e:
-            print(red + bold + '[Failed]'),
+            print(red + bold + '[Failed]', end='')
             print(reset)
