@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &#8212; TOP 1.0-rc1 documentation</title>
+    <title>Python API &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="next" title="Usage Examples" href="examples.html" />
     <link rel="prev" title="New Equation Format" href="new_equation.html" />
@@ -43,7 +43,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -62,8 +62,6 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="https://github.com/top-devel/top">GitHub Repository</a></li>
-            
             
               <li class="dropdown globaltoc-container">
   <a role="button"
@@ -80,7 +78,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -99,16 +97,14 @@
 <li class="toctree-l2"><a class="reference internal" href="new_equation.html">New Equation Format</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Python API</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Python API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#equation">Equation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#results-objects">Results Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#star-models">Star Models</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -146,12 +142,12 @@
 <span id="api"></span><h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="equation">
 <h2>Equation<a class="headerlink" href="#equation" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="#top.load" title="top.load"><code class="xref py py-class docutils literal"><span class="pre">top.load</span></code></a> class in responsible for loading a previously compiled
+<p>The <a class="reference internal" href="#top.load" title="top.load"><tt class="xref py py-class docutils literal"><span class="pre">top.load</span></tt></a> class in responsible for loading a previously compiled
 equation file, loading or setting parameters, loading stellar models and solving
 the underlying eigenvalue problem.</p>
 <dl class="class">
 <dt id="top.load">
-<em class="property">class </em><code class="descclassname">top.</code><code class="descname">load</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">top.</tt><tt class="descname">load</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#top.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main class for running TOP:</p>
 <p>It is responsible for loading a previously compiled equation file,
 initializing the model and running the Arnoldi-Chebyshev algorithm</p>
@@ -161,13 +157,13 @@ initializing the model and running the Arnoldi-Chebyshev algorithm</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; name of the equation filed to load</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body">poly = load(&#8216;eq_poly_ester&#8217;)</td>
+<tr class="field-even field"><th class="field-name">Example :</th><td class="field-body">poly = load(&#8216;eq_poly_ester&#8217;)</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="top.load.get_grid">
-<code class="descname">get_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_grid" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_grid</tt><big>(</big><big>)</big><a class="headerlink" href="#top.load.get_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the grid used by the model (requires a call to init_model)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -183,7 +179,7 @@ initializing the model and running the Arnoldi-Chebyshev algorithm</p>
 
 <dl class="method">
 <dt id="top.load.get_results">
-<code class="descname">get_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_results" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_results</tt><big>(</big><big>)</big><a class="headerlink" href="#top.load.get_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns an <cite>result</cite> object containing the results of a call to
 run_arncheb</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -200,7 +196,7 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.get_sol">
-<code class="descname">get_sol</code><span class="sig-paren">(</span><em>idom</em>, <em>isol</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_sol" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_sol</tt><big>(</big><em>idom</em>, <em>isol</em>, <em>var</em><big>)</big><a class="headerlink" href="#top.load.get_sol" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns <cite>isol</cite> th solution in domain number <cite>idom</cite> for variable named
 <cite>var</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -226,7 +222,7 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.get_vars">
-<code class="descname">get_vars</code><span class="sig-paren">(</span><em>idom</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_vars" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_vars</tt><big>(</big><em>idom</em><big>)</big><a class="headerlink" href="#top.load.get_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a list of variables in domain <cite>idom</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -244,13 +240,13 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.get_version">
-<code class="descname">get_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_version" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_version</tt><big>(</big><big>)</big><a class="headerlink" href="#top.load.get_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the version of TOP that compiled the currently loaded equation file</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="top.load.get_zeta">
-<code class="descname">get_zeta</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#top.load.get_zeta" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_zeta</tt><big>(</big><big>)</big><a class="headerlink" href="#top.load.get_zeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the zeta radial coordinate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -266,7 +262,7 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.init_model">
-<code class="descname">init_model</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.init_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">init_model</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#top.load.init_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>initializes the star model with the file <cite>filename</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -280,7 +276,7 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.read_dati">
-<code class="descname">read_dati</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.read_dati" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">read_dati</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#top.load.read_dati" title="Permalink to this definition">¶</a></dt>
 <dd><p>reads dati parameter file named <cite>filename</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -294,7 +290,7 @@ run_arncheb</p>
 
 <dl class="method">
 <dt id="top.load.run_arncheb">
-<code class="descname">run_arncheb</code><span class="sig-paren">(</span><em>shift</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.run_arncheb" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run_arncheb</tt><big>(</big><em>shift</em><big>)</big><a class="headerlink" href="#top.load.run_arncheb" title="Permalink to this definition">¶</a></dt>
 <dd><p>runs the Arnoldi-Chebyshev algorithm with a shift provided by the
 <cite>shift</cite> argument.
 Calls call to run_arncheb must be preceded by a call to <cite>read_dati</cite> to
@@ -316,7 +312,7 @@ the start model.</p>
 
 <dl class="method">
 <dt id="top.load.write_output">
-<code class="descname">write_output</code><span class="sig-paren">(</span><em>dir</em><span class="sig-paren">)</span><a class="headerlink" href="#top.load.write_output" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">write_output</tt><big>(</big><em>dir</em><big>)</big><a class="headerlink" href="#top.load.write_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>write the results computed by run_arncheb to location <cite>dir</cite>, this for
 retro compatibility purpose</p>
 </dd></dl>
@@ -328,7 +324,7 @@ retro compatibility purpose</p>
 <h2>Results Objects<a class="headerlink" href="#results-objects" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="top.results">
-<em class="property">class </em><code class="descclassname">top.</code><code class="descname">results</code><span class="sig-paren">(</span><em>result_file=''</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">top.</tt><tt class="descname">results</tt><big>(</big><em>result_file=''</em><big>)</big><a class="headerlink" href="#top.results" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class stores results of a previous computation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -336,7 +332,7 @@ retro compatibility purpose</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result_file</strong> (<em>str</em>) &#8211; (optional) file with previous results stored</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">results</span></code> object</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">results</span></tt> object</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">results of a previous computation (if result_file is provided) an empty results object otherwise</td>
 </tr>
@@ -344,20 +340,20 @@ retro compatibility purpose</p>
 </table>
 <dl class="method">
 <dt id="top.results.append">
-<code class="descname">append</code><span class="sig-paren">(</span><em>res</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.append" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">append</tt><big>(</big><em>res</em><big>)</big><a class="headerlink" href="#top.results.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>appends results stored in res</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="top.results.get_grid">
-<code class="descname">get_grid</code><span class="sig-paren">(</span><em>idom=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.get_grid" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_grid</tt><big>(</big><em>idom=-1</em><big>)</big><a class="headerlink" href="#top.results.get_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the grid used by the model (requires a call to init_model)</p>
 <p>if <cite>idom</cite> is provided returns the grid only for this particular domain</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="top.results.get_sol">
-<code class="descname">get_sol</code><span class="sig-paren">(</span><em>idom</em>, <em>isol</em>, <em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.get_sol" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_sol</tt><big>(</big><em>idom</em>, <em>isol</em>, <em>var</em><big>)</big><a class="headerlink" href="#top.results.get_sol" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the <cite>isol</cite> th solution in domain number <cite>idom</cite> for variable
 named <cite>var</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -383,7 +379,7 @@ named <cite>var</cite></p>
 
 <dl class="method">
 <dt id="top.results.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>idom</em>, <em>isol</em>, <em>var</em>, <em>m=None</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot</tt><big>(</big><em>idom</em>, <em>isol</em>, <em>var</em>, <em>m=None</em><big>)</big><a class="headerlink" href="#top.results.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots isol&#8217;th solution of variable var in domain number idom</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -402,7 +398,7 @@ named <cite>var</cite></p>
 
 <dl class="method">
 <dt id="top.results.plot_val">
-<code class="descname">plot_val</code><span class="sig-paren">(</span><em>mat</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.plot_val" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_val</tt><big>(</big><em>mat</em><big>)</big><a class="headerlink" href="#top.results.plot_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the values stored in <cite>mat</cite></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -416,13 +412,13 @@ named <cite>var</cite></p>
 
 <dl class="method">
 <dt id="top.results.read_model">
-<code class="descname">read_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#top.results.read_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">read_model</tt><big>(</big><big>)</big><a class="headerlink" href="#top.results.read_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the model that was used to perform the computation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">model</span></code> (see <a class="reference internal" href="#model"><span class="std std-ref">model</span></a>)</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">model</span></tt> (see <a class="reference internal" href="#model"><em>model</em></a>)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the model used to perform computation</td>
 </tr>
@@ -432,7 +428,7 @@ named <cite>var</cite></p>
 
 <dl class="method">
 <dt id="top.results.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>h5file</em>, <em>ids=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#top.results.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><em>h5file</em>, <em>ids=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#top.results.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>saves the results in HDF5 format in file named <cite>h5file</cite></p>
 </dd></dl>
 
@@ -445,10 +441,10 @@ named <cite>var</cite></p>
 with the name of the field between brackets (e.g, <cite>m[&#8216;h&#8217;]</cite> would return the
 enthalpy of the model <cite>m</cite>).</p>
 <p>But you need to know what are the fields defined for each model. See
-<a class="reference internal" href="model.html#models"><span class="std std-ref">models</span></a> for a list of supported models in TOP, and a list a fields defined by each model.</p>
+<a class="reference internal" href="model.html#models"><em>models</em></a> for a list of supported models in TOP, and a list a fields defined by each model.</p>
 <dl class="class">
 <dt id="top.model">
-<em class="property">class </em><code class="descclassname">top.</code><code class="descname">model</code><span class="sig-paren">(</span><em>libmodel</em>, <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#top.model" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">top.</tt><tt class="descname">model</tt><big>(</big><em>libmodel</em>, <em>filename</em><big>)</big><a class="headerlink" href="#top.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class storing a star model</p>
 <p>access to fields of the model can be achieved with square bracket operator.
 But you need to know the fields stored in your model.</p>
@@ -456,7 +452,7 @@ But you need to know the fields stored in your model.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body">m[&#8216;w&#8217;] # access the field omega of the model <cite>m</cite></td>
+<tr class="field-odd field"><th class="field-name">Example :</th><td class="field-body">m[&#8216;w&#8217;] # access the field omega of the model <cite>m</cite></td>
 </tr>
 </tbody>
 </table>
@@ -490,7 +486,7 @@ But you need to know the fields stored in your model.</p>
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>

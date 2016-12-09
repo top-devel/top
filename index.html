@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TOP’s documentation &#8212; TOP 1.0-rc1 documentation</title>
+    <title>TOP’s documentation &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="#" />
     <link rel="next" title="Install" href="install.html" />
 <meta charset='utf-8'>
@@ -42,7 +42,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -61,8 +61,6 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="https://github.com/top-devel/top">GitHub Repository</a></li>
-            
             
               <li class="dropdown globaltoc-container">
   <a role="button"
@@ -79,7 +77,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -105,9 +103,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -146,23 +142,23 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>TOP consists of a python module, a compiler and several <em>templates</em> (see
-<a class="reference internal" href="model.html#models"><span class="std std-ref">Stellar Models in TOP</span></a>) to read stellar models.
+<a class="reference internal" href="model.html#models"><em>Stellar Models in TOP</em></a>) to read stellar models.
 This allows users to write their own set of equations in a flexible way.</p>
 <p>The basic workflow with TOP is the following:</p>
 <ol class="arabic simple">
-<li>write an equation file (see <a class="reference internal" href="equation.html#equation"><span class="std std-ref">Equation Files</span></a>)</li>
-<li>compile this file with <code class="docutils literal"><span class="pre">top-build</span></code></li>
-<li>compute oscillations modes and frequencies with <code class="docutils literal"><span class="pre">top</span></code> python module (see
-<a class="reference internal" href="api.html#api"><span class="std std-ref">Python API</span></a>):<ul>
+<li>write an equation file (see <a class="reference internal" href="equation.html#equation"><em>Equation Files</em></a>)</li>
+<li>compile this file with <tt class="docutils literal"><span class="pre">top-build</span></tt></li>
+<li>compute oscillations modes and frequencies with <tt class="docutils literal"><span class="pre">top</span></tt> python module (see
+<a class="reference internal" href="api.html#api"><em>Python API</em></a>):<ul>
 <li>read input parameters</li>
 <li>read a stellar model</li>
 <li>run the Arnoldi-Chebyshev method</li>
 </ul>
 </li>
 </ol>
-<div class="figure align-center" id="id1" style="width: 500px">
-<a class="reference internal image-reference" href="_images/overview.png"><img alt="_images/overview.png" src="_images/overview.png" style="width: 400px;" /></a>
-<p class="caption"><span class="caption-text">TOP&#8217;s Software Architecture</span></p>
+<div class="figure align-center" style="width: 500px">
+<img alt="_images/overview.png" src="_images/overview.png" style="width: 400px;" />
+<p class="caption">TOP&#8217;s Software Architecture</p>
 </div>
 </div>
 <div class="section" id="documentation">
@@ -175,7 +171,7 @@ This allows users to write their own set of equations in a flexible way.</p>
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -201,13 +197,19 @@ This allows users to write their own set of equations in a flexible way.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
 </div>
+</div>
+<div class="section" id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
+<p>This public version of the TOP code is part of the <a class="reference external" href="http://www.spaceinn.eu/">SPACEInn</a> Project (Exploitation of Space Data for Innovative Helio- and Asteroseismology), initiated by the European Helio- and Asteroseismology Network (<a class="reference external" href="https://www.helas-project.eu/">HELAS</a>) and financed by the European Union under the Seventh Framework Programme (FP7 project n° 312844).</p>
+<a class="reference external image-reference" href="http://www.spaceinn.eu/"><img alt="SPACEInn" class="align-left" src="_images/spaceinn_logo.jpg" style="height: 100px;" /></a>
+<a class="reference external image-reference" href="http://www.irap.omp.eu/"><img alt="IRAP" class="align-left" src="_images/logo-irap.png" style="height: 100px;" /></a>
+<a class="reference external image-reference" href="http://www.univ-tlse3.fr/"><img alt="UPS Toulouse" class="align-left" src="_images/Logo-UPS.jpg" style="height: 100px;" /></a>
+<a class="reference external image-reference" href="http://www.cnrs.fr/"><img alt="CNRS" class="align-left" src="_images/logo_cnrs.png" style="height: 100px;" /></a>
 </div>
 </div>
 
@@ -224,7 +226,7 @@ This allows users to write their own set of equations in a flexible way.</p>
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>
