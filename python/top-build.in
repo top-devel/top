@@ -13,6 +13,12 @@ def is_multi(f):
         return True
     return False
 
+def is_new_eq(f):
+    if f.endswith('.eq'):
+        if 'field' in open(f).read():
+            return True
+    return False
+
 def is_2D(f):
     if 'llm' in open(f).read():
         raise Exception('2D problems not yet supported')
@@ -32,9 +38,9 @@ parser.add_argument('--cplx',
         dest='cplx_opt', action='store_true',
         help='Forces usage of complex version')
 
-parser.add_argument('--parser',
-        dest='new_parser', action='store_true',
-        help='Use new parser')
+# parser.add_argument('--parser',
+#         dest='new_parser', action='store_true',
+#         help='Use new parser')
 
 parser.add_argument('mpi',
         nargs='?',
@@ -56,55 +62,60 @@ parser.add_argument('--debug', dest='debug', action='store_true',
         help='debug')
 parser.set_defaults(debug=False)
 
+parser.add_argument('--latex',
+        nargs=1,
+        help='output LaTeX file')
+
+
 args = parser.parse_args()
 
 eqfile = args.file
 if not os.path.isfile(eqfile):
-    print("Error: file `" + eqfile + "' does not exists")
+    print('Error: file `' + eqfile + '\' does not exists')
     sys.exit(1)
 
 # get abs path for equation file
-eqfile = os.path.dirname(os.path.abspath(eqfile)) + "/" + os.path.basename(eqfile)
+eqfile = os.path.dirname(os.path.abspath(eqfile)) + '/' + os.path.basename(eqfile)
 
-if args.new_parser:
-    readeq = "@abs_top_builddir@/parser/readeq"
-else:
-    readeq = "@abs_top_builddir@/utils/readeq"
+# if args.new_parser:
+#     readeq = '@abs_top_builddir@/parser/readeq'
+# else:
+#     readeq = '@abs_top_builddir@/utils/readeq'
 
-flags="top_flags="
+flags='top_flags='
 f2py_def=''
 
+readeq = ''
+if not is_new_eq(eqfile):
+    readeq = '@abs_top_builddir@/utils/readeq'
+    if args.latex:
+        print('Warning: LaTeX output not supported for legacy equation format')
+        print('Ignoring --latex option...')
+
 if is_cplx(eqfile) or args.cplx_opt:
-    if not args.new_parser:
-        readeq += "-cplx"
-    flags += " -DUSE_COMPLEX"
+    readeq += '-cplx'
+    flags += ' -DUSE_COMPLEX'
     f2py_def='-DUSE_COMPLEX'
 else:
-    if not args.new_parser:
-        readeq += "-real"
+    readeq += '-real'
     f2py_def='-DUSE_REAL'
 
 if is_2D(eqfile):
-    if not args.new_parser:
-        readeq += "-2D"
+    readeq += '-2D'
 else:
-    if not args.new_parser:
-        readeq += "-1D"
-    flags += " -DUSE_1D"
+    readeq += '-1D'
+    flags += ' -DUSE_1D'
     f2py_def+=' -DUSE_1D'
 
 if is_multi(eqfile):
-    if not args.new_parser:
-        readeq += "-multi"
-    flags += " -DUSE_MULTI"
+    readeq += '-multi'
+    flags += ' -DUSE_MULTI'
     f2py_def+=' -DUSE_MULTI'
 else:
-    if not args.new_parser:
-        readeq += "-mono"
+    readeq += '-mono'
 
-if args.mpi == "mpi":
-    if not args.new_parser:
-        readeq += "-mpi"
+if is_new_eq(eqfile):
+    readeq = '@abs_top_builddir@/parser/readeq'
 
 if args.order:
     order = args.order[0]
@@ -124,116 +135,117 @@ if not os.access('@abs_top_srcdir@/src/model_%s.F90' % args.model, os.F_OK):
     print('Error: no model named `%s\'' % args.model)
     sys.exit(1)
 
-# print("TOP flavor: " + readeq)
 if not os.path.isfile(readeq):
-    print("Error incompatible options (readeq: `%s\')" % readeq)
+    print('Error incompatible options (readeq: `%s\')' % readeq)
     sys.exit(1)
 
 if args.debug:
-    sys.stdout.write("Building [DEBUG] " + os.path.basename(eqfile) + " (")
+    sys.stdout.write('Building [DEBUG] ' + os.path.basename(eqfile) + ' (')
 else:
-    sys.stdout.write("Building " + os.path.basename(eqfile) + " (")
+    sys.stdout.write('Building ' + os.path.basename(eqfile) + ' (')
 
 if is_cplx(eqfile) or args.cplx_opt:
-    sys.stdout.write("complex ")
+    sys.stdout.write('complex ')
 else:
-    sys.stdout.write("real ")
+    sys.stdout.write('real ')
 
 if is_2D(eqfile):
-    sys.stdout.write("2D ")
+    sys.stdout.write('2D ')
 else:
-    sys.stdout.write("1D ")
+    sys.stdout.write('1D ')
 
 if is_multi(eqfile):
-    sys.stdout.write("multi)")
+    sys.stdout.write('multi)')
 else:
-    sys.stdout.write("mono)")
+    sys.stdout.write('mono)')
 
-sys.stdout.write("... ")
+sys.stdout.write('... ')
 sys.stdout.flush()
 
 try:
-    subprocess.check_output(["make",
-        "clean",
-        "-C",
-        "@abs_top_builddir@/src"],
-        stderr=subprocess.STDOUT)
-
-    os.chdir("@abs_top_builddir@/src")
-    if args.new_parser:
-        if is_2D(eqfile):
-            subprocess.check_output([readeq,
-                "-o", "matrices.inc", eqfile],
-                stderr=subprocess.STDOUT)
-        else:
-            subprocess.check_output([readeq, "-d", "1",
-                "-o", "matrices.inc", eqfile],
-                stderr=subprocess.STDOUT)
-    else:
-        subprocess.check_output(["@PERL@", readeq, eqfile],
-                stderr=subprocess.STDOUT)
-    os.chdir(oldwd)
-
-    subprocess.check_output(["make",
-        "grid.o",
-        "eigensolve.o",
-        "inputs.o",
-        "matrices.o",
-        "mod_blacs.o",
-        "model.o",
-        "ester-interface.o",
-        "postproc.o",
-        "legpy.so",
-        "-C",
-        "@abs_top_builddir@/src",
-        "model=" + args.model,
-        flags],
-        stderr=subprocess.STDOUT)
-
-    subprocess.check_output(["mkdir",
-        "-p",
-        "@abs_top_builddir@/src/lib"],
+    subprocess.check_output(['make',
+        'clean',
+        '-C',
+        '@abs_top_builddir@/src'],
         stderr=subprocess.STDOUT)
 
     libname = os.path.basename(eqfile).split('.')[0]
-    subprocess.check_output(["@F2PY@",
-        "--f90exec=@FC@",
-        "-I@abs_top_builddir@",
-        "-I@abs_top_builddir@/src",
-        "-I@abs_top_builddir@/lib/itemlist",
-        "-I@abs_top_builddir@/lib/legendre",
-        "-I@abs_top_builddir@/lib/getpar",
-        "-I@abs_top_builddir@/lib/der",
-        "-L@libdir@",
+    os.chdir('@abs_top_builddir@/src')
+    if is_new_eq(eqfile):
+        cmd = readeq + ' -o matrices.inc'
+        if is_2D(eqfile):
+            cmd += ' -d 2 '
+        else:
+            cmd += ' -d 1 '
+        if args.latex:
+            cmd += ' -l ' + oldwd + '/' + args.latex[0] + ' '
+        cmd += eqfile
+        subprocess.check_output(cmd.split(),
+            stderr=subprocess.STDOUT)
+    else:
+        subprocess.check_output(['@PERL@', readeq, eqfile],
+                stderr=subprocess.STDOUT)
+    os.chdir(oldwd)
+
+    subprocess.check_output(['make',
+        'grid.o',
+        'eigensolve.o',
+        'inputs.o',
+        'matrices.o',
+        'mod_blacs.o',
+        'model.o',
+        'ester-interface.o',
+        'postproc.o',
+        'legpy.so',
+        '-C',
+        '@abs_top_builddir@/src',
+        'model=' + args.model,
+        flags],
+        stderr=subprocess.STDOUT)
+
+    subprocess.check_output(['mkdir',
+        '-p',
+        '@abs_top_builddir@/src/lib'],
+        stderr=subprocess.STDOUT)
+
+    subprocess.check_output(['@F2PY@',
+        '--f90exec=@FC@',
+        '-I@abs_top_builddir@',
+        '-I@abs_top_builddir@/src',
+        '-I@abs_top_builddir@/lib/itemlist',
+        '-I@abs_top_builddir@/lib/legendre',
+        '-I@abs_top_builddir@/lib/getpar',
+        '-I@abs_top_builddir@/lib/der',
+        '-L@libdir@',
         f2py_def,
-        "-c",
-        "-m",
+        '-c',
+        '-m',
         libname,
-        "-lgetpar",
-        "-llegendre",
-        "-larnoldi",
-        "-lder",
-        "-lfit",
-        "-litemlist",
-        "-llapack_extra",
-        "@libs@",
-        "@abs_top_builddir@/src/eigensolve.o",
-        "@abs_top_builddir@/src/grid.o",
-        "@abs_top_builddir@/src/matrices.o",
-        "@abs_top_builddir@/src/mod_blacs.o",
-        "@abs_top_builddir@/src/abstract_model.o",
-        "@abs_top_builddir@/src/model.o",
-        "@abs_top_builddir@/src/ester-interface.o",
-        "@abs_top_builddir@/src/postproc.o",
-        "@abs_top_builddir@/src/hpsort_index.o",
-        "@abs_top_srcdir@/src/python.F90",
-        "@abs_top_srcdir@/src/config.F90",
-        "@abs_top_builddir@/src/inputs.F90"],
+        '-lgetpar',
+        '-llegendre',
+        '-larnoldi',
+        '-lder',
+        '-lfit',
+        '-litemlist',
+        '-llapack_extra',
+        '@libs@',
+        '@abs_top_builddir@/src/eigensolve.o',
+        '@abs_top_builddir@/src/grid.o',
+        '@abs_top_builddir@/src/matrices.o',
+        '@abs_top_builddir@/src/mod_blacs.o',
+        '@abs_top_builddir@/src/abstract_model.o',
+        '@abs_top_builddir@/src/model.o',
+        '@abs_top_builddir@/src/ester-interface.o',
+        '@abs_top_builddir@/src/postproc.o',
+        '@abs_top_builddir@/src/hpsort_index.o',
+        '@abs_top_srcdir@/src/python.F90',
+        '@abs_top_srcdir@/src/config.F90',
+        '@abs_top_builddir@/src/inputs.F90'],
         stderr=subprocess.STDOUT)
 
     files=subprocess.check_output(['ls']).decode().split()
     for f in files:
-        if libname in f:
+        if libname in f and f.endswith('.so'):
             outlibname = f
     cmd = 'mv ' + outlibname + ' @abs_top_builddir@/src/lib/' + libname + '.so'
     subprocess.check_output(cmd.split())
@@ -242,19 +254,19 @@ try:
     # subprocess.check_output(cmd.split())
 
     # if args.debug == False:
-    #     subprocess.check_output(["make",
-    #         "uninstall",
-    #         "-C",
-    #         "@abs_top_builddir@/src"],
+    #     subprocess.check_output(['make',
+    #         'uninstall',
+    #         '-C',
+    #         '@abs_top_builddir@/src'],
     #         stderr=subprocess.STDOUT)
 
-    print("[OK]")
+    print('[OK]')
     # if args.debug:
     #     print('Debug binary location: @abs_top_builddir@/src/debug/top-debug')
     sys.exit(0)
 
 except subprocess.CalledProcessError as e:
-    print("[Failed]")
+    print('[Failed]')
     os.chdir(oldwd)
     f = open('top-build.err', 'w')
     print('Check `top-build.err\'')
@@ -263,8 +275,9 @@ except subprocess.CalledProcessError as e:
     except:
         f.write(e.output)
     f.close()
+    print(e)
     sys.exit(1)
 
 except Exception as e:
-    print("[Failed]")
+    print(e)
     sys.exit(1)

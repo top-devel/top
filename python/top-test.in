@@ -44,8 +44,6 @@ if __name__ == '__main__':
             print('  Build: ', end='')
             sys.stdout.flush()
             cmd = '@prefix@/bin/top-build'
-            if eq_file.endswith(".eq"):
-                cmd += ' --parser'
             if order != None:
                 cmd += ' --order=@abs_top_builddir@/examples/%s/%s' % \
                     (model, order)

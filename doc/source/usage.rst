@@ -24,7 +24,7 @@ Options
 
 The options you can pass to ``top-build`` are:
 
---parser        use the parser for the new language (see :ref:`new_equation`).
+--latex=FILE    enable LaTeX output to file ``FILE``
 
 --order=FILE    use the file named ``FILE`` instead of the default one to manage the order of variable and equation.
 
