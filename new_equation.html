@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>New Equation Format &#8212; TOP 1.0-rc1 documentation</title>
+    <title>New Equation Format &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="up" title="Equation Files" href="equation.html" />
     <link rel="next" title="Python API" href="api.html" />
@@ -44,7 +44,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -81,7 +81,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -97,7 +97,7 @@
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="equation.html">Equation Files</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="legacy_equation.html">Legacy Equation Format</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">New Equation Format</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">New Equation Format</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a><ul>
@@ -107,9 +107,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -151,14 +149,13 @@
 With this format equation are written in there mathematical expression after
 projection on the spherical harmonics.</p>
 <p>Here is an example of such equation if the 1D case:</p>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">lh</span><span class="o">*</span><span class="p">(</span><span class="n">lh</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Et</span> <span class="o">=</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">Gamma1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dP_P</span>    <span class="o">+</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>        <span class="o">*</span> <span class="n">Er</span><span class="s1">&#39;     +</span>
-    <span class="mi">2</span>             <span class="o">*</span> <span class="n">Er</span>
-<span class="k">with</span> <span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">dr</span><span class="p">(</span><span class="n">Er</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lh</span> <span class="o">*</span> <span class="n">dr</span><span class="p">(</span><span class="n">Et</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">at</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
-</pre></div>
+<div class="code highlight-python"><pre>lh*(lh+1) * Et =
+    avg(r/Gamma1) * dP_P    +
+    avg(r)        * Er'     +
+    2             * Er
+with (r=1)
+    dr(Er, -1) = lh * dr(Et, -1)
+    at r = 0</pre>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -172,8 +169,8 @@ linear.</p>
 <span id="param-def"></span><h3>The Parameters Section<a class="headerlink" href="#the-parameters-section" title="Permalink to this headline">¶</a></h3>
 <p>At the beginning of an equation file, one is able to define several parameter
 that can be used within the definition of equation. These parameters can be
-defined with the <code class="docutils literal"><span class="pre">input</span></code> keyword, followed by its type (<code class="docutils literal"><span class="pre">double</span></code>, <code class="docutils literal"><span class="pre">int</span></code>
-or <code class="docutils literal"><span class="pre">string</span></code>) ant its name:</p>
+defined with the <tt class="docutils literal"><span class="pre">input</span></tt> keyword, followed by its type (<tt class="docutils literal"><span class="pre">double</span></tt>, <tt class="docutils literal"><span class="pre">int</span></tt>
+or <tt class="docutils literal"><span class="pre">string</span></tt>) ant its name:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -182,9 +179,8 @@ or <code class="docutils literal"><span class="pre">string</span></code>) ant it
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="nb">input</span> <span class="n">double</span> <span class="n">mass</span>
-<span class="nb">input</span> <span class="n">double</span> <span class="n">rota</span>
-</pre></div>
+<div class="code highlight-python"><pre>input double mass
+input double rota</pre>
 </div>
 </div>
 <div class="section" id="variable-and-model-definition">
@@ -195,7 +191,7 @@ model.</p>
 <div class="section" id="variable-definition">
 <span id="var-def"></span><h4>Variable Definition<a class="headerlink" href="#variable-definition" title="Permalink to this headline">¶</a></h4>
 <p>In order to define variables of the problem, one has to define them using the
-<code class="docutils literal"><span class="pre">var</span></code> keyword followed by a comma separated list of names.</p>
+<tt class="docutils literal"><span class="pre">var</span></tt> keyword followed by a comma separated list of names.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">2 or 3 variables surrounded by parenthesis means that they are component of
@@ -209,16 +205,15 @@ vector.</p>
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">PhiP</span><span class="p">,</span> <span class="p">(</span><span class="n">Er</span><span class="p">,</span> <span class="n">Et</span><span class="p">),</span> <span class="n">dP_P</span>
-</pre></div>
+<div class="code highlight-python"><pre>var Phi, PhiP, (Er, Et), dP_P</pre>
 </div>
-<p>Will define 5 variables, <code class="docutils literal"><span class="pre">Er</span></code> and <code class="docutils literal"><span class="pre">Et</span></code> being first and second component
+<p>Will define 5 variables, <tt class="docutils literal"><span class="pre">Er</span></tt> and <tt class="docutils literal"><span class="pre">Et</span></tt> being first and second component
 of a vector.</p>
 </div>
 <div class="section" id="model-s-field-definition">
 <span id="model-def"></span><h4>Model&#8217;s Field definition<a class="headerlink" href="#model-s-field-definition" title="Permalink to this headline">¶</a></h4>
 <p>In the same way variables can be defined, fields and scalar defined from the
-stellar model can be defined with <code class="docutils literal"><span class="pre">field</span></code> or <code class="docutils literal"><span class="pre">scalar</span></code> keywords:</p>
+stellar model can be defined with <tt class="docutils literal"><span class="pre">field</span></tt> or <tt class="docutils literal"><span class="pre">scalar</span></tt> keywords:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -227,20 +222,19 @@ stellar model can be defined with <code class="docutils literal"><span class="pr
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">field</span> <span class="n">pm</span><span class="p">,</span> <span class="n">g_m</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">rhom</span><span class="p">,</span> <span class="n">dg_m</span><span class="p">,</span> <span class="n">rhom_z</span>
-<span class="n">scalar</span> <span class="n">Gamma1</span><span class="p">,</span> <span class="n">Lambda</span>
-</pre></div>
+<div class="code highlight-python"><pre>field pm, g_m, r, rhom, dg_m, rhom_z
+scalar Gamma1, Lambda</pre>
 </div>
 </div>
 </div>
 <div class="section" id="equation-definition">
 <h3>Equation Definition<a class="headerlink" href="#equation-definition" title="Permalink to this headline">¶</a></h3>
 <p>After the definition/declaration section, we can start defining the equation
-after the <code class="docutils literal"><span class="pre">in</span></code> keyword.</p>
+after the <tt class="docutils literal"><span class="pre">in</span></tt> keyword.</p>
 <div class="section" id="defining-an-equation">
 <h4>Defining an equation<a class="headerlink" href="#defining-an-equation" title="Permalink to this headline">¶</a></h4>
-<p>In order to add an equation in the system, one can use the <code class="docutils literal"><span class="pre">equation</span></code> keyword,
-followed by the name of the equation, followed by a <code class="docutils literal"><span class="pre">:</span></code> (colon) and the
+<p>In order to add an equation in the system, one can use the <tt class="docutils literal"><span class="pre">equation</span></tt> keyword,
+followed by the name of the equation, followed by a <tt class="docutils literal"><span class="pre">:</span></tt> (colon) and the
 expression of the equation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -250,18 +244,17 @@ expression of the equation.</p>
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">equation</span> <span class="n">eqdP_P</span><span class="p">:</span>
-<span class="n">lh</span><span class="o">*</span><span class="p">(</span><span class="n">lh</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Et</span> <span class="o">=</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">Gamma1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dP_P</span>    <span class="o">+</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>        <span class="o">*</span> <span class="n">Er</span><span class="s1">&#39;     +</span>
-    <span class="mi">2</span>             <span class="o">*</span> <span class="n">Er</span>
-</pre></div>
+<div class="code highlight-python"><pre>equation eqdP_P:
+lh*(lh+1) * Et =
+    avg(r/Gamma1) * dP_P    +
+    avg(r)        * Er'     +
+    2             * Er</pre>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Every identifier (<em>i.e.,</em> name) involved in an equation need to be defined
-(either as a <a class="reference internal" href="#var-def"><span class="std std-ref">variable</span></a>, a <a class="reference internal" href="#model-def"><span class="std std-ref">field or a scalar</span></a> or
-<a class="reference internal" href="#param-def"><span class="std std-ref">a parameter</span></a>).</p>
+(either as a <a class="reference internal" href="#var-def"><em>variable</em></a>, a <a class="reference internal" href="#model-def"><em>field or a scalar</em></a> or
+<a class="reference internal" href="#param-def"><em>a parameter</em></a>).</p>
 </div>
 </div>
 <div class="section" id="boundary-condition">
@@ -272,7 +265,7 @@ equation with the following syntax:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">with</span> <span class="pre">(r=numerical_location)</span> <span class="pre">epxression</span> <span class="pre">at</span> <span class="pre">r</span> <span class="pre">=</span> <span class="pre">location</span></code> where:</p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">with</span> <span class="pre">(r=numerical_location)</span> <span class="pre">epxression</span> <span class="pre">at</span> <span class="pre">r</span> <span class="pre">=</span> <span class="pre">location</span></tt> where:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -293,15 +286,14 @@ boundary condition.</td>
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">equation</span> <span class="n">eqdP_P</span><span class="p">:</span>
-<span class="n">lh</span><span class="o">*</span><span class="p">(</span><span class="n">lh</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Et</span> <span class="o">=</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">Gamma1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dP_P</span>    <span class="o">+</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>        <span class="o">*</span> <span class="n">Er</span><span class="s1">&#39;     +</span>
-    <span class="mi">2</span>             <span class="o">*</span> <span class="n">Er</span>
-<span class="k">with</span> <span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">dr</span><span class="p">(</span><span class="n">Er</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lh</span> <span class="o">*</span> <span class="n">dr</span><span class="p">(</span><span class="n">Et</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">at</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
-</pre></div>
+<div class="code highlight-python"><pre>equation eqdP_P:
+lh*(lh+1) * Et =
+    avg(r/Gamma1) * dP_P    +
+    avg(r)        * Er'     +
+    2             * Er
+with (r=1)
+    dr(Er, -1) = lh * dr(Et, -1)
+    at r = 0</pre>
 </div>
 </div>
 </div>
@@ -315,16 +307,16 @@ without prior declarations, here is a list of such symbols:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">fp</span></code>:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">fp</span></tt>:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">fp</span></code></td>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><tt class="docutils literal"><span class="pre">fp</span></tt></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><code class="docutils literal"><span class="pre">fp</span></code> is the eigenvalue of the problem. It should appear in
+<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body"><tt class="docutils literal"><span class="pre">fp</span></tt> is the eigenvalue of the problem. It should appear in
 equation definition</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><code class="docutils literal"><span class="pre">fp^2</span> <span class="pre">*</span> <span class="pre">r</span> <span class="pre">*</span> <span class="pre">Et</span> <span class="pre">-</span> <span class="pre">pm/rhom</span> <span class="pre">*</span> <span class="pre">dP_P</span> <span class="pre">-</span> <span class="pre">Phi</span> <span class="pre">-</span> <span class="pre">g_m</span> <span class="pre">=</span> <span class="pre">0</span></code></td>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><tt class="docutils literal"><span class="pre">fp^2</span> <span class="pre">*</span> <span class="pre">r</span> <span class="pre">*</span> <span class="pre">Et</span> <span class="pre">-</span> <span class="pre">pm/rhom</span> <span class="pre">*</span> <span class="pre">dP_P</span> <span class="pre">-</span> <span class="pre">Phi</span> <span class="pre">-</span> <span class="pre">g_m</span> <span class="pre">=</span> <span class="pre">0</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -339,37 +331,37 @@ equation definition</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">dr</span></code>:</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">dr</span></tt>:</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">dr(var,</span> <span class="pre">order)</span></code></td>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><tt class="docutils literal"><span class="pre">dr(var,</span> <span class="pre">order)</span></tt></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body">derivative of <code class="docutils literal"><span class="pre">var</span></code> of order <code class="docutils literal"><span class="pre">order</span></code></td>
+<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body">derivative of <tt class="docutils literal"><span class="pre">var</span></tt> of order <tt class="docutils literal"><span class="pre">order</span></tt></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><code class="docutils literal"><span class="pre">dr(Phi,</span> <span class="pre">2)</span></code> stands for <span class="math">\(\frac{\partial^2\Phi}{\partial r^2}\)</span></td>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><tt class="docutils literal"><span class="pre">dr(Phi,</span> <span class="pre">2)</span></tt> stands for <span class="math">\(\frac{\partial^2\Phi}{\partial r^2}\)</span></td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Radial derivatives can also be expressed with the <code class="docutils literal"><span class="pre">'</span></code> (apostrophe)
-post-fixed operator: <code class="docutils literal"><span class="pre">dr(Phi,</span> <span class="pre">2)</span></code> and <code class="docutils literal"><span class="pre">Phi''</span></code> are two notations strictly
+<p class="last">Radial derivatives can also be expressed with the <tt class="docutils literal"><span class="pre">'</span></tt> (apostrophe)
+post-fixed operator: <tt class="docutils literal"><span class="pre">dr(Phi,</span> <span class="pre">2)</span></tt> and <tt class="docutils literal"><span class="pre">Phi''</span></tt> are two notations strictly
 equivalent.</p>
 </div>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">avg</span></code>:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">avg</span></tt>:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><code class="docutils literal"><span class="pre">avg(expr)</span></code></td>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><tt class="docutils literal"><span class="pre">avg(expr)</span></tt></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body">average of expression <code class="docutils literal"><span class="pre">expr</span></code> on the point of the grid used for for
+<tr class="field-even field"><th class="field-name">Semantics:</th><td class="field-body">average of expression <tt class="docutils literal"><span class="pre">expr</span></tt> on the point of the grid used for for
 derivation or interpolation (therefore it depends on the numerical
 scheme used).</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><code class="docutils literal"><span class="pre">avg(r/Gamma1)</span> <span class="pre">*</span> <span class="pre">dP_P</span></code></td>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><tt class="docutils literal"><span class="pre">avg(r/Gamma1)</span> <span class="pre">*</span> <span class="pre">dP_P</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -381,7 +373,7 @@ scheme used).</td>
 </div>
 <div class="section" id="comments">
 <h3>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h3>
-<p>Comments can be added in equation file using a pound sign (<code class="docutils literal"><span class="pre">#</span></code>), the remaining
+<p>Comments can be added in equation file using a pound sign (<tt class="docutils literal"><span class="pre">#</span></tt>), the remaining
 of the line will be ignored.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -391,12 +383,11 @@ of the line will be ignored.</p>
 </tr>
 </tbody>
 </table>
-<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="c1"># define the first equation</span>
-<span class="n">equation</span> <span class="n">eqdP_P</span><span class="p">:</span>
-<span class="n">lh</span><span class="o">*</span><span class="p">(</span><span class="n">lh</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Et</span> <span class="o">=</span>            <span class="c1"># this is the LHS of the equation</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">Gamma1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dP_P</span> <span class="o">+</span>  <span class="c1"># this the RHS</span>
-    <span class="n">avg</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">Er</span><span class="s1">&#39;</span>
-</pre></div>
+<div class="code highlight-python"><pre># define the first equation
+equation eqdP_P:
+lh*(lh+1) * Et =            # this is the LHS of the equation
+    avg(r/Gamma1) * dP_P +  # this the RHS
+    avg(r) * Er'</pre>
 </div>
 </div>
 </div>
@@ -445,7 +436,7 @@ of the line will be ignored.</p>
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>

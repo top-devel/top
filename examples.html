@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Examples &#8212; TOP 1.0-rc1 documentation</title>
+    <title>Usage Examples &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="next" title="Download" href="download.html" />
     <link rel="prev" title="Python API" href="api.html" />
@@ -43,7 +43,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -80,7 +80,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -105,10 +105,11 @@
 <li class="toctree-l2"><a class="reference internal" href="api.html#star-models">Star Models</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#surface">Surface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -144,6 +145,31 @@
       
   <div class="section" id="usage-examples">
 <h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="surface">
+<h2>Surface<a class="headerlink" href="#surface" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="description">
+<h3>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<p>The directory example contains a subdirectory name <tt class="docutils literal"><span class="pre">surface</span></tt> that proposes python softwares and scripts:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">patch_model.py</span></tt> is a module patched an averaged 3-D atmosphere on a 1-D stellar structure</li>
+<li><tt class="docutils literal"><span class="pre">run_model.py</span></tt> is an example of use of the <tt class="docutils literal"><span class="pre">patch_model</span></tt> module followed by the frequency computation for the unpatched and patched model. The example is based on the solar cases. The reference model is the model S by by Christensen-Dalsgaard, J. et al. (1996, Science 272, 1286), the stellar atmosphere has been computed by Belkacem, K.,Samadi , R.,Kupka, F., Grimm-Strele, H. (in preparation) with the ANTARES code Muthsam et al. (2010, New Ast. 15, 460). At the end of the example the script compared computed frequencies with GOLF observation (Courtesy R.A. Garcia, CEA-Saclay)</li>
+<li><tt class="docutils literal"><span class="pre">script.sh</span></tt> is a script compiling top and running <tt class="docutils literal"><span class="pre">run_model.py</span></tt>. You must edit the first and replacing $HOME/TOP_2016/top/BUILD with the directory where top has been installed on your system.</li>
+</ul>
+</div>
+<div class="section" id="results">
+<h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
+<p>Here are some results obtained with <tt class="docutils literal"><span class="pre">run_model.py</span></tt></p>
+<div class="figure align-center" style="width: 600px">
+<img alt="density" src="_images/figure_0:rho.png" style="width: 500px;" />
+<p class="caption">Density profiles near the surface.</p>
+</div>
+<div class="figure align-center" style="width: 600px">
+<img alt="comparison" src="_images/figure_10:patched_result.png" style="width: 500px;" />
+<p class="caption">The frequencies of radial modes observed with GOLF compared to the ones computed with patched and unpatched models.</p>
+</div>
+<p>These results are based on an approach similar to the one used by  Rosenthal et al. (1999, A&amp;A 351, 689) or Piau et al. (2014, MNRAS 437, 164).</p>
+</div>
+</div>
 </div>
 
 
@@ -151,7 +177,14 @@
      
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Usage Examples</a></li>
+<li><a class="reference internal" href="#">Usage Examples</a><ul>
+<li><a class="reference internal" href="#surface">Surface</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -166,7 +199,7 @@
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>

@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Install &#8212; TOP 1.0-rc1 documentation</title>
+    <title>Install &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="next" title="Usage" href="usage.html" />
     <link rel="prev" title="TOP’s documentation" href="index.html" />
@@ -43,7 +43,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -74,13 +74,13 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Install</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Install</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#quick-install-guide">Quick Install Guide</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-the-code">Getting the code</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -106,9 +106,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -146,28 +144,27 @@
 <h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="quick-install-guide">
 <h2>Quick Install Guide<a class="headerlink" href="#quick-install-guide" title="Permalink to this headline">¶</a></h2>
-<p>TOP uses the standard <code class="docutils literal"><span class="pre">autotools</span></code> (<a class="reference external" href="https://www.gnu.org/software/autoconf/">autoconf</a>, <a class="reference external" href="https://www.gnu.org/software/automake/">automake</a>) install procedure,
+<p>TOP uses the standard <tt class="docutils literal"><span class="pre">autotools</span></tt> (<a class="reference external" href="https://www.gnu.org/software/autoconf/">autoconf</a>, <a class="reference external" href="https://www.gnu.org/software/automake/">automake</a>) install procedure,
 you should be able to install it using:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="c1"># get the code:</span>
+<div class="highlight-shell"><pre># get the code:
 git clone https://github.com/top-devel/top.git
 
-<span class="c1"># enter the source code directory:</span>
-<span class="nb">cd</span> top
+# enter the source code directory:
+cd top
 
-<span class="c1"># download the optional dependencies:</span>
+# download the optional dependencies:
 git submodule init
 git submodule update
 
-<span class="c1"># prepare the configure script:</span>
+# prepare the configure script:
 ./bootstrap
 
-<span class="c1"># configure and install TOP:</span>
-./configure <span class="o">&amp;&amp;</span> make install
-</pre></div>
+# configure and install TOP:
+./configure &amp;&amp; make install</pre>
 </div>
 <p>You can get more details and options reading the following sections:
-<a class="reference internal" href="#download"><span class="std std-ref">getting the code</span></a>, <a class="reference internal" href="#configure"><span class="std std-ref">configure</span></a> and
-<a class="reference internal" href="#build"><span class="std std-ref">compile and install</span></a>.</p>
+<a class="reference internal" href="#download"><em>getting the code</em></a>, <a class="reference internal" href="#configure"><em>configure</em></a> and
+<a class="reference internal" href="#build"><em>compile and install</em></a>.</p>
 </div>
 <div class="section" id="getting-the-code">
 <span id="download"></span><h2>Getting the code<a class="headerlink" href="#getting-the-code" title="Permalink to this headline">¶</a></h2>
@@ -175,45 +172,40 @@ git submodule update
 <h3>From the git repository<a class="headerlink" href="#from-the-git-repository" title="Permalink to this headline">¶</a></h3>
 <p>The best way to get the latest version of the code is to download it from the
 repository:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="c1"># with ssh:</span>
+<div class="highlight-shell"><pre># with ssh:
 git clone git@gitlab.com:top-dev/top.git
 
-<span class="c1"># with https:</span>
-git clone https://gitlab.com/top-dev/top.git
-</pre></div>
+# with https:
+git clone https://gitlab.com/top-dev/top.git</pre>
 </div>
-<p>This will download the latest version of the code in a directory named <code class="docutils literal"><span class="pre">top</span></code>.
+<p>This will download the latest version of the code in a directory named <tt class="docutils literal"><span class="pre">top</span></tt>.
 Enter this directory:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> top
-</pre></div>
+<div class="highlight-shell"><pre>cd top</pre>
 </div>
 <p>You can optionally download the parser to write oscillation equations with the
 new equation format:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>git submodule init
-git submodule update
-</pre></div>
+<div class="highlight-shell"><pre>git submodule init
+git submodule update</pre>
 </div>
-<p>Run the <code class="docutils literal"><span class="pre">bootstrap</span></code> script that will create the configure script:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>./bootstrap
-</pre></div>
+<p>Run the <tt class="docutils literal"><span class="pre">bootstrap</span></tt> script that will create the configure script:</p>
+<div class="highlight-shell"><pre>./bootstrap</pre>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">In order to run the <code class="docutils literal"><span class="pre">bootstrap</span></code> script you will need to have <code class="docutils literal"><span class="pre">autoconf</span></code>
-(&gt;=2.59), <code class="docutils literal"><span class="pre">automake</span></code> (&gt;=1.9) and <code class="docutils literal"><span class="pre">libtool</span></code> installed.</p>
+<p class="last">In order to run the <tt class="docutils literal"><span class="pre">bootstrap</span></tt> script you will need to have <tt class="docutils literal"><span class="pre">autoconf</span></tt>
+(&gt;=2.59), <tt class="docutils literal"><span class="pre">automake</span></tt> (&gt;=1.9) and <tt class="docutils literal"><span class="pre">libtool</span></tt> installed.</p>
 </div>
-<p>You can then proceed to the <a class="reference internal" href="#configure"><span class="std std-ref">configure</span></a> steps.</p>
+<p>You can then proceed to the <a class="reference internal" href="#configure"><em>configure</em></a> steps.</p>
 </div>
 <div class="section" id="from-a-source-archive">
 <h3>From a source archive<a class="headerlink" href="#from-a-source-archive" title="Permalink to this headline">¶</a></h3>
-<p>Download a source archive from the <a class="reference internal" href="download.html#download-page"><span class="std std-ref">download page</span></a>.</p>
+<p>Download a source archive from the <a class="reference internal" href="download.html#download-page"><em>download page</em></a>.</p>
 <p>If you don&#8217;t need the latest version of TOP, you can use a source archive.
 Extract your source archive and enter to source directory:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>tar xvjz top-x.y.tar.bz2
-<span class="nb">cd</span> top-x.y
-</pre></div>
+<div class="highlight-shell"><pre>tar xvjz top-x.y.tar.bz2
+cd top-x.y</pre>
 </div>
-<p>And proceed to the <a class="reference internal" href="#configure"><span class="std std-ref">configure</span></a> steps.</p>
+<p>And proceed to the <a class="reference internal" href="#configure"><em>configure</em></a> steps.</p>
 </div>
 </div>
 <div class="section" id="configure">
@@ -222,10 +214,10 @@ Extract your source archive and enter to source directory:</p>
 <p>The configure script allows you to configure the build environment of TOP.
 In order to install TOP, you will need:</p>
 <ul class="simple">
-<li>a Fortran compiler supporting procedure interface (<code class="docutils literal"><span class="pre">gfortran</span> <span class="pre">(&gt;=4.9)</span></code>)</li>
-<li>a recent version of Python (<code class="docutils literal"><span class="pre">python</span> <span class="pre">(&gt;=2.7)</span></code>)</li>
-<li>the program <code class="docutils literal"><span class="pre">f2py</span></code>, usually shipped with <code class="docutils literal"><span class="pre">numpy</span></code></li>
-<li>the following python modules: <code class="docutils literal"><span class="pre">numpy</span></code> and <code class="docutils literal"><span class="pre">h5py</span></code></li>
+<li>a Fortran compiler supporting procedure interface (<tt class="docutils literal"><span class="pre">gfortran</span> <span class="pre">(&gt;=4.9)</span></tt>)</li>
+<li>a recent version of Python (<tt class="docutils literal"><span class="pre">python</span> <span class="pre">(&gt;=2.7)</span></tt>)</li>
+<li>the program <tt class="docutils literal"><span class="pre">f2py</span></tt>, usually shipped with <tt class="docutils literal"><span class="pre">numpy</span></tt></li>
+<li>the following python modules: <tt class="docutils literal"><span class="pre">numpy</span></tt> and <tt class="docutils literal"><span class="pre">h5py</span></tt></li>
 </ul>
 <p>Configure will try to detect the libraries installed in your system, if it fails
 to find both a BLAS and a LAPACK library it will return an error.
@@ -233,56 +225,53 @@ You can try to re-run configure with some of the following option to help it
 find you libraries:</p>
 <p><strong>Configure options:</strong></p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">FC</span></code>: allows you to choose your Fortran compiler (e.g. <code class="docutils literal"><span class="pre">FC=gfortran</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">LDFLAGS</span></code>: sets linker flags. This can be used to specify libraries search
-directory (e.g. <code class="docutils literal"><span class="pre">LDFLAGS=-L$HOME/local/lib</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">LIBS</span></code>: what libraries should be linked with TOP. (e.g. <code class="docutils literal"><span class="pre">LIBS=-ltatlas</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">CPPFLAGS</span></code>: preprocessor flags, this can be used to tell the compiler where
-to find header files (e.g. <code class="docutils literal"><span class="pre">CPPFLAGS=-I$HOME/local/include</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">PYTHON</span></code>: the python interpreter to use (e.g. <code class="docutils literal"><span class="pre">PYTHON=python3</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">--prefix=</span></code>: this option allows you to set TOP&#8217;s install directory (by
-default the prefix is set to <code class="docutils literal"><span class="pre">$HOME/local</span></code>)</li>
+<li><tt class="docutils literal"><span class="pre">FC</span></tt>: allows you to choose your Fortran compiler (e.g. <tt class="docutils literal"><span class="pre">FC=gfortran</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">LDFLAGS</span></tt>: sets linker flags. This can be used to specify libraries search
+directory (e.g. <tt class="docutils literal"><span class="pre">LDFLAGS=-L$HOME/local/lib</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">LIBS</span></tt>: what libraries should be linked with TOP. (e.g. <tt class="docutils literal"><span class="pre">LIBS=-ltatlas</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">CPPFLAGS</span></tt>: preprocessor flags, this can be used to tell the compiler where
+to find header files (e.g. <tt class="docutils literal"><span class="pre">CPPFLAGS=-I$HOME/local/include</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">PYTHON</span></tt>: the python interpreter to use (e.g. <tt class="docutils literal"><span class="pre">PYTHON=python3</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">--prefix=</span></tt>: this option allows you to set TOP&#8217;s install directory (by
+default the prefix is set to <tt class="docutils literal"><span class="pre">$HOME/local</span></tt>)</li>
 </ul>
 <p><strong>Example:</strong></p>
-<p>If you want to use Intel compiler (<code class="samp docutils literal"><span class="pre">ifort</span></code>) and the ATLAS library
-(installed in <code class="docutils literal"><span class="pre">$HOME/local/lib</span></code>), you want to configure with the following
+<p>If you want to use Intel compiler (<tt class="samp docutils literal"><span class="pre">ifort</span></tt>) and the ATLAS library
+(installed in <tt class="docutils literal"><span class="pre">$HOME/local/lib</span></tt>), you want to configure with the following
 command line:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>./configure <span class="nv">FC</span><span class="o">=</span>ifort <span class="nv">LDFLAGS</span><span class="o">=</span>-L<span class="nv">$HOME</span>/local/lib <span class="nv">LIBS</span><span class="o">=</span>-ltatlas
-</pre></div>
+<div class="highlight-shell"><pre>./configure FC=ifort LDFLAGS=-L$HOME/local/lib LIBS=-ltatlas</pre>
 </div>
 </div>
 <div class="section" id="compile-install">
 <span id="build"></span><h2>Compile &amp; Install<a class="headerlink" href="#compile-install" title="Permalink to this headline">¶</a></h2>
 <p>After running successfully the configure script, you can compile and install TOP by running:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>make install
-</pre></div>
+<div class="highlight-shell"><pre>make install</pre>
 </div>
-<p>TOP is composed of a compiler wrapper <code class="docutils literal"><span class="pre">top-build</span></code> installed in
-<code class="docutils literal"><span class="pre">$prefix/bin</span></code>, a few libraries installed in <code class="docutils literal"><span class="pre">$prefix/lib</span></code> and a python
-module installed in <code class="docutils literal"><span class="pre">$prefix/lib/python-version/site-packages/top</span></code>.</p>
-<p>As few examples are also availiable in <code class="docutils literal"><span class="pre">$prefix/share/top/models</span></code></p>
+<p>TOP is composed of a compiler wrapper <tt class="docutils literal"><span class="pre">top-build</span></tt> installed in
+<tt class="docutils literal"><span class="pre">$prefix/bin</span></tt>, a few libraries installed in <tt class="docutils literal"><span class="pre">$prefix/lib</span></tt> and a python
+module installed in <tt class="docutils literal"><span class="pre">$prefix/lib/python-version/site-packages/top</span></tt>.</p>
+<p>As few examples are also availiable in <tt class="docutils literal"><span class="pre">$prefix/share/top/models</span></tt></p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">You can source the shell script <code class="docutils literal"><span class="pre">activate-top.sh</span></code> created in the directory
+<p class="last">You can source the shell script <tt class="docutils literal"><span class="pre">activate-top.sh</span></tt> created in the directory
 where you compiled TOP to set up the environment variables PATH,
 LD_LIBRARY_PATH and PYTHONPATH with the path where TOP was installed.</p>
 </div>
 </div>
 <div class="section" id="check-you-install">
 <h2>Check you Install<a class="headerlink" href="#check-you-install" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference internal" href="usage.html#usage"><span class="std std-ref">usage</span></a>.</p>
+<p>See <a class="reference internal" href="usage.html#usage"><em>usage</em></a>.</p>
 </div>
 <div class="section" id="using-libester">
-<h2>Using <code class="docutils literal"><span class="pre">libester</span></code><a class="headerlink" href="#using-libester" title="Permalink to this headline">¶</a></h2>
+<h2>Using <tt class="docutils literal"><span class="pre">libester</span></tt><a class="headerlink" href="#using-libester" title="Permalink to this headline">¶</a></h2>
 <p>In order to use <a class="reference external" href="http://ester-project.github.io/ester/">ESTER</a> stellar models, TOP needs to find where ESTER was
 installed on your system.
-In order to tell TOP&#8217;s configure script where to find <code class="docutils literal"><span class="pre">libester</span></code>, you need to
+In order to tell TOP&#8217;s configure script where to find <tt class="docutils literal"><span class="pre">libester</span></tt>, you need to
 provide it with the options:
-<code class="docutils literal"><span class="pre">LDFLAGS=-L$PATH_TO_ESTER/lib</span></code> and <code class="docutils literal"><span class="pre">CPPFLAGS=-I$PATH_TO_ESTER/include</span></code>.</p>
-<p>For instance if ESTER was installed in <code class="docutils literal"><span class="pre">$HOME/local</span></code>, TOP should be able to
+<tt class="docutils literal"><span class="pre">LDFLAGS=-L$PATH_TO_ESTER/lib</span></tt> and <tt class="docutils literal"><span class="pre">CPPFLAGS=-I$PATH_TO_ESTER/include</span></tt>.</p>
+<p>For instance if ESTER was installed in <tt class="docutils literal"><span class="pre">$HOME/local</span></tt>, TOP should be able to
 find it if you configure with:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>./configure <span class="nv">LDFLAGS</span><span class="o">=</span>-L<span class="nv">$HOME</span>/local/lib <span class="nv">CPPFLAGS</span><span class="o">=</span>-I<span class="nv">$HOME</span>/local/include
-</pre></div>
+<div class="highlight-shell"><pre>./configure LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include</pre>
 </div>
 </div>
 </div>
@@ -302,7 +291,7 @@ find it if you configure with:</p>
 <li><a class="reference internal" href="#configure">Configure</a></li>
 <li><a class="reference internal" href="#compile-install">Compile &amp; Install</a></li>
 <li><a class="reference internal" href="#check-you-install">Check you Install</a></li>
-<li><a class="reference internal" href="#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li><a class="reference internal" href="#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -319,7 +308,7 @@ find it if you configure with:</p>
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>
