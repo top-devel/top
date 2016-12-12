@@ -14,7 +14,7 @@ The directory example contains a subdirectory name ``surface`` that proposes pyt
 
 * ``run_model.py`` is an example of use of the ``patch_model`` module followed by the frequency computation for the unpatched and patched model. The example is based on the solar cases. The reference model is the model S by by Christensen-Dalsgaard, J. et al. (1996, Science 272, 1286), the stellar atmosphere has been computed by Belkacem, K.,Samadi , R.,Kupka, F., Grimm-Strele, H. (in preparation) with the ANTARES code Muthsam et al. (2010, New Ast. 15, 460). At the end of the example the script compared computed frequencies with GOLF observation (Courtesy R.A. Garcia, CEA-Saclay)
 
-* ``script.sh`` is a script compiling top and running ``run_model.py``. You must edit the first and replacing $HOME/TOP_2016/top/BUILD with the directory where top has been installed on your system.
+* ``script.sh`` is a script compiling top and running ``run_model.py``.
 
 Results
 =======
