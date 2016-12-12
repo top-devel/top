@@ -33,7 +33,7 @@ module model
 #ifdef USE_1D
     double precision, allocatable, dimension(:), save :: &
         rhom, rhom_z, pm, pm_z, c2, g_m, dg_m, Gamma1, NN, gm_r, &
-        rF, diffrho_r2
+        rF, diffrho_r2, pm_zz
 #else
     double precision, allocatable, dimension(:,:), save :: rhom, NNt,&
         rhom_z, rhom_t, pm, pm_z, pm_t, Gamma1, c2,pe,pe_z, &
@@ -159,6 +159,15 @@ contains
         elseif (fname == 'pm_z') then
             allocate(field(nr, 1))
             field(:, 1) = pm_z
+        elseif (fname == 'pm_zz') then
+            allocate(field(nr, 1))
+            field(:, 1) = pm_zz
+        elseif (fname == 'g_m') then
+            allocate(field(nr, 1))
+            field(:, 1) = g_m
+        elseif (fname == 'dg_m') then
+            allocate(field(nr, 1))
+            field(:, 1) = dg_m
         ! elseif (fname == 'pm_t') then
         !     allocate(field(nr, 1))
         !     field(:, 1) = pm_t
@@ -357,10 +366,10 @@ contains
 
         ! setting some global variables:
 !        mass    = glob(1)*dexp(var(2, nrmod)) ! in g
-!        radius  = var(1, nrmod) ! in cm
+         radius  = var(1, nrmod) ! in cm
          mass    = glob(1) ! in g
          mass_ref= glob(1) ! in g
-         radius  = glob(2) ! in cm
+        ! radius  = glob(2) ! in cm
         ! age     = glob(13) ! in some unknown unit
         p_ref   = G * mass**2 / radius**4
         rho_ref = mass / radius**3
@@ -374,7 +383,7 @@ contains
 
 
         ! convert mass into solar units:
-        mass = mass/solar_mass
+        !mass = mass/solar_mass
 
         ! create radial grid
         if (allocated(r_model)) deallocate(r_model)
@@ -883,12 +892,13 @@ contains
        call init_radial_grid()
        
        do j=1,nr
-         r(j) = var(1,j)/glob(2)
+!         r(j) = var(1,j)/glob(2)
+         r(j) = var(1,j)/radius
          r_map(j) = r(j)
        enddo
 
        order = 1
-       der_max = 1
+       der_max = 2
        der_min = 0
        dertype = "FD  "
        call init_derive(dm,r,nr,der_max,der_min,order,dertype)
@@ -898,6 +908,7 @@ contains
        if (allocated(diffrho_r2)) deallocate(diffrho_r2)
        if (allocated(pm))         deallocate(pm)
        if (allocated(pm_z))       deallocate(pm_z)
+       if (allocated(pm_zz))       deallocate(pm_zz)
        if (allocated(c2))         deallocate(c2)
        if (allocated(g_m))        deallocate(g_m)
        if (allocated(dg_m))       deallocate(dg_m)
@@ -909,7 +920,7 @@ contains
        ! calculate the different fields
        allocate(rhom(nr),rhom_z(nr),pm(nr),pm_z(nr),c2(nr),g_m(nr), &
                 dg_m(nr),Gamma1(nr),NN(nr),gm_r(nr),rF(nr),         &
-                diffrho_r2(nr))
+                diffrho_r2(nr),pm_zz(nr))
        do i=1,nr
            rhom(i)   = var(5,i)/rho_ref
            pm(i)     = var(4,i)/p_ref
@@ -929,13 +940,23 @@ contains
        do i=1,nr
          rhom_z(i) = 0d0
          pm_z(i)   = 0d0
+         pm_zz(i)   = 0d0
          dg_m(i)    = 0d0
          do ii=max(1,i-dm%lbder(1)),min(nr,i+dm%ubder(1))
            rhom_z(i) = rhom_z(i) + dm%derive(i,ii,1)*rhom(ii)
            pm_z(i)   = pm_z(i)   + dm%derive(i,ii,1)*pm(ii)
+           pm_zz(i)   = pm_zz(i)   + dm%derive(i,ii,2)*pm(ii)
            dg_m(i)   = dg_m(i)   + dm%derive(i,ii,1)*g_m(ii)
          enddo
        enddo
+!!$       pm_z(1) = 0d0
+!!$       do i=1,nr
+!!$         pm_zz(i)   = 0d0
+!!$         do ii=max(1,i-dm%lbder(1)),min(nr,i+dm%ubder(1))
+!!$           pm_zz(i)   = pm_zz(i)   + dm%derive(i,ii,1)*pm_z(ii)
+!!$         enddo
+!!$       enddo
+
 
        rhom_z(1) = 0d0 ! it is extremely important to do this before
                        ! calculating the 2nd derivative

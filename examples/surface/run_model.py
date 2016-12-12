@@ -1,0 +1,120 @@
+#!/usr/bin/python
+
+import top
+import numpy as np
+import matplotlib.pyplot as plt
+import patch_model as patch
+# def deriv_o2(x,y):
+#     dy=np.diff(y)
+#     dx=np.diff(x)
+#     dydx=dy/dx
+#     dydxp=np.append(dydx,[0])
+#     dydxm=np.append([0],dydx)
+#     return (dydxp+dydxm)/2
+
+G_grav = 6.67259e-08
+
+
+def scan_l0(filemod, is_eul, is_iso, is_full):
+#cesam = top.load('cesam1D_eul_iso_l0')
+#name_p='dP'
+#cesam = top.load('cesam1D')
+    if is_eul:
+        name_p='dP'
+        if is_iso:
+            fileeq='cesam1D_eul_iso_l0'
+        else:
+            fileeq='cesam1D_eul_l0'
+    else:
+        name_p='dP_P'
+        if is_iso:
+            fileeq='cesam1D_lag_iso_l0'
+        else:
+            fileeq='cesam1D_lag_l0'
+
+    if is_full:
+        name_p='dP_P'
+        fileeq='cesam1D'
+
+    cesam = top.load(fileeq)
+    cesam.read_dati('dati1D')
+    m = cesam.init_model(filemod)
+    nuref=np.sqrt(m['mass_ref']*G_grav/m['r_ref']**3)[0,0]*0.5/np.pi*1e6 #frequency reference in microHz
+
+    r,theta=cesam.get_grid()
+
+    shift0=12.0
+    dshift=1.4
+    shift1=41.0
+    ll = 0
+    tol = 1e-6
+
+    if (ll == 0):
+        nref=1
+    else:
+        nref=0
+
+    cesam.dati.lh=ll
+
+    continu_scan=True
+    shift=shift0
+    freq_list=[]
+    order_list=[]
+    while continu_scan:
+
+        res  = cesam.run_arncheb(shift)
+        vals = np.array(res.valps)
+        val  = vals[abs(vals-shift).argmin()] 
+        res  = cesam.run_arncheb(val+tol)
+        vals = np.array(res.valps)
+        diff = abs(vals-val).min()
+        isol = abs(vals-val).argmin()
+        print 'impact of shift change:',diff
+        if diff/val > tol: 
+            print 'convergence problem...'
+            break
+    
+        val, vec_er, ll = res.get_sol(0,isol,'Er')
+        val, vec_dp, ll = res.get_sol(0,isol,name_p)
+
+        index,=np.where(vec_er[1:-1,0]*vec_er[2:,0] < 0)
+        index=index-1
+        order=nref-int(np.sign((vec_er[index+1]-vec_er[index])*(vec_dp[index+1]+vec_dp[index])).sum())
+        freq_list.append(val*nuref)
+        order_list.append(order)
+
+        if (val > shift1): continu_scan=False
+        shift=val+dshift
+
+    return freq_list,order_list
+
+
+filegong='./modelS/fgong.l5bi.d.15c'
+fileatm=('./antares/cosc13_tav_table.dat','./antares/cosc13_tav_table_eos.dat')
+Teff = 5777.
+fileunpatch = 'modelS.osc'
+filepatch = 'patch.osc'
+Radu,Radp = patch.patch_model(filegong,fileatm,Teff,filepatch,fileunpatch)
+
+nueiu, nneiu = scan_l0(fileunpatch, True , True , False)
+nueip, nneip = scan_l0(filepatch, True , True , False)
+
+obs_golf = np.loadtxt('./golf/golf.txt')
+
+nngolf = obs_golf[:,1]
+nugolf = obs_golf[:,2]
+enugolf = obs_golf[:,3]
+plt.figure(10)
+
+plt.errorbar(nugolf,np.array(nugolf)-np.array(nueiu[:21]),yerr=enugolf,fmt='b+')
+plt.errorbar(nugolf,np.array(nugolf)-np.array(nueip[:21]),yerr=enugolf,fmt='r+')
+plt.xlabel(r'frequency [$\mu$Hz]')
+plt.ylabel(r'$\nu_{\mathrm{obs}}-\nu_{\mathrm{mod}}$ [$\mu$Hz]')
+plt.legend(['model S','patched'], loc='best')
+plt.show()
+# filemod='modS.osc'
+# nu, nn = scan_l0(filemod, False, False, True)
+# nul, nnl   = scan_l0(filemod, False, False, False)
+# nuli, nnli = scan_l0(filemod, False, True , False)
+# nue, nne   = scan_l0(filemod, True , False, False)
+# nuei, nnei = scan_l0(filemod, True , True , False)

@@ -1,0 +1,11 @@
+# nr = 1001     # the radial resolution
+lh = 0          # harmonic degree
+dertype = IFD   # FD = finite differences, CHEB = Chebyshev spectral method
+orderFD = 3     # order of the method when using finite differences
+mattype = BAND  # BAND = banded structure for the matrix, FULL = full structure for the matrix
+shift = 5d0
+nsol = 4
+# modelfile = ./sunmlt-fin-nad.osc
+# modelfile = ./m130.osc
+# modelfile = ./model.osc
+#rootdir = ./

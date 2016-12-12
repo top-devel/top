@@ -1,0 +1,16 @@
+We give access to the community a numerical tool which easily allow the user to modify the equations of stellar oscillations. This numerical tool is based on the TOP code developed to make oscillate bidimensional structure, as those provided by the ESTER code (Reese et al. 2006).
+The public version we release on github repository (https://github.com/top-devel/top) is limited to 1D models. The documentation describing the software TOP (principle, installation, usage and examples) is reachable through https://top-devel.github.io/top/
+Various numerical schemes (either spectral or finite difference) may be used to describe the equations and the eigenvalue problem is solved with an Arnoldi-Chebychev method.
+
+TOP consists of a python module, a compiler and several templates to read stellar models. This allows users to write their own set of equations with their boundary conditions in a very flexible way. During the SPACEInn project we develop an entirely new dedicated language that allow the user to write the equation as close as possible to their natural writing. This tool is very flexible and makes adding new terms in the equations or new variables in the problem easily possible for the user.
+
+In the repository we propose in the example section an application to the surface effect corrections. We provide a python software that patches the structure of an average 3-D stellar atmosphere to the corresponding 1-D stellar structure as it was done for example by Piau et al. (2014). As an example we provide the solar model S (Christensen-Dalsgaard et al. 1996) and a solar atmosphere (Belkacem et al., in prep.) computed with the ANTARES code (Muthsam et al. 2010). A script example is also provided to make oscillate this patched model that thus takes into account the turbulent pressure. Of course, this tool is easily adaptable to other stellar atmospheres, such as the one that will be provided in a near future by Magic et al (2013) on their website https://staggergrid.wordpress.com/
+
+The repository we propose is a living repository that will continue to evolve with time: new application examples may be provided by the community, other stellar structure file format may be supported. The equation language is still perfectible and will continue to evolve. A long term aim is to remove any references to properties of numerical schemes and only keep the physical/mathematical description of the equation.
+
+* Belkacem, K.,Samadi , R.,Kupka, F., Grimm-Strele, H., in preparation
+* Christensen-Dalsgaard, J. et al. Science 272, 1286 (1996)
+* Magic, Z., Collet, R., Asplund, M., Trampedach, R., Hayek, W., Chiavassa, A., Stein, R. F., Nordlund, Å., A&A 557, 26 (2013)
+* Muthsam, H. J., Kupka, F., Löw-Baselli, B., Obertscheider, C., Langer, M., Lenz, P., New Ast. 15, 460 (2010)
+* Piau, L., Collet, R., Stein, R. F., Trampedach, R., Morel, P., Turck-Chièze, S., MNRAS 437, 164 (2014)
+* Reese, D., Lignières, F., Rieutord, M., A&A 455, 621 (2006)
