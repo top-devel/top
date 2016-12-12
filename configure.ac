@@ -178,6 +178,7 @@ AC_CONFIG_FILES([Makefile
                  examples/poly_ester/Makefile
                  examples/poly_ester/model/Makefile
                  examples/cesam/Makefile
+                 examples/surface/Makefile
                  utils/readeq-real-1D-mono
                  utils/readeq-cplx-1D-mono
                  src/Makefile])

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!@PYTHON@
 
 import top
 import numpy as np
@@ -89,8 +89,8 @@ def scan_l0(filemod, is_eul, is_iso, is_full):
     return freq_list,order_list
 
 
-filegong='./modelS/fgong.l5bi.d.15c'
-fileatm=('./antares/cosc13_tav_table.dat','./antares/cosc13_tav_table_eos.dat')
+filegong='@abs_srcdir@/modelS/fgong.l5bi.d.15c'
+fileatm=('@abs_srcdir@/antares/cosc13_tav_table.dat','./antares/cosc13_tav_table_eos.dat')
 Teff = 5777.
 fileunpatch = 'modelS.osc'
 filepatch = 'patch.osc'
