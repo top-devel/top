@@ -46,7 +46,7 @@ Documentation
 
 Credits
 #######
-This public version of the TOP code is part of the SPACEInn_ Project (Exploitation of Space Data for Innovative Helio- and Asteroseismology), initiated by the European Helio- and Asteroseismology Network (HELAS_) and financed by the European Union under the Seventh Framework Programme (FP7 project n° 312844).
+This public version of the TOP code is part of the SPACEInn_ Project (Exploitation of Space Data for Innovative Helio- and Asteroseismology), initiated by the European Helio- and Asteroseismology Network (HELAS_) and financed by the European Union under the Seventh Framework Programme (FP7 project n° 312844). This work also benefits of the French Spatial Agency (CNES_) through its support to the *Plato* mission.
 
 .. image:: spaceinn_logo.jpg
    :alt: SPACEInn
@@ -71,4 +71,4 @@ This public version of the TOP code is part of the SPACEInn_ Project (Exploitati
 
 .. _SPACEInn: http://www.spaceinn.eu/
 .. _HELAS: https://www.helas-project.eu/
-
+.. _CNES: https://cnes.fr/en

@@ -89,8 +89,8 @@ def scan_l0(filemod, is_eul, is_iso, is_full):
     return freq_list,order_list
 
 
-filegong='@abs_srcdir@/modelS/fgong.l5bi.d.15c'
-fileatm=('@abs_srcdir@/antares/cosc13_tav_table.dat','./antares/cosc13_tav_table_eos.dat')
+filegong='@srcdir@/modelS/fgong.l5bi.d.15c'
+fileatm=('@srcdir@/antares/cosc13_tav_table.dat','@srcdir@/antares/cosc13_tav_table_eos.dat')
 Teff = 5777.
 fileunpatch = 'modelS.osc'
 filepatch = 'patch.osc'
@@ -99,7 +99,7 @@ Radu,Radp = patch.patch_model(filegong,fileatm,Teff,filepatch,fileunpatch)
 nueiu, nneiu = scan_l0(fileunpatch, True , True , False)
 nueip, nneip = scan_l0(filepatch, True , True , False)
 
-obs_golf = np.loadtxt('./golf/golf.txt')
+obs_golf = np.loadtxt('@srcdir@/golf/golf.txt')
 
 nngolf = obs_golf[:,1]
 nugolf = obs_golf[:,2]
