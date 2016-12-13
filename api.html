@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python API &#8212; TOP 1.0-rc1 documentation</title>
+    <title>Python API &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="next" title="Usage Examples" href="examples.html" />
     <link rel="prev" title="New Equation Format" href="new_equation.html" />
@@ -43,7 +43,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -80,7 +80,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -99,7 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="new_equation.html">New Equation Format</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Python API</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Python API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#equation">Equation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#results-objects">Results Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#star-models">Star Models</a></li>
@@ -109,9 +109,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples.html#surface">Surface</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -149,7 +147,7 @@
 <span id="api"></span><h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="equation">
 <h2>Equation<a class="headerlink" href="#equation" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="xref py py-class docutils literal"><span class="pre">top.load</span></code> class in responsible for loading a previously compiled
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">top.load</span></tt> class in responsible for loading a previously compiled
 equation file, loading or setting parameters, loading stellar models and solving
 the underlying eigenvalue problem.</p>
 </div>
@@ -162,7 +160,7 @@ the underlying eigenvalue problem.</p>
 with the name of the field between brackets (e.g, <cite>m[&#8216;h&#8217;]</cite> would return the
 enthalpy of the model <cite>m</cite>).</p>
 <p>But you need to know what are the fields defined for each model. See
-<a class="reference internal" href="model.html#models"><span class="std std-ref">models</span></a> for a list of supported models in TOP, and a list a fields defined by each model.</p>
+<a class="reference internal" href="model.html#models"><em>models</em></a> for a list of supported models in TOP, and a list a fields defined by each model.</p>
 </div>
 </div>
 
@@ -191,7 +189,7 @@ enthalpy of the model <cite>m</cite>).</p>
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>

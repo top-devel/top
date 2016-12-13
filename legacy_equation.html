@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 
@@ -7,18 +8,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Legacy Equation Format &#8212; TOP 1.0-rc1 documentation</title>
+    <title>Legacy Equation Format &mdash; TOP 1.0-rc1 documentation</title>
     
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.3.4/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/top.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0-rc1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -28,12 +29,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="TOP 1.0-rc1 documentation" href="index.html" />
     <link rel="up" title="Equation Files" href="equation.html" />
     <link rel="next" title="New Equation Format" href="new_equation.html" />
@@ -44,7 +44,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -81,7 +81,7 @@
 <li class="toctree-l2"><a class="reference internal" href="install.html#configure">Configure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#compile-install">Compile &amp; Install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#check-you-install">Check you Install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <code class="docutils literal"><span class="pre">libester</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#using-libester">Using <tt class="docutils literal"><span class="pre">libester</span></tt></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
@@ -96,7 +96,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="equation.html">Equation Files</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Legacy Equation Format</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Legacy Equation Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="new_equation.html">New Equation Format</a></li>
 </ul>
 </li>
@@ -106,10 +106,11 @@
 <li class="toctree-l2"><a class="reference internal" href="api.html#star-models">Star Models</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#sources">Sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#documentation">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#surface">Surface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -167,12 +168,12 @@ projected onto the spherical harmonics basis.</p>
 + ...\]</div>
 <p>In order to write such an equation in TOP, one need to split it into terms and
 add them incrementally in the numerical system. The purpose of TOP, in
-particular <code class="docutils literal"><span class="pre">top-build</span></code> is to ease writing such equations.
+particular <tt class="docutils literal"><span class="pre">top-build</span></tt> is to ease writing such equations.
 Several commands can help inserting such terms in the numerical system, see
-section <a class="reference internal" href="#commands"><span class="std std-ref">Commands</span></a> for a list of commands available in TOP&#8217;s language.</p>
+section <a class="reference internal" href="#commands"><em>Commands</em></a> for a list of commands available in TOP&#8217;s language.</p>
 <p>Few other features can help understanding how to write equations in TOP: for a
-description of the type of terms TOP can handle, see section <a class="reference internal" href="#terms"><span class="std std-ref">Type of Terms</span></a>. And
-see section <a class="reference internal" href="#preprocessing"><span class="std std-ref">String pre-processing</span></a> for a description of string pre-processing and
+description of the type of terms TOP can handle, see section <a class="reference internal" href="#terms"><em>Type of Terms</em></a>. And
+see section <a class="reference internal" href="#preprocessing"><em>String pre-processing</em></a> for a description of string pre-processing and
 special variables.</p>
 <div class="section" id="type-of-terms">
 <span id="terms"></span><h3>Type of Terms<a class="headerlink" href="#type-of-terms" title="Permalink to this headline">¶</a></h3>
@@ -184,18 +185,18 @@ radial coordinate <span class="math">\(r\)</span>, <span class="math">\(l\)</spa
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">s</span></code>:</th><td class="field-body">scalar term</td>
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">s</span></tt>:</th><td class="field-body">scalar term</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">r</span></code>:</th><td class="field-body">term only depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) (only available for
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">r</span></tt>:</th><td class="field-body">term only depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) (only available for
 1D equations)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">tt</span></code>:</th><td class="field-body">term depending on <span class="math">\(l\)</span> and <span class="math">\(l'\)</span> (only available in 2D
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">tt</span></tt>:</th><td class="field-body">term depending on <span class="math">\(l\)</span> and <span class="math">\(l'\)</span> (only available in 2D
 equations)</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">rt</span></code>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) and <span class="math">\(l\)</span> (only in
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">rt</span></tt>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>) and <span class="math">\(l\)</span> (only in
 2D equations)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">rtt</span></code>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>), <span class="math">\(l\)</span> and
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">rtt</span></tt>:</th><td class="field-body">term depending on <span class="math">\(r\)</span> (or <span class="math">\(\zeta\)</span>), <span class="math">\(l\)</span> and
 <span class="math">\(l'\)</span> (only available in 2D equations)</td>
 </tr>
 </tbody>
@@ -207,33 +208,33 @@ equations)</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$a</span></code>:</th><td class="field-body">stands for the current coupling matrix. This variable can only be used in a
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$a</span></tt>:</th><td class="field-body">stands for the current coupling matrix. This variable can only be used in a
 term definition</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$prev</span></code>:</th><td class="field-body">the previous coupling matrix. It correspond to variable <code class="docutils literal"><span class="pre">$a</span></code> of the last
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$prev</span></tt>:</th><td class="field-body">the previous coupling matrix. It correspond to variable <tt class="docutils literal"><span class="pre">$a</span></tt> of the last
 term definition.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$leq</span></code>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current equation.</td>
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$leq</span></tt>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current equation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$lvar</span></code>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current variable.</td>
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$lvar</span></tt>:</th><td class="field-body">the array containing <span class="math">\(l\)</span> values of the current variable.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$leq(x)</span></code>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current equation.</td>
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$leq(x)</span></tt>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current equation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$lvar(x)</span></code>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current variable.</td>
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$lvar(x)</span></tt>:</th><td class="field-body">is the <span class="math">\(x^{th}\)</span> <span class="math">\(l\)</span> value of the current variable.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$eq</span></code>:</th><td class="field-body">index of the current equation.</td>
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$eq</span></tt>:</th><td class="field-body">index of the current equation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$var</span></code>:</th><td class="field-body">index of the current variable.</td>
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$var</span></tt>:</th><td class="field-body">index of the current variable.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$nr</span></code>:</th><td class="field-body">radial resolution of the problem.</td>
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$nr</span></tt>:</th><td class="field-body">radial resolution of the problem.</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$i</span></code>:</th><td class="field-body">indices of the radial coordinate (this will result in the generation of a
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$i</span></tt>:</th><td class="field-body">indices of the radial coordinate (this will result in the generation of a
 FORTRAN loop over all radial points).</td>
 </tr>
-<tr class="field-odd field"><th class="field-name"><code class="docutils literal"><span class="pre">$j1</span></code>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l\)</span> (this will result in the
+<tr class="field-odd field"><th class="field-name"><tt class="docutils literal"><span class="pre">$j1</span></tt>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l\)</span> (this will result in the
 generation of a FORTRAN loop over all values of <span class="math">\(l\)</span>).</td>
 </tr>
-<tr class="field-even field"><th class="field-name"><code class="docutils literal"><span class="pre">$j2</span></code>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l'\)</span> (this will result in the
+<tr class="field-even field"><th class="field-name"><tt class="docutils literal"><span class="pre">$j2</span></tt>:</th><td class="field-body">indices of the horizontal coordinate <span class="math">\(l'\)</span> (this will result in the
 generation of a FORTRAN loop over all values of <span class="math">\(l'\)</span>).</td>
 </tr>
 </tbody>
@@ -250,17 +251,17 @@ written.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">input</span> <span class="pre">parameter</span> <span class="pre">format</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">input</span> <span class="pre">parameter</span> <span class="pre">format</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">parameter</span></code>: name of the parameter.</li>
-<li><code class="docutils literal"><span class="pre">format</span></code>: FORTRAN format specifier. This is used to read the
+<li><tt class="docutils literal"><span class="pre">parameter</span></tt>: name of the parameter.</li>
+<li><tt class="docutils literal"><span class="pre">format</span></tt>: FORTRAN format specifier. This is used to read the
 parameter input file.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">input</span> <span class="pre">mass</span> <span class="pre">0pf5.2</span></code></p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">input</span> <span class="pre">mass</span> <span class="pre">0pf5.2</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -273,15 +274,15 @@ parameter input file.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">stamp</span> <span class="pre">string</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">stamp</span> <span class="pre">string</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">string</span></code>: string to appear in output files.</li>
+<li><tt class="docutils literal"><span class="pre">string</span></tt>: string to appear in output files.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">stamp</span> <span class="pre">eq_ESTER_all_lagrange</span></code></p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">stamp</span> <span class="pre">eq_ESTER_all_lagrange</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -294,21 +295,21 @@ parameter input file.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">definition</span> <span class="pre">type</span> <span class="pre">name</span> <span class="pre">value</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">definition</span> <span class="pre">type</span> <span class="pre">name</span> <span class="pre">value</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">type</span></code>: type of the constant (<code class="docutils literal"><span class="pre">integer</span></code>, <code class="docutils literal"><span class="pre">double_precision</span></code>,
-<code class="docutils literal"><span class="pre">complex</span></code>)</li>
-<li><code class="docutils literal"><span class="pre">name</span></code>: name of the constant</li>
-<li><code class="docutils literal"><span class="pre">value</span></code>: value of the constant</li>
+<li><tt class="docutils literal"><span class="pre">type</span></tt>: type of the constant (<tt class="docutils literal"><span class="pre">integer</span></tt>, <tt class="docutils literal"><span class="pre">double_precision</span></tt>,
+<tt class="docutils literal"><span class="pre">complex</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">name</span></tt>: name of the constant</li>
+<li><tt class="docutils literal"><span class="pre">value</span></tt>: value of the constant</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">definition</span> <span class="pre">double_precision</span> <span class="pre">gamma_p</span> <span class="pre">1d0</span> <span class="pre">+</span> <span class="pre">1d0/pindex</span></code>
-will define <code class="docutils literal"><span class="pre">gamma_p</span></code> with a value of <span class="math">\(1+\frac{1}{pindex}\)</span>
-(where <span class="math">\(pindex\)</span> has to be another variable (<code class="docutils literal"><span class="pre">definition</span></code> or
-<code class="docutils literal"><span class="pre">input</span></code>)</p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">definition</span> <span class="pre">double_precision</span> <span class="pre">gamma_p</span> <span class="pre">1d0</span> <span class="pre">+</span> <span class="pre">1d0/pindex</span></tt>
+will define <tt class="docutils literal"><span class="pre">gamma_p</span></tt> with a value of <span class="math">\(1+\frac{1}{pindex}\)</span>
+(where <span class="math">\(pindex\)</span> has to be another variable (<tt class="docutils literal"><span class="pre">definition</span></tt> or
+<tt class="docutils literal"><span class="pre">input</span></tt>)</p>
 </td>
 </tr>
 </tbody>
@@ -321,15 +322,15 @@ will define <code class="docutils literal"><span class="pre">gamma_p</span></cod
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eq1</span> <span class="pre">eq2</span> <span class="pre">eq3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eq1</span> <span class="pre">eq2</span> <span class="pre">eq3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">eq1</span></code>: name of the equation</li>
+<li><tt class="docutils literal"><span class="pre">eq1</span></tt>: name of the equation</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eqEr</span> <span class="pre">eqdP</span> <span class="pre">eqPhi</span> <span class="pre">eqPhiP</span></code>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">eqlist</span> <span class="pre">eqEr</span> <span class="pre">eqdP</span> <span class="pre">eqPhi</span> <span class="pre">eqPhiP</span></tt>
 defines 4 equations named eqEr, eqdP, eqPhi and epPhiP</p>
 </td>
 </tr>
@@ -343,15 +344,15 @@ defines 4 equations named eqEr, eqdP, eqPhi and epPhiP</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">varlist</span> <span class="pre">var1</span> <span class="pre">var2</span> <span class="pre">var3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">varlist</span> <span class="pre">var1</span> <span class="pre">var2</span> <span class="pre">var3</span> <span class="pre">...</span> <span class="pre">#</span> <span class="pre">and</span> <span class="pre">so</span> <span class="pre">on</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">var1</span></code>: name of the variable</li>
+<li><tt class="docutils literal"><span class="pre">var1</span></tt>: name of the variable</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">varlist</span> <span class="pre">Er</span> <span class="pre">dP</span> <span class="pre">Phi</span> <span class="pre">PhiP</span></code>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">varlist</span> <span class="pre">Er</span> <span class="pre">dP</span> <span class="pre">Phi</span> <span class="pre">PhiP</span></tt>
 defines 4 variables named Er, dP, Phi and PhiP</p>
 </td>
 </tr>
@@ -366,16 +367,16 @@ use to define the starting <span class="math">\(l\)</span> for this projection.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">leq</span> <span class="pre">eqName</span> <span class="pre">value</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">leq</span> <span class="pre">eqName</span> <span class="pre">value</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">eqName</span></code>: name of the equation</li>
-<li><code class="docutils literal"><span class="pre">value</span></code>: starting value of <span class="math">\(l\)</span></li>
+<li><tt class="docutils literal"><span class="pre">eqName</span></tt>: name of the equation</li>
+<li><tt class="docutils literal"><span class="pre">value</span></tt>: starting value of <span class="math">\(l\)</span></li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">leq</span> <span class="pre">eqEr</span> <span class="pre">abs(m)+iparity</span></code></p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">leq</span> <span class="pre">eqEr</span> <span class="pre">abs(m)+iparity</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -389,16 +390,16 @@ use to define the starting <span class="math">\(l\)</span> for this projection.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">lvar</span> <span class="pre">varName</span> <span class="pre">value</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">lvar</span> <span class="pre">varName</span> <span class="pre">value</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">varName</span></code>: name of the variable</li>
-<li><code class="docutils literal"><span class="pre">value</span></code>: starting value of <span class="math">\(l\)</span></li>
+<li><tt class="docutils literal"><span class="pre">varName</span></tt>: name of the variable</li>
+<li><tt class="docutils literal"><span class="pre">value</span></tt>: starting value of <span class="math">\(l\)</span></li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">lvar</span> <span class="pre">Er</span> <span class="pre">abs(m)+iparity</span></code></p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">lvar</span> <span class="pre">Er</span> <span class="pre">abs(m)+iparity</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -412,15 +413,15 @@ command in the equation file will apply to the <em>current</em> equation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">equation</span> <span class="pre">eqName</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">equation</span> <span class="pre">eqName</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">eqName</span></code>: name of the equation</li>
+<li><tt class="docutils literal"><span class="pre">eqName</span></tt>: name of the equation</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">equation</span> <span class="pre">eqEr</span></code></p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">equation</span> <span class="pre">eqEr</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -434,24 +435,24 @@ computed by calling a FORTRAN subroutine.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">sub</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">sub</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
-<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">routine</span></code>: name of the FORTRAN subroutine to be called to compute the
+<li><tt class="docutils literal"><span class="pre">type</span></tt>: the type of term see <a class="reference internal" href="#terms"><em>type of terms in TOP</em></a>.</li>
+<li><tt class="docutils literal"><span class="pre">power</span></tt>: the power of the eigenvalue preceded by a <tt class="docutils literal"><span class="pre">w</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">routine</span></tt>: name of the FORTRAN subroutine to be called to compute the
 coupling coefficient.</li>
-<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+<li><tt class="docutils literal"><span class="pre">variable</span></tt>: name of the variable involved in the coupling. Further
 characters can be used indicate radial derives. For instance,
-<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
-order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
-<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
-to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+<tt class="docutils literal"><span class="pre">Er'</span></tt> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <tt class="docutils literal"><span class="pre">'</span></tt> character or with the
+<tt class="docutils literal"><span class="pre">^</span></tt> character followed by the derivative order: <tt class="docutils literal"><span class="pre">Er^2</span></tt> is equivalent
+to <tt class="docutils literal"><span class="pre">Er''</span></tt>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">sub</span> <span class="pre">rtt</span> <span class="pre">w1</span> <span class="pre">Illm(sint/roz,</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">u</span></code>: this basically add the
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">sub</span> <span class="pre">rtt</span> <span class="pre">w1</span> <span class="pre">Illm(sint/roz,</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">u</span></tt>: this basically add the
 term <span class="math">\(\omega \iint(\frac{sin(\theta)}{roz}) * u\)</span> in the current
 equation, where <span class="math">\(\omega\)</span> is the eigenvalue.</p>
 </td>
@@ -467,30 +468,30 @@ term will be computed by calling a FORTRAN subroutine.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">subbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable(index)</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">subbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">routine</span> <span class="pre">variable(index)</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
-<li><code class="docutils literal"><span class="pre">location</span></code>: the location where the boundary condition should be inserted
+<li><tt class="docutils literal"><span class="pre">type</span></tt>: the type of term see <a class="reference internal" href="#terms"><em>type of terms in TOP</em></a>.</li>
+<li><tt class="docutils literal"><span class="pre">location</span></tt>: the location where the boundary condition should be inserted
 in the <strong>numerical</strong> system. This is basically tells the line in the
 matrix to be replaced with the boundary condition.</li>
-<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">routine</span></code>: name of the FORTRAN subroutine to be called to compute the
+<li><tt class="docutils literal"><span class="pre">power</span></tt>: the power of the eigenvalue preceded by a <tt class="docutils literal"><span class="pre">w</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">routine</span></tt>: name of the FORTRAN subroutine to be called to compute the
 coupling coefficient.</li>
-<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+<li><tt class="docutils literal"><span class="pre">variable</span></tt>: name of the variable involved in the coupling. Further
 characters can be used indicate radial derives. For instance,
-<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
-order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
-<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
-to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">index'</span></code> radial coordinate of the boundary condition.</li>
+<tt class="docutils literal"><span class="pre">Er'</span></tt> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <tt class="docutils literal"><span class="pre">'</span></tt> character or with the
+<tt class="docutils literal"><span class="pre">^</span></tt> character followed by the derivative order: <tt class="docutils literal"><span class="pre">Er^2</span></tt> is equivalent
+to <tt class="docutils literal"><span class="pre">Er''</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">index'</span></tt> radial coordinate of the boundary condition.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">subbc</span> <span class="pre">tt</span> <span class="pre">nr</span> <span class="pre">w0</span> <span class="pre">Illmbc(hhz(1,</span> <span class="pre">:),</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">v(1)</span></code>, here we can see
-that <code class="docutils literal"><span class="pre">location</span></code> and <code class="docutils literal"><span class="pre">index</span></code> are different: the boundary condition is
-imposed at the center (<code class="docutils literal"><span class="pre">v(1)</span></code> stands for <span class="math">\(v\)</span> at <span class="math">\(r=0\)</span>), but in
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">subbc</span> <span class="pre">tt</span> <span class="pre">nr</span> <span class="pre">w0</span> <span class="pre">Illmbc(hhz(1,</span> <span class="pre">:),</span> <span class="pre">$a,</span> <span class="pre">$leq,</span> <span class="pre">$lvar)</span> <span class="pre">v(1)</span></tt>, here we can see
+that <tt class="docutils literal"><span class="pre">location</span></tt> and <tt class="docutils literal"><span class="pre">index</span></tt> are different: the boundary condition is
+imposed at the center (<tt class="docutils literal"><span class="pre">v(1)</span></tt> stands for <span class="math">\(v\)</span> at <span class="math">\(r=0\)</span>), but in
 the <strong>numerical</strong> system, the condition is imposed on the last line of the
 matrix.</p>
 </td>
@@ -505,23 +506,23 @@ matrix.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">term</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">expression</span>&#160; <span class="pre">variable</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">term</span> <span class="pre">type</span> <span class="pre">power</span> <span class="pre">expression</span>&nbsp; <span class="pre">variable</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
-<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">expression</span></code>: the mathematical expression of the term to be inserted.</li>
-<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+<li><tt class="docutils literal"><span class="pre">type</span></tt>: the type of term see <a class="reference internal" href="#terms"><em>type of terms in TOP</em></a>.</li>
+<li><tt class="docutils literal"><span class="pre">power</span></tt>: the power of the eigenvalue preceded by a <tt class="docutils literal"><span class="pre">w</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">expression</span></tt>: the mathematical expression of the term to be inserted.</li>
+<li><tt class="docutils literal"><span class="pre">variable</span></tt>: name of the variable involved in the coupling. Further
 characters can be used indicate radial derives. For instance,
-<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
-order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
-<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
-to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
+<tt class="docutils literal"><span class="pre">Er'</span></tt> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <tt class="docutils literal"><span class="pre">'</span></tt> character or with the
+<tt class="docutils literal"><span class="pre">^</span></tt> character followed by the derivative order: <tt class="docutils literal"><span class="pre">Er^2</span></tt> is equivalent
+to <tt class="docutils literal"><span class="pre">Er''</span></tt>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">term</span> <span class="pre">s</span> <span class="pre">w0</span> <span class="pre">-2d0</span> <span class="pre">Pi''</span></code>: this would insert the term
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">term</span> <span class="pre">s</span> <span class="pre">w0</span> <span class="pre">-2d0</span> <span class="pre">Pi''</span></tt>: this would insert the term
 <span class="math">\(-2\frac{\partial^2 Pi}{\partial r^2}\)</span> in the current equation.</p>
 </td>
 </tr>
@@ -535,27 +536,27 @@ to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">termbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">expression</span>&#160; <span class="pre">variable(index)</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">termbc</span> <span class="pre">type</span> <span class="pre">location</span> <span class="pre">power</span> <span class="pre">expression</span>&nbsp; <span class="pre">variable(index)</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">type</span></code>: the type of term see <a class="reference internal" href="#terms"><span class="std std-ref">type of terms in TOP</span></a>.</li>
-<li><code class="docutils literal"><span class="pre">power</span></code>: the power of the eigenvalue preceded by a <code class="docutils literal"><span class="pre">w</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">location</span></code>: the location where the boundary condition should be inserted
+<li><tt class="docutils literal"><span class="pre">type</span></tt>: the type of term see <a class="reference internal" href="#terms"><em>type of terms in TOP</em></a>.</li>
+<li><tt class="docutils literal"><span class="pre">power</span></tt>: the power of the eigenvalue preceded by a <tt class="docutils literal"><span class="pre">w</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">location</span></tt>: the location where the boundary condition should be inserted
 in the <strong>numerical</strong> system. This is basically tells the line in the
 matrix to be replaced with the boundary condition.</li>
-<li><code class="docutils literal"><span class="pre">expression</span></code>: the mathematical expression of the term to be inserted.</li>
-<li><code class="docutils literal"><span class="pre">variable</span></code>: name of the variable involved in the coupling. Further
+<li><tt class="docutils literal"><span class="pre">expression</span></tt>: the mathematical expression of the term to be inserted.</li>
+<li><tt class="docutils literal"><span class="pre">variable</span></tt>: name of the variable involved in the coupling. Further
 characters can be used indicate radial derives. For instance,
-<code class="docutils literal"><span class="pre">Er'</span></code> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
-order can be achieved either by chaining the <code class="docutils literal"><span class="pre">'</span></code> character or with the
-<code class="docutils literal"><span class="pre">^</span></code> character followed by the derivative order: <code class="docutils literal"><span class="pre">Er^2</span></code> is equivalent
-to <code class="docutils literal"><span class="pre">Er''</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">index'</span></code> radial coordinate of the boundary condition.</li>
+<tt class="docutils literal"><span class="pre">Er'</span></tt> mean <span class="math">\(\frac{\partial Er}{\partial r}\)</span>. Higher derivative
+order can be achieved either by chaining the <tt class="docutils literal"><span class="pre">'</span></tt> character or with the
+<tt class="docutils literal"><span class="pre">^</span></tt> character followed by the derivative order: <tt class="docutils literal"><span class="pre">Er^2</span></tt> is equivalent
+to <tt class="docutils literal"><span class="pre">Er''</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">index'</span></tt> radial coordinate of the boundary condition.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">termbc</span> <span class="pre">t</span> <span class="pre">$nr</span> <span class="pre">w0</span> <span class="pre">1d0</span> <span class="pre">Phi($nr)'</span></code>: this would insert the term
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">termbc</span> <span class="pre">t</span> <span class="pre">$nr</span> <span class="pre">w0</span> <span class="pre">1d0</span> <span class="pre">Phi($nr)'</span></tt>: this would insert the term
 <span class="math">\(\Phi(r=surf)\)</span> in the boundary condition. (The last line of the
 matrix would be replaced with this boundary condition).</p>
 </td>
@@ -571,17 +572,17 @@ coupling integrals.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">instruction</span> <span class="pre">fortran</span></code></p>
+<tr class="field-odd field"><th class="field-name">Syntax:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">instruction</span> <span class="pre">fortran</span></tt></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><code class="docutils literal"><span class="pre">fortran</span></code>: the FORTRAN instruction to be inserted.</li>
+<li><tt class="docutils literal"><span class="pre">fortran</span></tt>: the FORTRAN instruction to be inserted.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">instruction</span> <span class="pre">call</span> <span class="pre">modify_l0($prev,</span> <span class="pre">$nr,</span> <span class="pre">abs(m)+iparity)</span></code>: will insert the
-code <code class="docutils literal"><span class="pre">call</span> <span class="pre">modify_l0(dm(1)%artt(:,</span> <span class="pre">:,</span> <span class="pre">:),</span> <span class="pre">grd(1)%nr,</span> <span class="pre">abs(m)+iparity)</span></code>.
-See <a class="reference internal" href="#preprocessing"><span class="std std-ref">String pre-processing</span></a>.</p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">instruction</span> <span class="pre">call</span> <span class="pre">modify_l0($prev,</span> <span class="pre">$nr,</span> <span class="pre">abs(m)+iparity)</span></tt>: will insert the
+code <tt class="docutils literal"><span class="pre">call</span> <span class="pre">modify_l0(dm(1)%artt(:,</span> <span class="pre">:,</span> <span class="pre">:),</span> <span class="pre">grd(1)%nr,</span> <span class="pre">abs(m)+iparity)</span></tt>.
+See <a class="reference internal" href="#preprocessing"><em>String pre-processing</em></a>.</p>
 </td>
 </tr>
 </tbody>
@@ -633,7 +634,7 @@ See <a class="reference internal" href="#preprocessing"><span class="std std-ref
     </p>
     <p>
         &copy; Copyright 2016, D. Reese, J. Ballot, B. Putigny.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.1.3.<br/>
     </p>
   </div>
 </footer>
