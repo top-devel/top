@@ -247,22 +247,9 @@ try:
     for f in files:
         if libname in f and f.endswith('.so'):
             outlibname = f
-    cmd = 'mv ' + outlibname + ' @abs_top_builddir@/src/lib/' + libname + '.so'
-    subprocess.check_output(cmd.split())
-
-    # cmd = 'rm ' + libname + '*.so'
-    # subprocess.check_output(cmd.split())
-
-    # if args.debug == False:
-    #     subprocess.check_output(['make',
-    #         'uninstall',
-    #         '-C',
-    #         '@abs_top_builddir@/src'],
-    #         stderr=subprocess.STDOUT)
+    shutil.move(outlibname, '@abs_top_builddir@/src/lib/' + libname + '.so')
 
     print('[OK]')
-    # if args.debug:
-    #     print('Debug binary location: @abs_top_builddir@/src/debug/top-debug')
     sys.exit(0)
 
 except subprocess.CalledProcessError as e:
